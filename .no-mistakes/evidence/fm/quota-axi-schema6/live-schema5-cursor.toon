@@ -1,0 +1,11 @@
+bin: ~/.nvm/versions/node/v24.15.0/bin/quota-axi
+description: Report local agent-provider quota windows for routing-aware agents
+generatedAt: "2026-09-19T06:25:22.430Z"
+quota[2]{provider,scope,effectivePercentRemaining,spendPriority,runway,confidence,limitedBy,resetsAt}:
+  cursor,all_models,24,0.3996,projected_exhaustion,established,auto_usage,"2026-09-30T13:18:05.000Z"
+  cursor,grok_bot,100,2.8098,through_reset,established,grok_bot,"2026-09-21T18:12:49.357Z"
+exhaustion[1]{provider,scope,usableRunwaySeconds,projectedExhaustedAt,limitingWindowId}:
+  cursor,all_models,510580,"2026-09-25T04:15:02.671Z",auto_usage
+attention[0]:
+help[1]:
+  Run `quota-axi --full` for windows, pace, reserve, and account evidence

@@ -1,0 +1,36 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - help renders only the complete header
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 208: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 209: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 211: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - poll accepts its documented defaults
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 208: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 209: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 211: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - provider watch blocks until a model scope is exhausted
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 208: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 209: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 211: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - exhausted poll records the triggering scope
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 208: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 209: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 211: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - poll detects exhausted runway under unknown headroom
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 208: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 209: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 211: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - aggregate watch blocks until any scope is exhausted
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 208: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 209: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M2W51BK51263V20KM4CCCW0Z/bin/fm-procevent-quota.sh: line 211: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - aggregate watch preserves empty quota uncertainty
+not ok - missing provider value returned: bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+error: --provider needs a value
+
+exit_code: 1

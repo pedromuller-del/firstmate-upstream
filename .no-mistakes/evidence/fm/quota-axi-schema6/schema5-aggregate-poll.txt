@@ -1,0 +1,4 @@
+quota: quota
+status: low
+detail: {"provider":"aggregate","summary":[{"provider":"cursor","best":{"scope":"all_models","status":"known","effectivePercentRemaining":24,"boundedBy":["included_usage","auto_usage","api_usage"],"limitingWindowIds":["auto_usage"],"pace":{"status":"mixed","aheadWindowIds":["included_usage","auto_usage"],"worstReservePercentPoints":-13.6175,"worstReserveWindowId":"auto_usage"},"runway":{"status":"projected_exhaustion","usableRunwaySeconds":510617,"projectedExhaustedAt":"2026-09-25T04:17:35.676Z","limitingWindowId":"auto_usage","projectionConfidence":"established"},"selection":{"status":"known","spendPriority":0.3998}}}]}
+condition_polls: 1

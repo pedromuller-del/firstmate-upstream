@@ -1,0 +1,35 @@
+{
+  "target": "307073e4b5ecc5e9695bfc8fab59313fd59df39c",
+  "focused_tests": [
+    {
+      "command": "LC_ALL=C bash tests/fm-quota-choose.test.sh",
+      "checks": 55,
+      "exit_code": 0
+    },
+    {
+      "command": "bash tests/fm-dispatch-resolve.test.sh",
+      "checks": 21,
+      "exit_code": 0
+    },
+    {
+      "command": "LC_ALL=C bash tests/fm-procevent-quota.test.sh",
+      "checks": 22,
+      "exit_code": 0
+    }
+  ],
+  "setup_corrections": [
+    "The inherited C.UTF-8 locale is unavailable on this macOS host. Initial chooser and procevent tests each stopped after 7 passing checks because Bash warnings changed expected stderr. Both passed with LC_ALL=C.",
+    "An exploratory Pi/Codex chooser invocation returned none. The helper maps Pi to provider pi and documents its single-primary-provider limitation; explicit-provider Pi selection belongs to the resolver.",
+    "A poll-driver assertion assumed both live accounts would remain at 3%. One dropped to 2% during validation. Re-driven assertions use observed percentages; every product poll returned the correct low status."
+  ],
+  "live_results": [
+    "The base validator rejects the current schema-6 snapshot with exit 1; the target accepts the identical bytes with exit 0.",
+    "Schema-6 JSON and default TOON select Cursor after unmatched native Codex. Native Codex alone returns none, exit 1. Reversing rows preserves selection.",
+    "The real producer emits schema 5 for unexpanded Cursor. JSON and TOON both select Cursor, exit 0. Unknown Claude remains none, exit 1.",
+    "Unsupported version, missing/whitespace/numeric account keys, duplicate provider+account, and inconsistent TOON account columns all fail closed, exit 2.",
+    "Five real bounded polls cover schema-6 aggregate/Codex/default-account and schema-5 aggregate/Cursor. Poll, classify, and terminal exit 0. At threshold 4, Codex accounts have 3% and 2%, remain separate in details, and produce low despite their sum being 5%."
+  ],
+  "not_live": "Authenticated resolver selection, positive codex-home/default fallback, and profile/rule floors have focused executable fixture coverage but no credentialed end-to-end run: TYPESAFE_API_KEY is absent from the environment and isolated home. The recorded prior decision declined the same missing-live-resolver finding.",
+  "visual_evidence": "CLI-only change; captured producer output and consumer transcripts.",
+  "source_changes": []
+}

@@ -1,0 +1,30 @@
+bin: ~/.nvm/versions/node/v24.15.0/bin/quota-axi
+description: Report local agent-provider quota windows for routing-aware agents
+generatedAt: "2026-09-19T06:22:28.732Z"
+quota[6]{provider,accountKey,scope,effectivePercentRemaining,spendPriority,runway,confidence,limitedBy,resetsAt}:
+  codex,openai-codex,all_models,3,-1.4599,projected_exhaustion,established,weekly,"2026-09-21T20:37:11.000Z"
+  codex,openai-codex-work,all_models,3,-6.0209,projected_exhaustion,established,weekly,"2026-09-25T03:28:06.000Z"
+  cursor,default,all_models,24,0.3993,projected_exhaustion,established,auto_usage,"2026-09-30T13:18:05.000Z"
+  cursor,default,grok_bot,100,2.8075,through_reset,established,grok_bot,"2026-09-21T18:12:49.357Z"
+  grok,default,all_products,91,-0.7317,projected_exhaustion,early,credits,"2026-09-25T21:26:34.000Z"
+  grok,default,"product:grok_build",91,-0.7317,projected_exhaustion,early,"credits + product:grok_build","2026-09-25T21:26:34.000Z"
+exhaustion[5]{provider,scope,usableRunwaySeconds,projectedExhaustedAt,limitingWindowId}:
+  codex,openai-codex,all_models,11775,"2026-09-19T09:38:43.507Z",weekly
+  codex,openai-codex-work,all_models,2996,"2026-09-19T07:12:24.486Z",weekly
+  cursor,default,all_models,510525,"2026-09-25T04:11:14.121Z",auto_usage
+  grok,default,all_products,325120,"2026-09-23T00:41:08.800Z",credits
+  grok,default,"product:grok_build",325120,"2026-09-23T00:41:08.800Z",credits
+attention[10]{provider,accountKey,scope,kind,detail,remedy}:
+  claude,default,all,auth_required,keychain_prompt_required · reason keychain_access_required,quota-axi --allow-keychain-prompt
+  copilot,default,all,auth_required,GitHub Copilot sign-in required,none
+  kimi,default,all,stale,"last refreshed 2026-09-19T06:13:37.033Z · pi_kimi_credential_expired (auth expired_refreshable)",none
+  kimi,default,all_models,headroom_unknown,five_hour + weekly,none
+  zai,default,all,auth_required,zai_credential_unavailable,none
+  agy,default,all,unavailable,Antigravity/agy is not running,none
+  alibaba,default,all,unavailable,bl_cli_unavailable,none
+  opencode-go,default,all,auth_required,opencode_go_credential_unavailable,none
+  opencode-go,default,all,unresolved_windows,rolling + weekly + monthly,none
+  commandcode,default,all,auth_required,commandcode_sign_in_required (auth unusable),none
+help[2]:
+  Tell your user: run `quota-axi --allow-keychain-prompt` once and approve Keychain access ("Always Allow") so quota-axi can read claude's live quota.
+  Run `quota-axi --full` for windows, pace, reserve, and account evidence

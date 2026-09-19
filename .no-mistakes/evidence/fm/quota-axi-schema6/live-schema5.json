@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-09-19T06:22:30.125Z",
+  "schemaVersion": 5,
+  "providers": [
+    {
+      "provider": "claude",
+      "windows": [],
+      "state": {
+        "status": "auth_required",
+        "stale": false,
+        "error": "keychain_prompt_required",
+        "reason": "keychain_access_required",
+        "remedyCommand": "quota-axi --allow-keychain-prompt"
+      },
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    }
+  ],
+  "help": [
+    "Tell your user: run `quota-axi --allow-keychain-prompt` once and approve Keychain access (\"Always Allow\") so quota-axi can read claude's live quota."
+  ]
+}
