@@ -1,0 +1,13 @@
+$ quota-axi --json | jq schema/account-key summary
+{"schemaVersion":6,"providerRows":12,"providers":[{"provider":"claude","hasAccountKey":true},{"provider":"codex","hasAccountKey":true},{"provider":"codex","hasAccountKey":true},{"provider":"cursor","hasAccountKey":true},{"provider":"copilot","hasAccountKey":true},{"provider":"grok","hasAccountKey":true},{"provider":"kimi","hasAccountKey":true},{"provider":"zai","hasAccountKey":true},{"provider":"agy","hasAccountKey":true},{"provider":"alibaba","hasAccountKey":true},{"provider":"opencode-go","hasAccountKey":true},{"provider":"commandcode","hasAccountKey":true}]}
+$ quota-axi --json | bin/fm-quota-choose.sh --candidate codex:default --candidate cursor:default
+cursor default
+exit=0
+$ bin/fm-procevent-quota.sh poll --interval 0.01 --threshold 100 --provider codex --timeout 5
+quota: quota-codex
+status: exhausted
+condition_polls: 1
+detail: {"provider":"codex","summary":[{"provider":"codex","accountKey":"account-1","best":{"scope":"all_models","status":"known","effectivePercentRemaining":3,"boundedBy":["weekly"],"limitingWindowIds":["weekly"],"pace":{"status":"ahead","aheadWindowIds":["weekly"],"worstReservePercentPoints":-24.9752,"worstReserveWindowId":"weekly"},"runway":{"status":"projected_exhaustion","usableRunwaySeconds":13472,"projectedExhaustedAt":"2026-09-20T01:21:49.509Z","limitingWindowId":"weekly","projectionConfidence":"established"},"selection":{"status":"known","spendPriority":-1.2396}}},{"provider":"codex","accountKey":"account-2","best":{"scope":"all_models","status":"known","effectivePercentRemaining":0,"boundedBy":["weekly"],"limitingWindowIds":["weekly"],"pace":{"status":"ahead","aheadWindowIds":["weekly"],"worstReservePercentPoints":-74.9089,"worstReserveWindowId":"weekly"},"runway":{"status":"exhausted_now","usableRunwaySeconds":0,"limitingWindowId":"weekly","projectedExhaustedAt":"2026-09-19T21:37:17.154Z"},"selection":{"status":"known","spendPriority":-3.9855}}}]}
+$ quota-axi --json | jq schemaVersion=5, one row/provider, remove accountKey | bin/fm-quota-choose.sh --candidate cursor:default
+cursor default
+exit=0
