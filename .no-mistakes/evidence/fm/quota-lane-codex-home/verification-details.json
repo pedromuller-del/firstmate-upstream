@@ -1,0 +1,26 @@
+{
+  "base_commit": "c5131a33a1e35a42e34733a5334fcc4e0225a656",
+  "target_commit": "5aa7dbbc25a6a83713bdf0c3bd7615361e54af32",
+  "regression": {
+    "command": "LC_ALL=C env -u TYPESAFE_API_KEY bash tests/fm-dispatch-resolve.test.sh",
+    "target_groups_passed": 24,
+    "target_exit_code": 0,
+    "base_groups_passed_before_failure": 17,
+    "base_exit_code": 1,
+    "base_failure": "Pi home lane snapshot resolves: eligible but unranked because no openai-codex quota row",
+    "setup_retry": "The initial isolated baseline copy omitted docs/examples; copied that test dependency and reran. The setup failure was resolved."
+  },
+  "adjacent_consumer": {
+    "command": "LC_ALL=C bash tests/fm-quota-choose.test.sh",
+    "groups_passed": 55,
+    "exit_code": 0
+  },
+  "live_commands": [
+    "FM_HOME=<isolated-home> FM_CONFIG_OVERRIDE=<isolated-home>/config bash bin/fm-dispatch-resolve.sh <brief> --project quota-validation",
+    "Same command against copied executable with base-commit fm-quota-axi-lib.sh",
+    "Same target command with Pi home, Pi sibling, Pi codex-native, native Codex, and Cursor profiles"
+  ],
+  "live_environment": "Real Typesafe API and real quota-axi. Transparent quota-axi wrapper adds --no-credential-refresh, preserves real stdout and exit status, and records only non-secret provider, accountKey, and quotaSemantics fields for codex and cursor. No credentials copied. No Herdr session needed.",
+  "snapshot_evidence": "A temporary test copy records the existing run() output and fixture inputs without changing assertions. All 24 groups passed again, exit 0. These are fixture-backed CLI checks, not live-provider results.",
+  "cleanup": "Temporary .quota-validation directory removed; tracked source files unchanged."
+}

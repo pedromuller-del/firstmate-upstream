@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T19:04:04.184Z",
+  "generatedAt": "2026-09-22T19:04:06.881Z",
   "schemaVersion": 6,
   "providers": [
     {
@@ -20,7 +20,7 @@
             ],
             "pace": {
               "status": "behind",
-              "worstReservePercentPoints": 8.3608,
+              "worstReservePercentPoints": 8.3613,
               "worstReserveWindowId": "weekly"
             },
             "runway": {
@@ -56,14 +56,14 @@
               "aheadWindowIds": [
                 "weekly"
               ],
-              "worstReservePercentPoints": -33.5719,
+              "worstReservePercentPoints": -33.5713,
               "worstReserveWindowId": "weekly"
             },
             "runway": {
               "status": "exhausted_now",
               "usableRunwaySeconds": 0,
               "limitingWindowId": "weekly",
-              "projectedExhaustedAt": "2026-09-22T19:04:04.184Z"
+              "projectedExhaustedAt": "2026-09-22T19:04:06.881Z"
             },
             "selection": {
               "status": "known",
@@ -96,13 +96,13 @@
               "aheadWindowIds": [
                 "auto_usage"
               ],
-              "worstReservePercentPoints": -3.8658,
+              "worstReservePercentPoints": -3.8657,
               "worstReserveWindowId": "auto_usage"
             },
             "runway": {
               "status": "projected_exhaustion",
-              "usableRunwaySeconds": 541978,
-              "projectedExhaustedAt": "2026-09-29T01:37:02.415Z",
+              "usableRunwaySeconds": 541979,
+              "projectedExhaustedAt": "2026-09-29T01:37:05.873Z",
               "limitingWindowId": "auto_usage",
               "projectionConfidence": "established"
             },
@@ -123,7 +123,7 @@
             ],
             "pace": {
               "status": "behind",
-              "worstReservePercentPoints": 14.7941,
+              "worstReservePercentPoints": 14.7946,
               "worstReserveWindowId": "grok_bot"
             },
             "runway": {

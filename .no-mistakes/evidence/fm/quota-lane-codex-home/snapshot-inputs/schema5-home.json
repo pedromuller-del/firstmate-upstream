@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2030-01-01T00:00:00Z",
+  "schemaVersion": 5,
+  "providers": [
+    {
+      "provider": "claude",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "codex",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 97,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.8
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "cursor",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 24,
+            "runway": {
+              "status": "projected_exhaustion"
+            },
+            "selection": {
+              "spendPriority": 0.3917
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

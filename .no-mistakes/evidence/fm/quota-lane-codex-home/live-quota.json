@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T19:04:04.184Z",
+  "generatedAt": "2026-09-22T19:03:04.548Z",
   "schemaVersion": 6,
   "providers": [
     {
@@ -20,7 +20,7 @@
             ],
             "pace": {
               "status": "behind",
-              "worstReservePercentPoints": 8.3608,
+              "worstReservePercentPoints": 8.351,
               "worstReserveWindowId": "weekly"
             },
             "runway": {
@@ -29,7 +29,7 @@
             },
             "selection": {
               "status": "known",
-              "spendPriority": 0.7223
+              "spendPriority": 0.7219
             }
           }
         ]
@@ -56,18 +56,18 @@
               "aheadWindowIds": [
                 "weekly"
               ],
-              "worstReservePercentPoints": -33.5719,
+              "worstReservePercentPoints": -33.5816,
               "worstReserveWindowId": "weekly"
             },
             "runway": {
               "status": "exhausted_now",
               "usableRunwaySeconds": 0,
               "limitingWindowId": "weekly",
-              "projectedExhaustedAt": "2026-09-22T19:04:04.184Z"
+              "projectedExhaustedAt": "2026-09-22T19:03:04.548Z"
             },
             "selection": {
               "status": "known",
-              "spendPriority": -1.5054
+              "spendPriority": -1.5056
             }
           }
         ]
@@ -96,19 +96,19 @@
               "aheadWindowIds": [
                 "auto_usage"
               ],
-              "worstReservePercentPoints": -3.8658,
+              "worstReservePercentPoints": -3.8681,
               "worstReserveWindowId": "auto_usage"
             },
             "runway": {
               "status": "projected_exhaustion",
-              "usableRunwaySeconds": 541978,
-              "projectedExhaustedAt": "2026-09-29T01:37:02.415Z",
+              "usableRunwaySeconds": 541961,
+              "projectedExhaustedAt": "2026-09-29T01:35:45.958Z",
               "limitingWindowId": "auto_usage",
               "projectionConfidence": "established"
             },
             "selection": {
               "status": "known",
-              "spendPriority": 1.0327
+              "spendPriority": 1.0324
             }
           },
           {
@@ -123,7 +123,7 @@
             ],
             "pace": {
               "status": "behind",
-              "worstReservePercentPoints": 14.7941,
+              "worstReservePercentPoints": 14.7843,
               "worstReserveWindowId": "grok_bot"
             },
             "runway": {
@@ -132,7 +132,7 @@
             },
             "selection": {
               "status": "known",
-              "spendPriority": 1.1736
+              "spendPriority": 1.1735
             }
           }
         ]

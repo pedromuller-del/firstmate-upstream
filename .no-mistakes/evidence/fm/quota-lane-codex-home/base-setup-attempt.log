@@ -1,0 +1,12 @@
+ok - absent key is off: one stderr line, exit 0, no network call
+ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
+ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
+ok - rules snapshots and shell quoting preserve the profile protocol
+cp: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation/baseline/docs/examples/crew-dispatch.json: No such file or directory
+not ok - the documented example passes opted-in resolution (missing: '  status: clear')
+--- output ---
+dispatch-resolve:
+  status: error
+  reason: response is not a rule Choice answer
+
+exit_code=1
