@@ -1,0 +1,32 @@
+Case: exact-exhausted-precedence
+Product: real bin/fm-dispatch-resolve.sh at 6d5a563e9264e83705f1113641c2a3e1c7998f8e
+TypeSafe: real HTTPS request via /usr/bin/curl; inherited API key, never written to disk.
+Quota: isolated fixture shim; no account quota or credentials accessed.
+
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/brief.md --project quota-row-validation
+
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 675   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+stderr:
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+
+exit_code: 0
+quota-axi calls:
+--json
+
+Assertions:
+  status: escalate
+  reason: no rankable eligible candidate
+candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+result: pass
+

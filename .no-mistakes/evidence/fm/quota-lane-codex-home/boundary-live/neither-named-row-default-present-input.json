@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 6,
+  "providers": [
+    {
+      "provider": "codex",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 97,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.8
+            }
+          }
+        ]
+      },
+      "accountKey": "default"
+    },
+    {
+      "provider": "cursor",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 22,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.3
+            }
+          }
+        ]
+      },
+      "accountKey": "default"
+    }
+  ]
+}

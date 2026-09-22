@@ -1,0 +1,36 @@
+{
+  "dispatch_suite": {
+    "command": "env -u TYPESAFE_API_KEY -u FM_CONFIG_OVERRIDE -u FM_ROOT_OVERRIDE LC_ALL=C TMPDIR=\"$PWD/.quota-lane-validation/tmp\" bash tests/fm-dispatch-resolve.test.sh",
+    "passed_groups": 24,
+    "failed_groups": 0,
+    "exit_code": 0
+  },
+  "quota_choose_suite": {
+    "command": "env -u FM_ROOT_OVERRIDE LC_ALL=C TMPDIR=\"$PWD/.quota-lane-validation/tmp\" bash tests/fm-quota-choose.test.sh",
+    "passed_groups": 55,
+    "failed_groups": 0,
+    "exit_code": 0
+  },
+  "before_regression": {
+    "command": "bash .quota-lane-validation/before/tests/fm-dispatch-resolve.test.sh",
+    "library_commit": "ada21f5b813f8a19e00f44c50555104cb481d3ac",
+    "passed_groups": 17,
+    "failed_groups": 1,
+    "exit_code": 1,
+    "expected_failure": "Pi home lane snapshot resolves; candidate remained eligible, unranked because the account key did not match"
+  },
+  "live_runs": {
+    "count": 2,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "dependencies": "Real Typesafe.ai and installed quota-axi; credential refresh disabled; no fabricated responses"
+  },
+  "fixture_boundary_checks": {
+    "count": 5,
+    "exit_code": 0,
+    "live": false
+  },
+  "changes": "No tracked source or test changes. Temporary scratch removed."
+}

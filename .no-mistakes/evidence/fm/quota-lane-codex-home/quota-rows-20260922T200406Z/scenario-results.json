@@ -1,0 +1,47 @@
+[
+  {
+    "name": "home-fallback",
+    "result": "pass",
+    "exit_code": 0,
+    "live_service": "TypeSafe HTTPS API",
+    "quota_source": "isolated fixture",
+    "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/quota-rows-20260922T200406Z/home-fallback.log",
+    "errors": []
+  },
+  {
+    "name": "exact-exhausted-precedence",
+    "result": "pass",
+    "exit_code": 0,
+    "live_service": "TypeSafe HTTPS API",
+    "quota_source": "isolated fixture",
+    "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/quota-rows-20260922T200406Z/exact-exhausted-precedence.log",
+    "errors": []
+  },
+  {
+    "name": "neither-named-row-default-present",
+    "result": "pass",
+    "exit_code": 0,
+    "live_service": "TypeSafe HTTPS API",
+    "quota_source": "isolated fixture",
+    "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/quota-rows-20260922T200406Z/neither-named-row-default-present.log",
+    "errors": []
+  },
+  {
+    "name": "schema5-single-provider-row",
+    "result": "pass",
+    "exit_code": 0,
+    "live_service": "TypeSafe HTTPS API",
+    "quota_source": "isolated fixture",
+    "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/quota-rows-20260922T200406Z/schema5-single-provider-row.log",
+    "errors": []
+  },
+  {
+    "name": "other-lanes-stay-isolated",
+    "result": "pass",
+    "exit_code": 0,
+    "live_service": "TypeSafe HTTPS API",
+    "quota_source": "isolated fixture",
+    "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/quota-rows-20260922T200406Z/other-lanes-stay-isolated.log",
+    "errors": []
+  }
+]

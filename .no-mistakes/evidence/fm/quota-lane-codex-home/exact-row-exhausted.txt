@@ -1,0 +1,16 @@
+Fixture-driven executable check; NOT live. Real fm-dispatch-resolve.sh with simulated quota-axi and Typesafe.ai responses.
+$ bash bin/fm-dispatch-resolve.sh <brief>
+dispatch-resolve:
+  status: escalate
+  model: fixture-rule-matcher   latency_ms: 265   tokens: -/-
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+
+exit_code: 0

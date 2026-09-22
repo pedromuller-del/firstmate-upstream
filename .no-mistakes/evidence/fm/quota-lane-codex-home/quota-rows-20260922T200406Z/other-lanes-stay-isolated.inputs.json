@@ -1,0 +1,173 @@
+{
+  "brief": "Validate Codex quota account selection. This task is exclusively quota account validation.\n",
+  "rules": {
+    "rules": [
+      {
+        "when": "Tasks that validate Codex quota account selection.",
+        "use": [
+          {
+            "harness": "pi",
+            "model": "openai-codex/gpt-5.6-sol",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi",
+            "model": "openai-codex-muller-labs/gpt-5.6-luna",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi",
+            "model": "codex-native/gpt-6-astra",
+            "provider": "codex"
+          },
+          {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi-signed",
+            "model": "openai-codex/gpt-5.6-sol",
+            "provider": "codex"
+          },
+          {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium",
+            "provider": "cursor"
+          },
+          {
+            "harness": "pi",
+            "model": "anthropic/claude-sonnet-4-6",
+            "provider": "claude"
+          }
+        ]
+      }
+    ]
+  },
+  "snapshot": {
+    "generatedAt": "2026-09-22T20:04:06Z",
+    "schemaVersion": 6,
+    "providers": [
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 99,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.99
+              }
+            }
+          ]
+        },
+        "accountKey": "default"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 30,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.2
+              }
+            }
+          ]
+        },
+        "accountKey": "codex-home"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 8,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.05
+              }
+            }
+          ]
+        },
+        "accountKey": "openai-codex"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 80,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.6
+              }
+            }
+          ]
+        },
+        "accountKey": "openai-codex-muller-labs"
+      },
+      {
+        "provider": "cursor",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 70,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.4
+              }
+            }
+          ]
+        },
+        "accountKey": "default"
+      },
+      {
+        "provider": "claude",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 60,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.3
+              }
+            }
+          ]
+        },
+        "accountKey": "default"
+      }
+    ]
+  }
+}

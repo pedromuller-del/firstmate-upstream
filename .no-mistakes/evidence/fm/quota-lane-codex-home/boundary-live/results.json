@@ -1,0 +1,32 @@
+{
+  "tested_head_sha": "6d5a563e9264e83705f1113641c2a3e1c7998f8e",
+  "passed": 3,
+  "expected": 3,
+  "scenarios": [
+    {
+      "scenario": "exact-row-exhausted",
+      "result": "pass",
+      "live_typesafe": true,
+      "fixture_quota": true,
+      "exit_code": 0,
+      "transcript": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/boundary-live/exact-row-exhausted.txt"
+    },
+    {
+      "scenario": "neither-named-row-default-present",
+      "result": "pass",
+      "live_typesafe": true,
+      "fixture_quota": true,
+      "exit_code": 0,
+      "transcript": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/boundary-live/neither-named-row-default-present.txt"
+    },
+    {
+      "scenario": "schema-5",
+      "result": "pass",
+      "live_typesafe": true,
+      "fixture_quota": true,
+      "exit_code": 0,
+      "transcript": "/Users/pedromuller/.no-mistakes/evidence/01M354G9F3ZYS8PYSQSKWC9PAS/boundary-live/schema-5.txt"
+    }
+  ],
+  "scratch_removed": true
+}

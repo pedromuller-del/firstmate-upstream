@@ -1,11 +1,14 @@
+$ FM_HOME=<isolated worktree home> bash bin/fm-dispatch-resolve.sh <brief> --project quota-lane-validation
+Candidates: pi:openai-codex/gpt-5.6-sol and pi:openai-codex-muller-labs/gpt-5.6-luna.
+Installed quota-axi forwards its live result unchanged; only --no-credential-refresh and evidence capture are added. Real Typesafe.ai request.
 dispatch-resolve:
   status: clear
-  model: jev-1.13.0   latency_ms: 838   tokens: 426/35
-  rule: rule_1 (The task fixes a bug in the pager.)   confidence: 0.98
-  probabilities: rule_1=0.99 default=0.01
+  model: jev-1.13.0   latency_ms: 712   tokens: 444/35
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
   note: rule matched
-  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=95%  spendPriority=0.7219  runway=through_reset  -> eligible
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=94%  spendPriority=0.6565  runway=through_reset  -> eligible
   candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
   profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
 
-exit_code=0
+exit_code: 0

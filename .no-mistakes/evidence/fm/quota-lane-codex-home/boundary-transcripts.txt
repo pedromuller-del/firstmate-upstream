@@ -1,0 +1,93 @@
+Controlled boundary checks. All five passed with exit code 0. These use simulated dependency responses and are NOT live evidence.
+
+=== exact-row-exhausted ===
+Fixture-driven executable check; NOT live. Real fm-dispatch-resolve.sh with simulated quota-axi and Typesafe.ai responses.
+$ bash bin/fm-dispatch-resolve.sh <brief>
+dispatch-resolve:
+  status: escalate
+  model: fixture-rule-matcher   latency_ms: 265   tokens: -/-
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+
+exit_code: 0
+
+=== exact-row-reversed ===
+Fixture-driven executable check; NOT live. Real fm-dispatch-resolve.sh with simulated quota-axi and Typesafe.ai responses.
+$ bash bin/fm-dispatch-resolve.sh <brief>
+dispatch-resolve:
+  status: escalate
+  model: fixture-rule-matcher   latency_ms: 35   tokens: -/-
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+
+exit_code: 0
+
+=== neither-named-row-default-present ===
+Fixture-driven executable check; NOT live. Real fm-dispatch-resolve.sh with simulated quota-axi and Typesafe.ai responses.
+$ bash bin/fm-dispatch-resolve.sh <brief>
+dispatch-resolve:
+  status: escalate
+  model: fixture-rule-matcher   latency_ms: 26   tokens: -/-
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+
+exit_code: 0
+
+=== no-codex-row ===
+Fixture-driven executable check; NOT live. Real fm-dispatch-resolve.sh with simulated quota-axi and Typesafe.ai responses.
+$ bash bin/fm-dispatch-resolve.sh <brief>
+dispatch-resolve:
+  status: clear
+  model: fixture-rule-matcher   latency_ms: 22   tokens: -/-
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  note: 4 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex not in the quota snapshot: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  -> eligible, unranked: provider codex not in the quota snapshot: disclosed uncertainty
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  -> eligible, unranked: provider codex not in the quota snapshot: disclosed uncertainty
+  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex not in the quota snapshot: disclosed uncertainty
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+exit_code: 0
+
+=== schema-5 ===
+Fixture-driven executable check; NOT live. Real fm-dispatch-resolve.sh with simulated quota-axi and Typesafe.ai responses.
+$ bash bin/fm-dispatch-resolve.sh <brief>
+dispatch-resolve:
+  status: escalate
+  model: fixture-rule-matcher   latency_ms: 21   tokens: -/-
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+
+exit_code: 0
+

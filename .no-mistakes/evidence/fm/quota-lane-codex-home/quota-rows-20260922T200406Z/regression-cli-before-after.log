@@ -1,0 +1,40 @@
+Same synthetic brief, rules, quota input, real TypeSafe API, and environment. Before differs only in the base quota-row library. No credential is written to evidence.
+
+BEFORE
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE LC_ALL=C FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/baseline-quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/before/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/brief.md --project quota-row-validation
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 729   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3917  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+stderr:
+
+process_exit_code: 0
+regression_assertion_exit_code: 1
+
+AFTER
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE LC_ALL=C FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/baseline-quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/brief.md --project quota-row-validation
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 802   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3917  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+stderr:
+
+process_exit_code: 0
+regression_assertion_exit_code: 0

@@ -1,0 +1,93 @@
+{
+  "brief": "Validate Codex quota account selection. This task is exclusively quota account validation.\n",
+  "rules": {
+    "rules": [
+      {
+        "when": "Tasks that validate Codex quota account selection.",
+        "use": [
+          {
+            "harness": "pi",
+            "model": "openai-codex/gpt-5.6-sol",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi",
+            "model": "openai-codex-muller-labs/gpt-5.6-luna",
+            "provider": "codex"
+          },
+          {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium",
+            "provider": "cursor"
+          }
+        ]
+      }
+    ]
+  },
+  "snapshot": {
+    "generatedAt": "2026-09-22T20:04:06Z",
+    "schemaVersion": 6,
+    "providers": [
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 97,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.8
+              }
+            }
+          ]
+        },
+        "accountKey": "codex-home"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 0,
+              "runway": {
+                "status": "exhausted_now"
+              },
+              "selection": {
+                "spendPriority": -1.4788
+              }
+            }
+          ]
+        },
+        "accountKey": "openai-codex-muller-labs"
+      },
+      {
+        "provider": "cursor",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 24,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.3917
+              }
+            }
+          ]
+        },
+        "accountKey": "default"
+      }
+    ]
+  }
+}

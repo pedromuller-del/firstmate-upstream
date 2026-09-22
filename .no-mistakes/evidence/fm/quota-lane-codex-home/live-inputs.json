@@ -1,0 +1,37 @@
+{
+  "brief": "# Task\nFix the known off-by-one bug in a pager. The page loop uses <= instead of < for its upper bound, producing one extra empty page. Change that condition and verify exactly the expected number of pages.\n",
+  "rules": {
+    "rules": [
+      {
+        "when": "Implement a concrete software bug fix with a known root cause.",
+        "use": [
+          {
+            "harness": "pi",
+            "model": "openai-codex/gpt-5.6-sol",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi",
+            "model": "openai-codex-muller-labs/gpt-5.6-luna",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi",
+            "model": "codex-native/gpt-6-astra",
+            "provider": "codex",
+            "effort": "ultra"
+          },
+          {
+            "harness": "codex",
+            "model": "gpt-5.6-sol"
+          },
+          {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        ]
+      }
+    ]
+  },
+  "quota_execution": "Installed quota-axi with --no-credential-refresh; no output interception or replay."
+}

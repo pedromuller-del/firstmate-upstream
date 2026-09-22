@@ -1,0 +1,22 @@
+Real resolver and live Typesafe.ai; isolated fixture quota-axi.
+TYPESAFE_API_KEY inherited from runtime, never recorded.
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE -u FM_TIMING_LOG FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-boundary-live-i08t30se/neither-named-row-default-present TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-boundary-live-i08t30se/neither-named-row-default-present/tmp LC_ALL=C PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-boundary-live-i08t30se/neither-named-row-default-present/stub-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0zZaDpK:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-boundary-live-i08t30se/neither-named-row-default-present/brief.md --project quota-lane-validation
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 656   tokens: 417/35
+  rule: rule_1 (Implement a concrete software bug fix with a known root caus)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.3  runway=through_reset  -> eligible
+
+stderr:
+
+exit_code: 0
+quota-axi calls:
+--json

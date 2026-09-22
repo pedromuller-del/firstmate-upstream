@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 6,
+  "providers": [
+    {
+      "provider": "cursor",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 22,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.3
+            }
+          }
+        ]
+      },
+      "accountKey": "default"
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+Case: home-fallback
+Product: real bin/fm-dispatch-resolve.sh at 6d5a563e9264e83705f1113641c2a3e1c7998f8e
+TypeSafe: real HTTPS request via /usr/bin/curl; inherited API key, never written to disk.
+Quota: isolated fixture shim; no account quota or credentials accessed.
+
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/home-fallback/brief.md --project quota-row-validation
+
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 936   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3917  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+stderr:
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+
+exit_code: 0
+quota-axi calls:
+--json
+
+Assertions:
+  status: clear
+candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3917  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+result: pass
+
+
+Case: exact-exhausted-precedence
+Product: real bin/fm-dispatch-resolve.sh at 6d5a563e9264e83705f1113641c2a3e1c7998f8e
+TypeSafe: real HTTPS request via /usr/bin/curl; inherited API key, never written to disk.
+Quota: isolated fixture shim; no account quota or credentials accessed.
+
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/exact-exhausted-precedence/brief.md --project quota-row-validation
+
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 675   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+stderr:
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+
+exit_code: 0
+quota-axi calls:
+--json
+
+Assertions:
+  status: escalate
+  reason: no rankable eligible candidate
+candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+result: pass
+
+
+Case: neither-named-row-default-present
+Product: real bin/fm-dispatch-resolve.sh at 6d5a563e9264e83705f1113641c2a3e1c7998f8e
+TypeSafe: real HTTPS request via /usr/bin/curl; inherited API key, never written to disk.
+Quota: isolated fixture shim; no account quota or credentials accessed.
+
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/neither-named-row-default-present/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/neither-named-row-default-present/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/neither-named-row-default-present/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/neither-named-row-default-present/quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/neither-named-row-default-present/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/neither-named-row-default-present/brief.md --project quota-row-validation
+
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 684   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+
+stderr:
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+
+exit_code: 0
+quota-axi calls:
+--json
+
+Assertions:
+  status: clear
+candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+result: pass
+
+
+Case: schema5-single-provider-row
+Product: real bin/fm-dispatch-resolve.sh at 6d5a563e9264e83705f1113641c2a3e1c7998f8e
+TypeSafe: real HTTPS request via /usr/bin/curl; inherited API key, never written to disk.
+Quota: isolated fixture shim; no account quota or credentials accessed.
+
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/schema5-single-provider-row/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/schema5-single-provider-row/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/schema5-single-provider-row/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/schema5-single-provider-row/quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/schema5-single-provider-row/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/schema5-single-provider-row/brief.md --project quota-row-validation
+
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 742   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+
+stderr:
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+
+exit_code: 0
+quota-axi calls:
+--json
+
+Assertions:
+  status: escalate
+  reason: genuine spendPriority tie
+candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.5  runway=through_reset  -> eligible
+result: pass
+
+
+Case: other-lanes-stay-isolated
+Product: real bin/fm-dispatch-resolve.sh at 6d5a563e9264e83705f1113641c2a3e1c7998f8e
+TypeSafe: real HTTPS request via /usr/bin/curl; inherited API key, never written to disk.
+Quota: isolated fixture shim; no account quota or credentials accessed.
+
+$ env -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/other-lanes-stay-isolated/home TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/other-lanes-stay-isolated/tmp QUOTA_FIXTURE=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/other-lanes-stay-isolated/quota.json QUOTA_CALLS=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/other-lanes-stay-isolated/quota.calls PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/other-lanes-stay-isolated/shim:"$PATH" bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M354G9F3ZYS8PYSQSKWC9PAS/.quota-validation-n223_xxj/other-lanes-stay-isolated/brief.md --project quota-row-validation
+
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 699   tokens: 410/35
+  rule: rule_1 (Tasks that validate Codex quota account selection.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=8%  spendPriority=0.05  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=80%  spendPriority=0.6  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=30%  spendPriority=0.2  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=30%  spendPriority=0.2  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=8%  spendPriority=0.05  runway=through_reset  -> eligible
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=70%  spendPriority=0.4  runway=through_reset  -> eligible
+  candidate: pi:anthropic/claude-sonnet-4-6  provider=claude  scope=all_models  remaining=60%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+
+stderr:
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+
+exit_code: 0
+quota-axi calls:
+--json
+
+Assertions:
+  status: clear
+candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=8%  spendPriority=0.05  runway=through_reset  -> eligible
+candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=80%  spendPriority=0.6  runway=through_reset  -> eligible
+candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=30%  spendPriority=0.2  runway=through_reset  -> eligible
+candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=30%  spendPriority=0.2  runway=through_reset  -> eligible
+candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=8%  spendPriority=0.05  runway=through_reset  -> eligible
+candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=70%  spendPriority=0.4  runway=through_reset  -> eligible
+candidate: pi:anthropic/claude-sonnet-4-6  provider=claude  scope=all_models  remaining=60%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+result: pass
+
