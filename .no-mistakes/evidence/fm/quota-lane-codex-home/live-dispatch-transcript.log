@@ -1,0 +1,86 @@
+## home-fallback
+
+command: FM_HOME=<isolated worktree directory> bash bin/fm-dispatch-resolve.sh <brief> --project quota-validation
+quota command: quota-axi --json --provider codex,cursor --no-credential-refresh (fresh real output forwarded unchanged)
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 735   tokens: 435/35
+  rule: rule_1 (Any coding task, including a small shell-script bug fix with)   confidence: 0.99
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7628  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+exit_code=0
+
+## native-codex
+
+command: FM_HOME=<isolated worktree directory> bash bin/fm-dispatch-resolve.sh <brief> --project quota-validation
+quota command: quota-axi --json --provider codex,cursor --no-credential-refresh (fresh real output forwarded unchanged)
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 725   tokens: 435/35
+  rule: rule_1 (Any coding task, including a small shell-script bug fix with)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7628  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+exit_code=0
+
+## pi-native
+
+command: FM_HOME=<isolated worktree directory> bash bin/fm-dispatch-resolve.sh <brief> --project quota-validation
+quota command: quota-axi --json --provider codex,cursor --no-credential-refresh (fresh real output forwarded unchanged)
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 747   tokens: 435/35
+  rule: rule_1 (Any coding task, including a small shell-script bug fix with)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7628  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'codex-native/gpt-6-astra'
+
+exit_code=0
+
+## pi-signed-home
+
+command: FM_HOME=<isolated worktree directory> bash bin/fm-dispatch-resolve.sh <brief> --project quota-validation
+quota command: quota-axi --json --provider codex,cursor --no-credential-refresh (fresh real output forwarded unchanged)
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 687   tokens: 435/35
+  rule: rule_1 (Any coding task, including a small shell-script bug fix with)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7629  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi-signed' --model 'openai-codex/gpt-5.6-sol'
+
+exit_code=0
+
+## non-codex
+
+command: FM_HOME=<isolated worktree directory> bash bin/fm-dispatch-resolve.sh <brief> --project quota-validation
+quota command: quota-axi --json --provider codex,cursor --no-credential-refresh (fresh real output forwarded unchanged)
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 678   tokens: 435/35
+  rule: rule_1 (Any coding task, including a small shell-script bug fix with)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7629  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=1.0104  runway=projected_exhaustion  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+exit_code=0
+

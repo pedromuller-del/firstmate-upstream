@@ -1,0 +1,245 @@
+{
+  "generatedAt": "2026-09-22T17:00:14.461Z",
+  "schemaVersion": 6,
+  "providers": [
+    {
+      "provider": "codex",
+      "plan": "pro",
+      "windows": [
+        {
+          "id": "weekly",
+          "label": "week",
+          "kind": "weekly",
+          "resetsAt": "2026-09-28T20:37:18.000Z",
+          "percentRemaining": 96,
+          "pace": {
+            "status": "behind",
+            "reservePercentPoints": 8.1324,
+            "burnMultiple": 0.3297
+          }
+        }
+      ],
+      "credits": {
+        "remaining": 0,
+        "unlimited": false,
+        "unit": "credits"
+      },
+      "state": {
+        "status": "fresh",
+        "stale": false
+      },
+      "accountKey": "codex-home",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 96,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 8.1324,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 0.7629
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "plan": "prolite",
+      "windows": [
+        {
+          "id": "weekly",
+          "label": "week",
+          "kind": "weekly",
+          "resetsAt": "2026-09-25T03:28:06.000Z",
+          "percentRemaining": 0,
+          "pace": {
+            "status": "ahead",
+            "reservePercentPoints": -34.8002,
+            "burnMultiple": 1.5337
+          }
+        }
+      ],
+      "credits": {
+        "remaining": 0,
+        "unlimited": false,
+        "unit": "credits"
+      },
+      "state": {
+        "status": "fresh",
+        "stale": false
+      },
+      "accountKey": "openai-codex-muller-labs",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 0,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "ahead",
+              "aheadWindowIds": [
+                "weekly"
+              ],
+              "worstReservePercentPoints": -34.8002,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "exhausted_now",
+              "usableRunwaySeconds": 0,
+              "limitingWindowId": "weekly",
+              "projectedExhaustedAt": "2026-09-22T17:00:14.461Z"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": -1.5337
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "cursor",
+      "plan": "Team",
+      "windows": [
+        {
+          "id": "included_usage",
+          "label": "included usage",
+          "kind": "monthly",
+          "resetsAt": "2026-09-30T13:18:05.000Z",
+          "percentRemaining": 31,
+          "pace": {
+            "status": "behind",
+            "reservePercentPoints": 4.8476,
+            "burnMultiple": 0.9344
+          }
+        },
+        {
+          "id": "auto_usage",
+          "label": "auto usage",
+          "kind": "monthly",
+          "resetsAt": "2026-09-30T13:18:05.000Z",
+          "percentRemaining": 22,
+          "pace": {
+            "status": "ahead",
+            "reservePercentPoints": -4.1524,
+            "burnMultiple": 1.0562
+          }
+        },
+        {
+          "id": "api_usage",
+          "label": "API usage",
+          "kind": "monthly",
+          "resetsAt": "2026-09-30T13:18:05.000Z",
+          "percentRemaining": 84,
+          "pace": {
+            "status": "behind",
+            "reservePercentPoints": 57.8476,
+            "burnMultiple": 0.2167
+          }
+        },
+        {
+          "id": "grok_bot",
+          "label": "Grok Bot",
+          "kind": "weekly",
+          "resetsAt": "2026-09-28T18:12:49.357Z",
+          "percentRemaining": 100,
+          "pace": {
+            "status": "behind",
+            "reservePercentPoints": 13.5657,
+            "burnMultiple": 0
+          }
+        }
+      ],
+      "state": {
+        "status": "fresh",
+        "stale": false
+      },
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 22,
+            "boundedBy": [
+              "included_usage",
+              "auto_usage",
+              "api_usage"
+            ],
+            "limitingWindowIds": [
+              "auto_usage"
+            ],
+            "pace": {
+              "status": "mixed",
+              "aheadWindowIds": [
+                "auto_usage"
+              ],
+              "worstReservePercentPoints": -4.1524,
+              "worstReserveWindowId": "auto_usage"
+            },
+            "runway": {
+              "status": "projected_exhaustion",
+              "usableRunwaySeconds": 539883,
+              "projectedExhaustedAt": "2026-09-28T22:58:17.129Z",
+              "limitingWindowId": "auto_usage",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 1.0104
+            }
+          },
+          {
+            "scope": "grok_bot",
+            "status": "known",
+            "effectivePercentRemaining": 100,
+            "boundedBy": [
+              "grok_bot"
+            ],
+            "limitingWindowIds": [
+              "grok_bot"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 13.5657,
+              "worstReserveWindowId": "grok_bot"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 1.1569
+            }
+          }
+        ]
+      },
+      "accountKey": "default"
+    }
+  ]
+}

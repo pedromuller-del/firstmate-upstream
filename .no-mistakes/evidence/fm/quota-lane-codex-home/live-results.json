@@ -1,0 +1,32 @@
+[
+  {
+    "name": "home-fallback",
+    "result": "pass",
+    "errors": [],
+    "exit_code": 0
+  },
+  {
+    "name": "native-codex",
+    "result": "pass",
+    "errors": [],
+    "exit_code": 0
+  },
+  {
+    "name": "pi-native",
+    "result": "pass",
+    "errors": [],
+    "exit_code": 0
+  },
+  {
+    "name": "pi-signed-home",
+    "result": "pass",
+    "errors": [],
+    "exit_code": 0
+  },
+  {
+    "name": "non-codex",
+    "result": "pass",
+    "errors": [],
+    "exit_code": 0
+  }
+]

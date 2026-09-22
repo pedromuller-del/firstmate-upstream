@@ -1,0 +1,17 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - help renders the complete header only
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - first positive candidate wins
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - exhausted provider is skipped
+ok - no positive candidate returns none and exit 1
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - positional candidates work
+ok - specific model scope bounds generic quota
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+ok - omp openai-codex prefix matches the bare codex model scope
+not ok - unmapped omp prefix returned: bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+error: omp quota mapping covers only the openai-codex and claude-bridge prefixes: ollama/qwen3:8b
+
+exit_code=1
