@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-09-22T18:12:32.360Z",
+  "schemaVersion": 5,
+  "providers": [
+    {
+      "provider": "codex",
+      "accountKey": null,
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 96,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 8.8496,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 0.7902
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

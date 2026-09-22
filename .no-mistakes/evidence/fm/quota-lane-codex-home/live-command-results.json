@@ -1,0 +1,14 @@
+[
+  {
+    "case": "home-fallback",
+    "exit_code": 0
+  },
+  {
+    "case": "native-adapter",
+    "exit_code": 0
+  },
+  {
+    "case": "codex-harness",
+    "exit_code": 0
+  }
+]

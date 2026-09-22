@@ -1,0 +1,11 @@
+Fixture integration output (not live); snapshot=schema6-home.json; exit=0
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 14   tokens: 812/60
+  rule: rule_1 (Codex work.)   confidence: 0.9
+  probabilities: rule_1=0.97 default=0.03
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+

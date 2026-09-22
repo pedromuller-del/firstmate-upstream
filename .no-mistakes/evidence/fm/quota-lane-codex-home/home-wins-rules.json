@@ -1,0 +1,19 @@
+{
+  "rules": [
+    {
+      "when": "The task is a simple bug fix with an isolated cause for Codex work.",
+      "use": [
+        {
+          "harness": "pi",
+          "model": "openai-codex/gpt-5.6-sol",
+          "provider": "codex"
+        },
+        {
+          "harness": "pi",
+          "model": "openai-codex-muller-labs/gpt-5.6-luna",
+          "provider": "codex"
+        }
+      ]
+    }
+  ]
+}

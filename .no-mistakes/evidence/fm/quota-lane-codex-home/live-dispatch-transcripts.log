@@ -1,0 +1,84 @@
+=== home-wins: real services ===
+$ FM_HOME=<isolated test home> LC_ALL=C bash bin/fm-dispatch-resolve.sh <test brief> --project quota-routing-validation
+quota-axi pass-through adds --no-credential-refresh; real TypeSafe and quota responses, no stubs.
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 725   tokens: 448/35
+  rule: rule_1 (The task is a simple bug fix with an isolated cause for Code)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7898  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+EXIT_CODE=0
+
+=== home-fallback: real services ===
+$ FM_HOME=<isolated test home> LC_ALL=C bash bin/fm-dispatch-resolve.sh <test brief> --project quota-routing-validation
+quota-axi pass-through adds --no-credential-refresh; real TypeSafe and quota responses, no stubs.
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 778   tokens: 448/35
+  rule: rule_1 (The task is a simple bug fix with an isolated cause for Code)   confidence: 0.99
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7889  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=1.0226  runway=projected_exhaustion  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+EXIT_CODE=0
+
+=== native-adapter: real services ===
+$ FM_HOME=<isolated test home> LC_ALL=C bash bin/fm-dispatch-resolve.sh <test brief> --project quota-routing-validation
+quota-axi pass-through adds --no-credential-refresh; real TypeSafe and quota responses, no stubs.
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 696   tokens: 448/35
+  rule: rule_1 (The task is a simple bug fix with an isolated cause for Code)   confidence: 0.97
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7889  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=1.0226  runway=projected_exhaustion  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+EXIT_CODE=0
+
+=== codex-harness: real services ===
+$ FM_HOME=<isolated test home> LC_ALL=C bash bin/fm-dispatch-resolve.sh <test brief> --project quota-routing-validation
+quota-axi pass-through adds --no-credential-refresh; real TypeSafe and quota responses, no stubs.
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 658   tokens: 448/35
+  rule: rule_1 (The task is a simple bug fix with an isolated cause for Code)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7889  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=1.0226  runway=projected_exhaustion  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+EXIT_CODE=0
+
+=== schema5: real services ===
+$ FM_HOME=<isolated test home> LC_ALL=C bash bin/fm-dispatch-resolve.sh <test brief> --project quota-routing-validation
+quota-axi pass-through adds --provider codex --profile-only --no-credential-refresh, with CODEX_HOME selecting the existing credential store. The real profile-only mode excludes other credential sources and does not refresh credentials or write its cache. Real TypeSafe and quota responses, no stubs.
+
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 652   tokens: 448/35
+  rule: rule_1 (The task is a simple bug fix with an isolated cause for Code)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7902  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7902  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7902  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7902  runway=through_reset  -> eligible
+
+EXIT_CODE=0

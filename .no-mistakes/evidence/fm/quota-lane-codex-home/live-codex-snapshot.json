@@ -1,0 +1,77 @@
+{
+  "generatedAt": "2026-09-22T18:06:40.789Z",
+  "schemaVersion": 6,
+  "providers": [
+    {
+      "provider": "codex",
+      "accountKey": "codex-home",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 96,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 8.7915,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 0.7881
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "openai-codex-muller-labs",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 0,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "ahead",
+              "aheadWindowIds": [
+                "weekly"
+              ],
+              "worstReservePercentPoints": -34.1411,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "exhausted_now",
+              "usableRunwaySeconds": 0,
+              "limitingWindowId": "weekly",
+              "projectedExhaustedAt": "2026-09-22T18:06:40.789Z"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": -1.5184
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

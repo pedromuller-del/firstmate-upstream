@@ -1,0 +1,14 @@
+$ FM_HOME=<isolated test home> LC_ALL=C bash bin/fm-dispatch-resolve.sh <test brief> --project quota-routing-validation
+quota-axi pass-through adds --no-credential-refresh; real TypeSafe and quota responses, no stubs.
+
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 725   tokens: 448/35
+  rule: rule_1 (The task is a simple bug fix with an isolated cause for Code)   confidence: 0.98
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=96%  spendPriority=0.7898  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+EXIT_CODE=0

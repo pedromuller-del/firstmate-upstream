@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {
+      "when": "The task is a simple bug fix with an isolated cause for Codex work.",
+      "use": [
+        {
+          "harness": "pi",
+          "model": "codex-native/gpt-6-astra",
+          "provider": "codex",
+          "effort": "ultra"
+        },
+        {
+          "harness": "pi",
+          "model": "openai-codex-muller-labs/gpt-5.6-luna",
+          "provider": "codex"
+        },
+        {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      ]
+    }
+  ]
+}

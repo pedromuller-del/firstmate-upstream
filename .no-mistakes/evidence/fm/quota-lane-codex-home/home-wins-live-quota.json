@@ -1,0 +1,398 @@
+{
+  "generatedAt": "2026-09-22T18:11:11.606Z",
+  "schemaVersion": 6,
+  "providers": [
+    {
+      "provider": "claude",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 90,
+            "boundedBy": [
+              "five_hour",
+              "seven_day"
+            ],
+            "limitingWindowIds": [
+              "five_hour",
+              "seven_day"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 3.2062,
+              "worstReserveWindowId": "seven_day"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 0.4694
+            }
+          },
+          {
+            "scope": "model:fable",
+            "status": "known",
+            "effectivePercentRemaining": 90,
+            "boundedBy": [
+              "five_hour",
+              "seven_day",
+              "model:fable"
+            ],
+            "limitingWindowIds": [
+              "five_hour",
+              "seven_day"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 3.2062,
+              "worstReserveWindowId": "seven_day"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 0.4619
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "codex-home",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 96,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 8.8362,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 0.7898
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "openai-codex-muller-labs",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 0,
+            "boundedBy": [
+              "weekly"
+            ],
+            "limitingWindowIds": [
+              "weekly"
+            ],
+            "pace": {
+              "status": "ahead",
+              "aheadWindowIds": [
+                "weekly"
+              ],
+              "worstReservePercentPoints": -34.0963,
+              "worstReserveWindowId": "weekly"
+            },
+            "runway": {
+              "status": "exhausted_now",
+              "usableRunwaySeconds": 0,
+              "limitingWindowId": "weekly",
+              "projectedExhaustedAt": "2026-09-22T18:11:11.606Z"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": -1.5174
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "cursor",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 22,
+            "boundedBy": [
+              "included_usage",
+              "auto_usage",
+              "api_usage"
+            ],
+            "limitingWindowIds": [
+              "auto_usage"
+            ],
+            "pace": {
+              "status": "mixed",
+              "aheadWindowIds": [
+                "auto_usage"
+              ],
+              "worstReservePercentPoints": -3.9882,
+              "worstReserveWindowId": "auto_usage"
+            },
+            "runway": {
+              "status": "projected_exhaustion",
+              "usableRunwaySeconds": 541083,
+              "projectedExhaustedAt": "2026-09-29T00:29:15.007Z",
+              "limitingWindowId": "auto_usage",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 1.0231
+            }
+          },
+          {
+            "scope": "grok_bot",
+            "status": "known",
+            "effectivePercentRemaining": 100,
+            "boundedBy": [
+              "grok_bot"
+            ],
+            "limitingWindowIds": [
+              "grok_bot"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 14.2696,
+              "worstReserveWindowId": "grok_bot"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 1.1664
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "copilot",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": [],
+        "unresolvedWindowIds": []
+      }
+    },
+    {
+      "provider": "grok",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_products",
+            "status": "known",
+            "effectivePercentRemaining": 73,
+            "boundedBy": [
+              "credits"
+            ],
+            "limitingWindowIds": [
+              "credits"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 28.2046,
+              "worstReserveWindowId": "credits"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 1.1405
+            }
+          },
+          {
+            "scope": "product:grok_build",
+            "status": "known",
+            "effectivePercentRemaining": 73,
+            "boundedBy": [
+              "credits",
+              "product:grok_build"
+            ],
+            "limitingWindowIds": [
+              "credits",
+              "product:grok_build"
+            ],
+            "pace": {
+              "status": "behind",
+              "worstReservePercentPoints": 28.2046,
+              "worstReserveWindowId": "credits"
+            },
+            "runway": {
+              "status": "through_reset",
+              "projectionConfidence": "established"
+            },
+            "selection": {
+              "status": "known",
+              "spendPriority": 1.1405
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "kimi",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "unknown",
+            "boundedBy": [
+              "five_hour",
+              "weekly"
+            ],
+            "runway": {
+              "status": "unknown",
+              "unmeasurableWindowIds": [
+                "five_hour",
+                "weekly"
+              ]
+            },
+            "selection": {
+              "status": "unknown",
+              "unmeasurableWindowIds": [
+                "five_hour",
+                "weekly"
+              ]
+            },
+            "pace": {
+              "status": "unknown",
+              "unknownWindowIds": [
+                "five_hour",
+                "weekly"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "zai",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "agy",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "alibaba",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "opencode-go",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "partial",
+        "effectiveAvailability": [],
+        "unresolvedWindowIds": [
+          "rolling",
+          "weekly",
+          "monthly"
+        ]
+      }
+    },
+    {
+      "provider": "commandcode",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "minimax",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "mimo",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": [],
+        "unresolvedWindowIds": []
+      }
+    },
+    {
+      "provider": "deepseek",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": [],
+        "unresolvedWindowIds": []
+      }
+    },
+    {
+      "provider": "openrouter",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": [],
+        "unresolvedWindowIds": []
+      }
+    },
+    {
+      "provider": "elevenlabs",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    }
+  ]
+}
