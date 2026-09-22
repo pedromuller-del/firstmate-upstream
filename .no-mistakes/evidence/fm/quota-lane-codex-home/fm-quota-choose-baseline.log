@@ -1,0 +1,19 @@
+$ env -u TYPESAFE_API_KEY -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/tmp bash tests/fm-quota-choose.test.sh
+ok - help renders the complete header only
+ok - first positive candidate wins
+ok - exhausted provider is skipped
+ok - no positive candidate returns none and exit 1
+ok - positional candidates work
+ok - specific model scope bounds generic quota
+ok - omp openai-codex prefix matches the bare codex model scope
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+not ok - unmapped omp prefix returned: bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+error: omp quota mapping covers only the openai-codex and claude-bridge prefixes: ollama/qwen3:8b
+
+exit_code=1
+passed_groups=7

@@ -1,0 +1,114 @@
+{
+  "brief": "# Task\nFix a software bug in the pager. The identified root cause is an off-by-one condition that emits the final page twice. Change the condition and verify that every page is emitted exactly once.\n",
+  "rules": {
+    "rules": [
+      {
+        "when": "The task fixes a software bug with an identified root cause.",
+        "use": [
+          {
+            "harness": "pi",
+            "model": "openai-codex/gpt-5.6-sol",
+            "provider": "codex"
+          },
+          {
+            "harness": "pi",
+            "model": "openai-codex-muller-labs/gpt-5.6-sol",
+            "provider": "codex"
+          }
+        ]
+      }
+    ]
+  },
+  "quota": {
+    "generatedAt": "2026-09-22T00:00:00Z",
+    "schemaVersion": 6,
+    "providers": [
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 97,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.8
+              }
+            }
+          ]
+        },
+        "accountKey": "codex-home"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 0,
+              "runway": {
+                "status": "exhausted_now"
+              },
+              "selection": {
+                "spendPriority": -1
+              }
+            }
+          ]
+        },
+        "accountKey": "openai-codex"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 0,
+              "runway": {
+                "status": "exhausted_now"
+              },
+              "selection": {
+                "spendPriority": -2
+              }
+            }
+          ]
+        },
+        "accountKey": "openai-codex-muller-labs"
+      },
+      {
+        "provider": "codex",
+        "quotaSemantics": {
+          "status": "known",
+          "effectiveAvailability": [
+            {
+              "scope": "all_models",
+              "status": "known",
+              "effectivePercentRemaining": 100,
+              "runway": {
+                "status": "through_reset"
+              },
+              "selection": {
+                "spendPriority": 0.95
+              }
+            }
+          ]
+        },
+        "accountKey": "default"
+      }
+    ]
+  },
+  "expected": [
+    "status: escalate",
+    "reason: no rankable eligible candidate",
+    "candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models",
+    "candidate: pi:openai-codex-muller-labs/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models"
+  ]
+}

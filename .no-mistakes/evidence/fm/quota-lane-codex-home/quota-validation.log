@@ -1,0 +1,266 @@
+Quota dispatch validation at c486116dae8f0091ccec4c934db1e6e46275bff1
+Five real resolver / typesafe.ai runs, using the explicitly authorized quota-axi snapshot stub in five separate FM_HOME directories. No real quota account, credential file, Herdr session, or fleet state was accessed.
+
+=== home-fallback ===
+# Real resolver and real typesafe.ai request; only quota-axi is a controlled snapshot source.
+# TYPESAFE_API_KEY inherited from the runtime, never recorded.
+$ env PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/home-fallback/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0ce9EKL:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/home-fallback/user FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/home-fallback TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/home-fallback/tmp LANG=en_US.UTF-8 bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/home-fallback/brief.md --project quota-lane-verification
+
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 750   tokens: 443/35
+  rule: rule_1 (The task fixes a software bug with an identified root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+stderr:
+
+exit_code=0
+quota-axi invocations:
+--json
+
+assertions=4
+result=pass
+
+=== exact-exhausted ===
+# Real resolver and real typesafe.ai request; only quota-axi is a controlled snapshot source.
+# TYPESAFE_API_KEY inherited from the runtime, never recorded.
+$ env PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/exact-exhausted/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0ce9EKL:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/exact-exhausted/user FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/exact-exhausted TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/exact-exhausted/tmp LANG=en_US.UTF-8 bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/exact-exhausted/brief.md --project quota-lane-verification
+
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 749   tokens: 443/35
+  rule: rule_1 (The task fixes a software bug with an identified root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+stderr:
+
+exit_code=0
+quota-axi invocations:
+--json
+
+assertions=4
+result=pass
+
+=== neither-named ===
+# Real resolver and real typesafe.ai request; only quota-axi is a controlled snapshot source.
+# TYPESAFE_API_KEY inherited from the runtime, never recorded.
+$ env PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/neither-named/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0ce9EKL:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/neither-named/user FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/neither-named TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/neither-named/tmp LANG=en_US.UTF-8 bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/neither-named/brief.md --project quota-lane-verification
+
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 938   tokens: 443/35
+  rule: rule_1 (The task fixes a software bug with an identified root cause.)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-sol'
+
+stderr:
+
+exit_code=0
+quota-axi invocations:
+--json
+
+assertions=4
+result=pass
+
+=== schema5 ===
+# Real resolver and real typesafe.ai request; only quota-axi is a controlled snapshot source.
+# TYPESAFE_API_KEY inherited from the runtime, never recorded.
+$ env PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/schema5/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0ce9EKL:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/schema5/user FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/schema5 TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/schema5/tmp LANG=en_US.UTF-8 bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/schema5/brief.md --project quota-lane-verification
+
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 733   tokens: 443/35
+  rule: rule_1 (The task fixes a software bug with an identified root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.65  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.65  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.65  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=61%  spendPriority=0.65  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=61%  spendPriority=0.65  runway=through_reset  -> eligible
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=42%  spendPriority=0.4  runway=through_reset  -> eligible
+
+stderr:
+
+exit_code=0
+quota-axi invocations:
+--json
+
+assertions=8
+result=pass
+
+=== other-lanes ===
+# Real resolver and real typesafe.ai request; only quota-axi is a controlled snapshot source.
+# TYPESAFE_API_KEY inherited from the runtime, never recorded.
+$ env PATH=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/other-lanes/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0ce9EKL:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/other-lanes/user FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/other-lanes TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/other-lanes/tmp LANG=en_US.UTF-8 bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/other-lanes/brief.md --project quota-lane-verification
+
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 769   tokens: 443/35
+  rule: rule_1 (The task fixes a software bug with an identified root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-sol  provider=codex  scope=all_models  remaining=11%  spendPriority=0.3  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=42%  spendPriority=0.4  runway=through_reset  -> eligible
+
+stderr:
+
+exit_code=0
+quota-axi invocations:
+--json
+
+assertions=8
+result=pass
+
+=== Before-change regression ===
+Base bin/, tests/, docs/ extracted with git archive ada21f5b813f8a19e00f44c50555104cb481d3ac; target tests/fm-dispatch-resolve.test.sh copied over the base test.
+$ env -u TYPESAFE_API_KEY -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE LC_ALL=C LANG=C bash tests/fm-dispatch-resolve.test.sh
+ok - absent key is off: one stderr line, exit 0, no network call
+ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
+ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
+ok - rules snapshots and shell quoting preserve the profile protocol
+ok - no-rule fallback, Agy, Gemini, and documented configurations resolve
+ok - ambiguous: confidence below the fixed floor hands the decision back
+ok - escalate: a rule declared approval: captain never yields a profile
+ok - rule floor: known shortfall falls through while unavailable evidence escalates
+ok - declared provider and profile floor evidence are applied in code
+ok - nonnumeric spendPriority evidence is never ranked
+ok - partial and missing quota evidence remain eligible but unranked
+ok - provider-wide and exact quota rows combine into one limiting candidate
+ok - default: no rule matched resolves among the default profiles
+ok - tie: equal spendPriority never breaks by array order
+ok - no rankable candidate: the tool escalates instead of guessing
+ok - native Codex binds to codex-home before default, independently of Pi accounts and row order
+ok - Pi native adapters bind to codex-home with existing fallbacks and schema 5 compatibility
+not ok - Pi home lane snapshot resolves (missing: '  status: clear')
+--- output ---
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 22   tokens: 812/60
+  rule: rule_1 (Codex work.)   confidence: 0.9
+  probabilities: rule_1=0.97 default=0.03
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+exit_code=1
+passed_groups_before_regression=17
+
+=== After-change regression ===
+$ env -u TYPESAFE_API_KEY -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE LC_ALL=C LANG=C bash tests/fm-dispatch-resolve.test.sh
+ok - absent key is off: one stderr line, exit 0, no network call
+ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
+ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
+ok - rules snapshots and shell quoting preserve the profile protocol
+ok - no-rule fallback, Agy, Gemini, and documented configurations resolve
+ok - ambiguous: confidence below the fixed floor hands the decision back
+ok - escalate: a rule declared approval: captain never yields a profile
+ok - rule floor: known shortfall falls through while unavailable evidence escalates
+ok - declared provider and profile floor evidence are applied in code
+ok - nonnumeric spendPriority evidence is never ranked
+ok - partial and missing quota evidence remain eligible but unranked
+ok - provider-wide and exact quota rows combine into one limiting candidate
+ok - default: no rule matched resolves among the default profiles
+ok - tie: equal spendPriority never breaks by array order
+ok - no rankable candidate: the tool escalates instead of guessing
+ok - native Codex binds to codex-home before default, independently of Pi accounts and row order
+ok - Pi native adapters bind to codex-home with existing fallbacks and schema 5 compatibility
+ok - Pi's openai-codex home lane falls back to codex-home; sibling and native lanes are unchanged
+ok - the openai-codex lane never binds the default row; other lanes keep the fallback
+ok - exact openai-codex wins over healthy codex-home; schema 5 still joins by provider
+ok - schema 6: each candidate binds to its account row; schema 5 is unchanged
+ok - quota evidence comes from one quota-axi --json read, and its failure is an error outcome
+ok - API, transport, and response failures are error outcomes with exit 0
+ok - configuration errors exit 2 before any network call
+# all fm-dispatch-resolve tests passed
+
+exit_code=0
+passed_groups=24
+
+=== Adjacent quota helper ===
+$ env -u TYPESAFE_API_KEY -u FM_ROOT_OVERRIDE -u FM_CONFIG_OVERRIDE -u FM_STATE_OVERRIDE LC_ALL=C LANG=C TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M35CR0J4T5R92RG3Z28Z5KF2/.quota-test-phase/tmp bash tests/fm-quota-choose.test.sh
+ok - help renders the complete header only
+ok - first positive candidate wins
+ok - exhausted provider is skipped
+ok - no positive candidate returns none and exit 1
+ok - positional candidates work
+ok - specific model scope bounds generic quota
+ok - omp openai-codex prefix matches the bare codex model scope
+ok - omp without a mapped prefix fails closed
+ok - default model uses provider-wide quota
+ok - fractional positive quota is eligible
+ok - unknown harness fails closed
+ok - all candidates are validated before selection
+ok - malformed provider data fails closed
+ok - multiple JSON values fail closed
+ok - known-empty quota fails closed
+ok - semantics and availability statuses must agree
+ok - exhausted runway vetoes unknown headroom
+ok - unknown headroom is not positive quota
+ok - partial semantics accept mixed availability
+ok - stdin snapshot is accepted
+ok - empty model candidate fails closed
+ok - bare harness maps to default model
+ok - default TOON snapshot is accepted
+ok - renderer-shaped TOON snapshot is accepted
+ok - malformed nonzero TOON envelopes fail closed
+ok - zero-row TOON has no positive quota
+ok - empty-array TOON has no positive quota
+ok - inline attention TOON has no positive quota
+ok - TOON attention identities fail closed
+ok - truncated zero-row TOON fails closed
+ok - malformed zero-row TOON fails closed
+ok - zero-row TOON rejects leading garbage
+ok - counted TOON rows require every declared field
+ok - TOON conversion preserves unknown-headroom exhaustion
+ok - trailing empty TOON fields fail closed
+ok - quoted TOON scope vetoes dispatch
+ok - provider-level unknown quota is not positive
+ok - Muse candidate is accepted
+ok - Muse uses Meta quota
+ok - Agy remains resolver-only
+ok - duplicate providers fail closed
+ok - empty quota scopes fail closed
+ok - whitespace quota identities fail closed
+ok - out-of-range quota fails closed
+ok - invalid runway status fails closed
+ok - missing applicable quota is not positive
+ok - any exhausted applicable scope vetoes dispatch
+ok - named model quota matches exact identity only
+ok - invalid availability status fails closed
+ok - native Codex never infers an account from a Pi lane
+ok - native Codex binds to codex-home before default, independently of model and row order
+ok - the same path still selects from a schema 5 snapshot by provider alone
+ok - schema 6 requires accountKey on every row and uniqueness on provider + accountKey
+ok - schema 6 TOON with the accountKey column is accepted
+ok - helper reuses the captured quota snapshot
+# all fm-quota-choose tests passed
+
+exit_code=0
+passed_groups=55
+
+Setup recovery: the first quota-helper run exited 1 because the ambient C.UTF-8 locale emitted warnings into expected stderr. Re-running with LC_ALL=C and LANG=C passed all 55 groups. The first base archive omitted docs/examples/crew-dispatch.json; adding base docs/ restored the test setup and exposed the intended Pi-home regression.

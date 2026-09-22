@@ -1,0 +1,37 @@
+[
+  {
+    "name": "home-fallback",
+    "exit_code": 0,
+    "assertions": 4,
+    "pass": true,
+    "missing": []
+  },
+  {
+    "name": "exact-exhausted",
+    "exit_code": 0,
+    "assertions": 4,
+    "pass": true,
+    "missing": []
+  },
+  {
+    "name": "neither-named",
+    "exit_code": 0,
+    "assertions": 4,
+    "pass": true,
+    "missing": []
+  },
+  {
+    "name": "schema5",
+    "exit_code": 0,
+    "assertions": 8,
+    "pass": true,
+    "missing": []
+  },
+  {
+    "name": "other-lanes",
+    "exit_code": 0,
+    "assertions": 8,
+    "pass": true,
+    "missing": []
+  }
+]
