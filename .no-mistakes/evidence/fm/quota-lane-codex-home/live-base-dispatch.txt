@@ -1,0 +1,16 @@
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 664   tokens: 428/35
+  rule: rule_1 (Any software bug fix, including an off-by-one bug in a shell)   confidence: 0.99
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  note: 3 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8229  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8229  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=22%  spendPriority=0.9931  runway=projected_exhaustion  -> eligible
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=92%  spendPriority=0.3735  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-unconfigured/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex-unconfigured: disclosed uncertainty
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'

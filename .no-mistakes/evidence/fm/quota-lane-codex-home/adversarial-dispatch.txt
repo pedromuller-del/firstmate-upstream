@@ -1,0 +1,107 @@
+Controlled dependency fixtures: these checks are not live.
+
+CASE: home fallback
+input: {"schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-muller-labs", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: clear
+  model: fixture   latency_ms: 166   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+exit_code=0
+ASSERTIONS: PASS
+
+CASE: exact exhausted row overrides healthy home
+input: {"schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-muller-labs", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 42, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: clear
+  model: fixture   latency_ms: 12   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=42%  spendPriority=0.8  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+
+exit_code=0
+ASSERTIONS: PASS
+
+CASE: exact unknown row does not borrow healthy home
+input: {"schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex", "quotaSemantics": {"status": "unknown", "effectiveAvailability": []}}, {"provider": "codex", "accountKey": "openai-codex-muller-labs", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: escalate
+  model: fixture   latency_ms: 12   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex unmeasured (unknown): disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+exit_code=0
+ASSERTIONS: PASS
+
+CASE: no named home row stays unranked
+input: {"schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "openai-codex-muller-labs", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 42, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: clear
+  model: fixture   latency_ms: 11   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=42%  spendPriority=0.8  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+
+exit_code=0
+ASSERTIONS: PASS
+
+CASE: exhausted home cannot borrow sibling quota
+input: {"schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-muller-labs", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 72, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: clear
+  model: fixture   latency_ms: 11   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=72%  spendPriority=0.8  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-muller-labs/gpt-5.6-luna'
+
+exit_code=0
+ASSERTIONS: PASS
+
+CASE: row order does not change home fallback
+input: {"schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "openai-codex-muller-labs", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: clear
+  model: fixture   latency_ms: 13   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+exit_code=0
+ASSERTIONS: PASS
+
+CASE: schema 5 binds every Codex lane to its single row
+input: {"schemaVersion": 5, "providers": [{"provider": "codex", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 23, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+dispatch-resolve:
+  status: escalate
+  model: fixture   latency_ms: 11   tokens: -/-
+  rule: rule_1 (Bug fixes.)   confidence: 0.99
+  probabilities: rule_1=1 default=0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=23%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-muller-labs/gpt-5.6-luna  provider=codex  scope=all_models  remaining=23%  spendPriority=0.8  runway=through_reset  -> eligible
+
+exit_code=0
+ASSERTIONS: PASS
