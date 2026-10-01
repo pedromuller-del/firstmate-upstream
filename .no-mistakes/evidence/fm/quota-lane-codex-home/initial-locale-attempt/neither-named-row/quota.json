@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 6,
+  "generatedAt": "2026-10-01T00:00:00Z",
+  "providers": [
+    {
+      "provider": "codex",
+      "accountKey": "unrelated-account",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 3,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 8
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 97,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.8
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "claude",
+      "accountKey": "codex-home",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 8,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 100
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

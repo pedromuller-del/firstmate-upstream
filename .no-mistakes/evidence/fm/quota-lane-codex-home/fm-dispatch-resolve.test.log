@@ -1,9 +1,13 @@
+command: env -u TYPESAFE_API_KEY LC_ALL=C LANG=C TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3TVQPACFFCZERV0TM6D0RZH/.quota-baseline-fy5k2z10 bash tests/fm-dispatch-resolve.test.sh
 ok - absent key is off: one stderr line, exit 0, no network call
 ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
 ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
+ok - never-send list withholds the request on a match or a bad list, and never prints the value
 ok - rules snapshots and shell quoting preserve the profile protocol
 ok - no-rule fallback, Agy, Gemini, and documented configurations resolve
 ok - ambiguous: confidence below the fixed floor hands the decision back
+ok - per-rule confidence floors fall to the most probable runner-up that clears its own floor
+ok - only the brief's task sections and scout tag reach the model, with a whole-brief fallback
 ok - escalate: a rule declared approval: captain never yields a profile
 ok - rule floor: known shortfall falls through while unavailable evidence escalates
 ok - declared provider and profile floor evidence are applied in code
@@ -24,4 +28,6 @@ ok - API, transport, and response failures are error outcomes with exit 0
 ok - configuration errors exit 2 before any network call
 # all fm-dispatch-resolve tests passed
 
-EXIT_CODE=0
+exit_code: 0
+passed_groups: 27
+failed_groups: 0

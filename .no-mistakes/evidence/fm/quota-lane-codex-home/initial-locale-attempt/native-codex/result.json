@@ -1,0 +1,14 @@
+{
+  "name": "native-codex",
+  "result": "fail",
+  "live": true,
+  "exit_code": 0,
+  "errors": [
+    "unexpected stderr"
+  ],
+  "real_product": "bin/fm-dispatch-resolve.sh",
+  "real_service": "https://api.typesafe.ai/v1/systemone",
+  "fixture_dependency": "quota-axi",
+  "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M3TVQPACFFCZERV0TM6D0RZH/native-codex",
+  "scratch_removed": true
+}

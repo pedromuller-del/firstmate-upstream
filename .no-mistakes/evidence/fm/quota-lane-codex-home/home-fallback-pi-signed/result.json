@@ -1,0 +1,12 @@
+{
+  "name": "home-fallback-pi-signed",
+  "result": "pass",
+  "live": true,
+  "exit_code": 0,
+  "errors": [],
+  "real_product": "bin/fm-dispatch-resolve.sh",
+  "real_service": "https://api.typesafe.ai/v1/systemone",
+  "fixture_dependency": "quota-axi",
+  "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M3TVQPACFFCZERV0TM6D0RZH/home-fallback-pi-signed",
+  "scratch_removed": true
+}

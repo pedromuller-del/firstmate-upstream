@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 6,
+  "generatedAt": "2026-10-01T00:00:00Z",
+  "providers": [
+    {
+      "provider": "codex",
+      "accountKey": "openai-codex",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 0,
+            "runway": {
+              "status": "exhausted_now"
+            },
+            "selection": {
+              "spendPriority": -1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "claude",
+      "accountKey": "codex-home",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 8,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 100
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "codex-home",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 97,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.8
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "default",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 53,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 9
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "accountKey": "openai-codex-work",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 0,
+            "runway": {
+              "status": "exhausted_now"
+            },
+            "selection": {
+              "spendPriority": -1
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

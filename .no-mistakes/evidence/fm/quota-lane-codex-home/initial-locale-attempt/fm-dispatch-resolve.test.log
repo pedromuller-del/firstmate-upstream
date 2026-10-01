@@ -1,0 +1,12 @@
+command: env -u TYPESAFE_API_KEY TMPDIR=<disposable-worktree-directory> bash tests/fm-dispatch-resolve.test.sh
+ok - absent key is off: one stderr line, exit 0, no network call
+ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
+ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3TVQPACFFCZERV0TM6D0RZH/bin/fm-wake-lib.sh: line 105: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+not ok - a case-insensitive literal match prints one diagnostic line (expected '1', got '2')
+
+exit_code: 1
+passed_groups: 3
+failed_groups: 1

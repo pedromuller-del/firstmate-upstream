@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 5,
+  "generatedAt": "2026-10-01T00:00:00Z",
+  "providers": [
+    {
+      "provider": "codex",
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 97,
+            "runway": {
+              "status": "through_reset"
+            },
+            "selection": {
+              "spendPriority": 0.8
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "neither-named-row",
+  "result": "pass",
+  "live": true,
+  "exit_code": 0,
+  "errors": [],
+  "real_product": "bin/fm-dispatch-resolve.sh",
+  "real_service": "https://api.typesafe.ai/v1/systemone",
+  "fixture_dependency": "quota-axi",
+  "evidence": "/Users/pedromuller/.no-mistakes/evidence/01M3TVQPACFFCZERV0TM6D0RZH/neither-named-row",
+  "scratch_removed": true
+}

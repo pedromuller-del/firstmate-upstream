@@ -1,0 +1,9 @@
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 309   tokens: 458/35
+  rule: rule_1 (A routine code bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  profile: --harness 'codex' --model 'gpt-5.6-sol'

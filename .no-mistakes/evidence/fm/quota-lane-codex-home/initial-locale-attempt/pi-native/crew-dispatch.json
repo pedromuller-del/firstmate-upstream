@@ -1,0 +1,20 @@
+{
+  "rules": [
+    {
+      "when": "A routine code bug fix with a stated root cause.",
+      "use": [
+        {
+          "harness": "pi",
+          "model": "codex-native/gpt-6-astra",
+          "provider": "codex",
+          "effort": "ultra"
+        },
+        {
+          "harness": "pi",
+          "model": "openai-codex-work/gpt-5.6-luna",
+          "provider": "codex"
+        }
+      ]
+    }
+  ]
+}

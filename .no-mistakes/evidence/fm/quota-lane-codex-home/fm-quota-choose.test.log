@@ -1,3 +1,4 @@
+command: env -u TYPESAFE_API_KEY LC_ALL=C LANG=C TMPDIR=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3TVQPACFFCZERV0TM6D0RZH/.quota-baseline-fy5k2z10 bash tests/fm-quota-choose.test.sh
 ok - help renders the complete header only
 ok - first positive candidate wins
 ok - exhausted provider is skipped
@@ -53,6 +54,11 @@ ok - the same path still selects from a schema 5 snapshot by provider alone
 ok - schema 6 requires accountKey on every row and uniqueness on provider + accountKey
 ok - schema 6 TOON with the accountKey column is accepted
 ok - helper reuses the captured quota snapshot
+ok - provider-table lookup writes nothing to stderr when SIGPIPE is ignored
+ok - provider-table lookup reads the whole table before answering
+ok - provider-table lookup prints the provider when called directly under set -e
 # all fm-quota-choose tests passed
 
-EXIT_CODE=0
+exit_code: 0
+passed_groups: 58
+failed_groups: 0

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eu
+[ "$#" -eq 1 ] && [ "$1" = --json ] || exit 64
+printf '%s
+' "$*" >> "$QUOTA_AXI_CALLS"
+cat "$QUOTA_AXI_FIXTURE"
