@@ -1,0 +1,293 @@
+Quota account routing validation
+
+41 isolated scenarios; 123 executable-interface checks; 0 assertion failures.
+The resolver used real curl and api.typesafe.ai with the inherited API key. Only quota-axi was substituted with the explicitly authorized fixture emitter.
+The worker helper consumed JSON and TOON snapshots through --snapshot. Its fixtures use the documented primary-provider mapping (pi).
+Every case used its own scratch HOME and FM_HOME under the gate worktree. All scratch homes were removed. No login or credential store was accessed.
+
+Focused baselines: bash tests/fm-dispatch-resolve.test.sh: 29 pass groups, 0 failures, exit 0; bash tests/fm-quota-choose.test.sh: 58 pass groups, 0 failures, exit 0.
+
+Representative product transcripts follow. Complete commands, isolated environment, input quota and routing configuration, stdout/stderr, exit codes, and assertions are in live-quota-results.json. live-quota-boundaries.py recreates all disposable cases.
+
+CASE pi-home-ordinary
+Result: pass
+Pin: ordinary; ambient directory: alternate; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-spyfz9or/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-spyfz9or/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-spyfz9or/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 393   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-spyfz9or/helper.json --candidate pi:openai-codex/gpt-5.6-sol
+pi openai-codex/gpt-5.6-sol
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-spyfz9or/helper.toon --candidate pi:openai-codex/gpt-5.6-sol
+pi openai-codex/gpt-5.6-sol
+
+exit_code: 0
+
+CASE pi-signed-home-alias
+Result: pass
+Pin: alias; ambient directory: alternate; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-9km_95ag/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-9km_95ag/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-9km_95ag/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 394   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'pi-signed' --model 'openai-codex/gpt-5.6-sol'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-9km_95ag/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+pi-signed openai-codex/gpt-5.6-sol
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-9km_95ag/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+pi-signed openai-codex/gpt-5.6-sol
+
+exit_code: 0
+
+CASE pi-signed-exact-both-reversed
+Result: pass
+Pin: ordinary; ambient directory: alternate; snapshot: both-reversed
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-j7iv2tmo/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-j7iv2tmo/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-j7iv2tmo/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 305   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-j7iv2tmo/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-j7iv2tmo/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+
+CASE pi-signed-default-only
+Result: pass
+Pin: ordinary; ambient directory: alternate; snapshot: default-only
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-qh0b53oi/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-qh0b53oi/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-qh0b53oi/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 340   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=91%  spendPriority=0.7  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'pi-signed' --model 'openai-codex-work/gpt-5.6-luna'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-qh0b53oi/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-qh0b53oi/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+
+CASE pi-signed-schema5
+Result: pass
+Pin: ordinary; ambient directory: alternate; snapshot: schema5
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rpmw82ho/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rpmw82ho/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rpmw82ho/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 340   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rpmw82ho/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+pi-signed openai-codex/gpt-5.6-sol
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rpmw82ho/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+pi-signed openai-codex/gpt-5.6-sol
+
+exit_code: 0
+
+CASE pi-signed-unpinned-home
+Result: pass
+Pin: absent; ambient directory: home; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-jnr4ipnb/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-jnr4ipnb/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-jnr4ipnb/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 304   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-jnr4ipnb/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-jnr4ipnb/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+
+CASE pi-signed-alternate-pin
+Result: pass
+Pin: alternate; ambient directory: home; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bztr8upk/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bztr8upk/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bztr8upk/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 340   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bztr8upk/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bztr8upk/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+
+CASE pi-signed-similar-provider
+Result: pass
+Pin: similar-provider; ambient directory: alternate; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6xsb13e9/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6xsb13e9/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6xsb13e9/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 389   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.01 rule_1=0.99
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6xsb13e9/helper.json --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6xsb13e9/helper.toon --candidate pi-signed:openai-codex/gpt-5.6-sol
+none
+
+exit_code: 1
+
+CASE pi-signed-invalid-malformed-default
+Result: pass
+Pin: malformed; ambient directory: alternate; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/brief.md --project quota-routing-validation
+
+error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm/config/pi-account
+exit_code: 2
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/helper.json --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm/config/pi-account
+exit_code: 2
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/helper.toon --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm/config/pi-account
+exit_code: 2
+
+CASE pi-signed-invalid-missing-root-use
+Result: pass
+Pin: missing-root; ambient directory: alternate; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/brief.md --project quota-routing-validation
+
+error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/absent
+exit_code: 2
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/helper.json --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/absent
+exit_code: 2
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/helper.toon --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/absent
+exit_code: 2
+
+CASE non-pi-invalid-pin
+Result: pass
+Pin: malformed; ambient directory: alternate; snapshot: home
+HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/user
+FM_HOME=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/fm
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 329   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/helper.json --candidate cursor:default
+cursor default
+
+exit_code: 0
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/helper.toon --candidate cursor:default
+cursor default
+
+exit_code: 0

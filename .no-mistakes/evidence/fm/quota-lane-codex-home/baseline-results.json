@@ -1,0 +1,24 @@
+[
+  {
+    "command": "bash tests/fm-dispatch-resolve.test.sh",
+    "exit_code": 0,
+    "pass_groups": 29,
+    "fail_groups": 0,
+    "tail": [
+      "ok - API, transport, and response failures are error outcomes with exit 0",
+      "ok - configuration errors exit 2 before any network call",
+      "# all fm-dispatch-resolve tests passed"
+    ]
+  },
+  {
+    "command": "bash tests/fm-quota-choose.test.sh",
+    "exit_code": 0,
+    "pass_groups": 58,
+    "fail_groups": 0,
+    "tail": [
+      "ok - provider-table lookup reads the whole table before answering",
+      "ok - provider-table lookup prints the provider when called directly under set -e",
+      "# all fm-quota-choose tests passed"
+    ]
+  }
+]

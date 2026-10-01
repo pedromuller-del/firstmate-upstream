@@ -1,0 +1,23 @@
+Case: pi-signed-invalid-missing-root-use
+Result: pass
+Real resolver/service; authorized quota snapshot stub; no account login used.
+Pin: missing-root; ambient: alternate; layout: home; harness: pi-signed
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/brief.md --project quota-routing-validation
+
+error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/absent
+
+exit_code: 2
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/helper.json --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/absent
+
+exit_code: 2
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/helper.toon --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/fm/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-7_tscg7x/absent
+
+exit_code: 2
+assertion_errors: []
+scratch_removed: True

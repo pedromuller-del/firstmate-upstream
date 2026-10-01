@@ -1,0 +1,23 @@
+Case: pi-signed-invalid-malformed-default
+Result: pass
+Real resolver/service; authorized quota snapshot stub; no account login used.
+Pin: malformed; ambient: alternate; layout: home; harness: pi-signed
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/brief.md --project quota-routing-validation
+
+error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm/config/pi-account
+
+exit_code: 2
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/helper.json --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm/config/pi-account
+
+exit_code: 2
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/helper.toon --candidate cursor:default --candidate pi-signed:openai-codex/gpt-5.6-sol
+
+error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6om0llrb/fm/config/pi-account
+
+exit_code: 2
+assertion_errors: []
+scratch_removed: True

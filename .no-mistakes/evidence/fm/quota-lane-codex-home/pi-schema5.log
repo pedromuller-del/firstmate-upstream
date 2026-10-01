@@ -1,0 +1,34 @@
+Case: pi-schema5
+Result: pass
+Real resolver/service; authorized quota snapshot stub; no account login used.
+Pin: ordinary; ambient: alternate; layout: schema5; harness: pi
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wuzre2qk/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 348   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+
+
+exit_code: 0
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wuzre2qk/helper.json --candidate pi:openai-codex/gpt-5.6-sol
+pi openai-codex/gpt-5.6-sol
+
+
+exit_code: 0
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wuzre2qk/helper.toon --candidate pi:openai-codex/gpt-5.6-sol
+pi openai-codex/gpt-5.6-sol
+
+
+exit_code: 0
+assertion_errors: []
+scratch_removed: True

@@ -1,0 +1,33 @@
+Case: pi-unpinned-unset
+Result: pass
+Real resolver/service; authorized quota snapshot stub; no account login used.
+Pin: absent; ambient: unset; layout: home; harness: pi
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-3xgj0m9w/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 324   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+
+exit_code: 0
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-3xgj0m9w/helper.json --candidate pi:openai-codex/gpt-5.6-sol
+none
+
+
+exit_code: 1
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-3xgj0m9w/helper.toon --candidate pi:openai-codex/gpt-5.6-sol
+none
+
+
+exit_code: 1
+assertion_errors: []
+scratch_removed: True

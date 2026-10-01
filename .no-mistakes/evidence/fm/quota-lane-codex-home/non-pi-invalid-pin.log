@@ -1,0 +1,30 @@
+Case: non-pi-invalid-pin
+Result: pass
+Real resolver/service; authorized quota snapshot stub; no account login used.
+Pin: malformed; ambient: alternate; layout: home; harness: pi
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/brief.md --project quota-routing-validation
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 329   tokens: 450/35
+  rule: rule_1 (Any software bug fix, including a pager off-by-one with a kn)   confidence: 0.99
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.39  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+
+exit_code: 0
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/helper.json --candidate cursor:default
+cursor default
+
+
+exit_code: 0
+assertion_errors: []
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-bdg7jm4f/helper.toon --candidate cursor:default
+cursor default
+
+
+exit_code: 0
+assertion_errors: []
+scratch_removed: True
