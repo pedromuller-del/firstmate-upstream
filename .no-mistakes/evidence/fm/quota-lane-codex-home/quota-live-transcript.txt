@@ -1,0 +1,932 @@
+Real quota CLI validation
+Target: 92a21b6105b642a33664de5ff376ac00b0c5810e
+Every case uses a distinct disposable FM_HOME and HOME inside the gate worktree.
+TYPESAFE_API_KEY is inherited without disclosure. The HTTP wrapper forwards to the real curl.
+Only the quota producer is stubbed, as authorized; all decision logic is the real product.
+All temporary directories are removed after each case.
+
+=== pi: home-preferred ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 598   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+pi openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_72u5efl/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+pi openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: unpinned-home ===
+Result: PASS
+Account pin: None
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/user-home/.pi/agent", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 530   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-13ay3_s9/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: unpinned-alternate ===
+Result: PASS
+Account pin: None
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 464   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l85pntz1/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: alternate-pin ===
+Result: PASS
+Account pin: '/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/alternate-account\nopenai-codex\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/user-home/.pi/agent", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 508   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-2dworywr/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: provider-not-permitted ===
+Result: PASS
+Account pin: 'ordinary\nanthropic\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 575   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l88w29ao/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: provider-prefix-not-permitted ===
+Result: PASS
+Account pin: 'ordinary\nanthropic openai-codex-work\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 510   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-hzogjp1a/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: exact-exhausted ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "openai-codex", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -5}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 518   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-wqo1mqj2/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: default-only ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 484   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'openai-codex-work/gpt-5.6-luna'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-iz3j81f_/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: schema5 ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 5, "providers": [{"provider": "codex", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "cursor", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}, {"harness": "codex", "model": "gpt-5.6-sol"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/brief.md
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 513   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/helper.json pi:openai-codex/gpt-5.6-sol cursor:default
+pi openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-d928rh7a/helper.toon pi:openai-codex/gpt-5.6-sol cursor:default
+pi openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: native-adapter ===
+Result: PASS
+Account pin: '/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/alternate-account\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi", "model": "codex-native/gpt-6-astra", "provider": "codex"}, {"harness": "pi", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 471   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'codex-native/gpt-6-astra'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/helper.json pi:codex-native/gpt-6-astra cursor:default
+pi codex-native/gpt-6-astra
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-1w_daeg3/helper.toon pi:codex-native/gpt-6-astra cursor:default
+pi codex-native/gpt-6-astra
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi: malformed-pin ===
+Result: PASS
+Account pin: 'ordinary\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}, {"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/brief.md
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/helper.json cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/helper.toon cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-andqn13s/fm-home/config/pi-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi: missing-root ===
+Result: PASS
+Account pin: '/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/missing-account\nopenai-codex\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}, {"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/brief.md
+
+stderr: error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/fm-home/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/missing-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/helper.json cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/fm-home/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/missing-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/helper.toon cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/fm-home/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-kv1kcd0z/missing-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi: directory-pin ===
+Result: PASS
+Account pin: None
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}, {"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/brief.md
+
+stderr: error: config/pi-account must be a readable regular file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/helper.json cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must be a readable regular file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/helper.toon cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must be a readable regular file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-15cfk88j/fm-home/config/pi-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi: invalid-default ===
+Result: PASS
+Account pin: 'ordinary\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": {"harness": "cursor", "model": "default"}}], "default": [{"harness": "cursor", "model": "default"}, {"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/brief.md
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/helper.json cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/helper.toon cursor:default pi:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rt15l9am/fm-home/config/pi-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi-signed: home-preferred ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 550   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi-signed' --model 'openai-codex/gpt-5.6-sol'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+pi-signed openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-l01imrw_/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+pi-signed openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: unpinned-home ===
+Result: PASS
+Account pin: None
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/user-home/.pi/agent", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 566   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 0.99
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-q88n0w15/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: unpinned-alternate ===
+Result: PASS
+Account pin: None
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 478   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-moef5mgy/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: alternate-pin ===
+Result: PASS
+Account pin: '/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/alternate-account\nopenai-codex\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/user-home/.pi/agent", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 716   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-w1z_v2td/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: provider-not-permitted ===
+Result: PASS
+Account pin: 'ordinary\nanthropic\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 523   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-cv9neah6/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: provider-prefix-not-permitted ===
+Result: PASS
+Account pin: 'ordinary\nanthropic openai-codex-work\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 547   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-vno8dv22/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: exact-exhausted ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "openai-codex", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -5}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 522   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-atkj14ui/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: default-only ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 507   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  note: 1 eligible candidate(s) unranked (codex)
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account openai-codex: disclosed uncertainty
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi-signed' --model 'openai-codex-work/gpt-5.6-luna'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-fo4jt146/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: schema5 ===
+Result: PASS
+Account pin: 'ordinary\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 5, "providers": [{"provider": "codex", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "cursor", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}, {"harness": "codex", "model": "gpt-5.6-sol"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/brief.md
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 545   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: genuine spendPriority tie
+  note: rule matched
+  candidate: pi-signed:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/helper.json pi-signed:openai-codex/gpt-5.6-sol cursor:default
+pi-signed openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-5vjkknam/helper.toon pi-signed:openai-codex/gpt-5.6-sol cursor:default
+pi-signed openai-codex/gpt-5.6-sol
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: native-adapter ===
+Result: PASS
+Account pin: '/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/alternate-account\nopenai-codex openai-codex-work codex-native\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "pi-signed", "model": "codex-native/gpt-6-astra", "provider": "codex"}, {"harness": "pi-signed", "model": "openai-codex-work/gpt-5.6-luna", "provider": "codex"}, {"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 527   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: default=0.0 rule_1=1.0
+  note: rule matched
+  candidate: pi-signed:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=97%  spendPriority=0.8  runway=through_reset  -> eligible
+  candidate: pi-signed:openai-codex-work/gpt-5.6-luna  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'pi-signed' --model 'codex-native/gpt-6-astra'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/helper.json pi-signed:codex-native/gpt-6-astra cursor:default
+pi-signed codex-native/gpt-6-astra
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-rm2auc8f/helper.toon pi-signed:codex-native/gpt-6-astra cursor:default
+pi-signed codex-native/gpt-6-astra
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
+
+=== pi-signed: malformed-pin ===
+Result: PASS
+Account pin: 'ordinary\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}, {"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/brief.md
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/helper.json cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/helper.toon cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-_6r7n6s9/fm-home/config/pi-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi-signed: missing-root ===
+Result: PASS
+Account pin: '/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/missing-account\nopenai-codex\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}, {"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/brief.md
+
+stderr: error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/fm-home/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/missing-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/helper.json cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/fm-home/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/missing-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/helper.toon cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must name a readable, searchable existing directory (ordinary means ~/.pi/agent): /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/fm-home/config/pi-account -> /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-art9ftoz/missing-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi-signed: directory-pin ===
+Result: PASS
+Account pin: None
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}, {"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/brief.md
+
+stderr: error: config/pi-account must be a readable regular file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/helper.json cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must be a readable regular file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/helper.toon cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must be a readable regular file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-y8367n_q/fm-home/config/pi-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi-signed: invalid-default ===
+Result: PASS
+Account pin: 'ordinary\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": {"harness": "cursor", "model": "default"}}], "default": [{"harness": "cursor", "model": "default"}, {"harness": "pi-signed", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/brief.md
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/helper.json cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/fm-home/config/pi-account
+
+exit code: 2
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/helper.toon cursor:default pi-signed:openai-codex/gpt-5.6-sol
+
+stderr: error: config/pi-account must hold 'ordinary' or one absolute path on line 1 and the providers this home may spend on line 2, separated by spaces, with no other lines or control characters: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-msn5wirv/fm-home/config/pi-account
+
+exit code: 2
+quota calls: []
+real HTTP calls: []
+
+=== pi: non-pi-invalid ===
+Result: PASS
+Account pin: 'ordinary\n'
+Environment: {"HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/user-home", "FM_HOME": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/fm-home", "TMPDIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/tmp", "LC_ALL": "C", "PI_CODING_AGENT_DIR": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/alternate-account", "PATH": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/fixture-bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/Users/pedromuller/.codex/tmp/arg0/codex-arg0vJ9aqZ:/Users/pedromuller/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/pedromuller/.grok/bin:/Users/pedromuller/.motherbase/bin:/Users/pedromuller/.local/bin:/Users/pedromuller/Library/pnpm:/Users/pedromuller/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/sbin:/Users/pedromuller/go/bin:/Users/pedromuller/.cargo/bin:/Users/pedromuller/bin:/usr/local/sbin"}
+Snapshot: {"generatedAt": "2026-10-04T00:00:00Z", "schemaVersion": 6, "providers": [{"provider": "codex", "accountKey": "codex-home", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 97, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.8}}]}}, {"provider": "codex", "accountKey": "openai-codex-work", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "codex", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 0, "runway": {"status": "exhausted_now"}, "selection": {"spendPriority": -1.4}}]}}, {"provider": "cursor", "accountKey": "default", "quotaSemantics": {"status": "known", "effectiveAvailability": [{"scope": "all_models", "status": "known", "effectivePercentRemaining": 24, "runway": {"status": "through_reset"}, "selection": {"spendPriority": 0.3}}]}}]}
+Rules: {"rules": [{"when": "Fix a software bug with a stated root cause.", "use": [{"harness": "cursor", "model": "default"}]}]}
+The helper retains its documented primary-provider mapping: Pi candidates consume provider=pi. JSON and TOON carry identical rows with that provider.
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/brief.md
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 503   tokens: 419/35
+  rule: rule_1 (Fix a software bug with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: cursor:default  provider=cursor  scope=all_models  remaining=24%  spendPriority=0.3  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'default'
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/helper.json cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+$ /opt/homebrew/bin/bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M3VSZ7YKHZJ7FVPQ6PW6QDZG/.quota-live-6mbbnixi/helper.toon cursor:default
+cursor default
+
+stderr: (empty)
+exit code: 0
+quota calls: ['--json']
+real HTTP calls: ['real curl invoked']
