@@ -1,0 +1,1 @@
+scaffolded: /tmp/fm-lab.MszP5y/data/bgjob-demo/brief.md (ship, mode=no-mistakes; replace {TASK} and {FIRSTMATE_SPEC})
