@@ -1,0 +1,9 @@
+# Excerpt of generated brief (FM_HOME=lab): pause instructions
+44-   Before ending your turn with your own background shell or monitor still running, or before waiting on your own pipeline run or a long foreground command, append `paused [at=<epoch>]: {job and completion condition}` to the status file.
+45-   Name what you are waiting for and what will let you resume; do not repeat the declaration on every poll.
+46-   Do not declare active implementation or reasoning as a wait.
+47-   Firstmate may still raise one first-sight alert; the declared wait then uses the existing long recheck cadence instead of repeated possible-wedge alarms.
+48:   When you know when the wait clears, include `until <YYYY-MM-DDTHH:MMZ>` (UTC) for a recheck at that time; for your own background job or command with a timeout, that time is its start plus its timeout, rounded up to the minute.
+49-   Follow the resolution rule below when the wait clears, then resume the task.
+50-   Use `blocked:` when you are stuck and need help.
+51-
