@@ -1,0 +1,26 @@
+### rg -v digit-led rows   ($ bin/fm-wake-drain.sh 2>&1 | rg -v '^\d')
+WAKE_ACK_REQUIRED: rows: 7 [1 stale window-1, 2 stale window-2, 3 stale window-3, 4 stale window-4, 5 stale window-5, 6 check due-recheck, 7 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 7 --recovery-generation 462962.1791986775.kJMlUS
+>> due-recheck VISIBLE in filtered output
+>> ack '--ack-through 7 --recovery-generation 462962.1791986775.kJMlUS' rc=0 queue-left=0
+
+### first WAKE_ACK line only   ($ bin/fm-wake-drain.sh 2>&1 | rg WAKE_ACK | head -1)
+WAKE_ACK_REQUIRED: rows: 7 [8 stale window-1, 9 stale window-2, 10 stale window-3, 11 stale window-4, 12 stale window-5, 13 check due-recheck, 14 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 14 --recovery-generation 466458.1791986777.ByCc9k
+>> due-recheck VISIBLE in filtered output
+>> ack '--ack-through 14 --recovery-generation 466458.1791986777.ByCc9k' rc=0 queue-left=0
+
+### tail -2   ($ bin/fm-wake-drain.sh 2>&1 | tail -2)
+1791986780	21	signal	alpha	signal: /tmp/fm-lab.5MOlvR/state/alpha.status
+WAKE_ACK_REQUIRED: rows: 7 [15 stale window-1, 16 stale window-2, 17 stale window-3, 18 stale window-4, 19 stale window-5, 20 check due-recheck, 21 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 21 --recovery-generation 469140.1791986779.N8GgjF
+>> due-recheck VISIBLE in filtered output
+>> ack '--ack-through 21 --recovery-generation 469140.1791986779.N8GgjF' rc=0 queue-left=0
+
+### stdout discarded ($ bin/fm-wake-drain.sh >/dev/null)
+WAKE_ACK_REQUIRED: rows: 7 [22 stale window-1, 23 stale window-2, 24 stale window-3, 25 stale window-4, 26 stale window-5, 27 check due-recheck, 28 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 28 --recovery-generation 473742.1791986781.vSFlo7
+>> ack rc=0
+
+### adversarial key: spaces, shell metachars, 80-char key
+WAKE_ACK_REQUIRED: rows: 2 [29 signal evil_key__echo__HOME__x___q___a___b_, 30 stale kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk] after handling completes run bin/fm-wake-drain.sh --ack-through 30 --recovery-generation 480110.1791986783.D5255p
+>> ack '--ack-through 30 --recovery-generation 480110.1791986783.D5255p' rc=0 queue-left=0
+
+### empty queue: no rows summary
+>> no WAKE_ACK_REQUIRED line printed

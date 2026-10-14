@@ -1,0 +1,2 @@
+not ok - the acknowledgement line did not name row 1 stale test:fm-parked: WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 544091.1791986819.rFKQJh
+exit=1

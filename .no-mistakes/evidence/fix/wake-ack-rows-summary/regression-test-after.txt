@@ -1,0 +1,2 @@
+ok - wake drain: the acknowledgement line names every row it acknowledges, with its command intact
+exit=0

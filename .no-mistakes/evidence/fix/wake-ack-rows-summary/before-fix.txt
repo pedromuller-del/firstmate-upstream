@@ -1,0 +1,26 @@
+### rg -v digit-led rows   ($ bin/fm-wake-drain.sh 2>&1 | rg -v '^\d')
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 7 --recovery-generation 487264.1791986786.jm9cTm
+>> due-recheck HIDDEN by filter
+>> ack '--ack-through 7 --recovery-generation 487264.1791986786.jm9cTm' rc=0 queue-left=0
+
+### first WAKE_ACK line only   ($ bin/fm-wake-drain.sh 2>&1 | rg WAKE_ACK | head -1)
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 14 --recovery-generation 492276.1791986788.TUkgPy
+>> due-recheck HIDDEN by filter
+>> ack '--ack-through 14 --recovery-generation 492276.1791986788.TUkgPy' rc=0 queue-left=0
+
+### tail -2   ($ bin/fm-wake-drain.sh 2>&1 | tail -2)
+1791986790	21	signal	alpha	signal: /tmp/fm-lab.GLYDn1/state/alpha.status
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 21 --recovery-generation 497298.1791986789.L7FJdv
+>> due-recheck HIDDEN by filter
+>> ack '--ack-through 21 --recovery-generation 497298.1791986789.L7FJdv' rc=0 queue-left=0
+
+### stdout discarded ($ bin/fm-wake-drain.sh >/dev/null)
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 28 --recovery-generation 500717.1791986791.nSQBhz
+>> ack rc=0
+
+### adversarial key: spaces, shell metachars, 80-char key
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 30 --recovery-generation 504851.1791986793.uc7LqW
+>> ack '--ack-through 30 --recovery-generation 504851.1791986793.uc7LqW' rc=0 queue-left=0
+
+### empty queue: no rows summary
+>> no WAKE_ACK_REQUIRED line printed
