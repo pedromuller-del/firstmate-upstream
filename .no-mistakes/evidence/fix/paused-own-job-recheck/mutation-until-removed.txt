@@ -1,0 +1,2 @@
+not ok - the recheck was not recorded as the passed declared time
+exit=1
