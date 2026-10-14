@@ -1,0 +1,4 @@
+49:   When you know when the wait clears, include `until <YYYY-MM-DDTHH:MMZ>` (UTC) for a recheck at that time; for your own background job or command with a timeout, that time is its start plus its timeout, rounded up to the minute.
+50-   Follow the resolution rule below when the wait clears, then resume the task.
+40:   When you know when the wait clears, include `until <YYYY-MM-DDTHH:MMZ>` (UTC) for a recheck at that time; for your own background job or command with a timeout, that time is its start plus its timeout, rounded up to the minute.
+41-   Follow the resolution rule below when the wait clears, then resume the task.
