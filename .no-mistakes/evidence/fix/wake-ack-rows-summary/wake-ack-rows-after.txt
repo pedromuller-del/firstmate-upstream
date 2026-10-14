@@ -1,0 +1,22 @@
+== empty queue: drain
+(no WAKE_ACK line)
+== 3 rows incl. due recheck, filter: 2>&1 | rg -v '^\d'
+WAKE_ACK_REQUIRED: rows: 3 [1 stale test:fm-parked, 2 check due-recheck, 3 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1641667.1791987655.CK1cNw
+== same queue (undrained), filter: 2>&1 | rg WAKE_ACK | head -1
+WAKE_ACK_REQUIRED: rows: 3 [1 stale test:fm-parked, 2 check due-recheck, 3 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1641667.1791987655.CK1cNw
+== same queue, filter: 2>&1 | tail -3
+1791987655	2	check	due-recheck	check: due recheck
+1791987656	3	signal	alpha	signal: alpha.status
+WAKE_ACK_REQUIRED: rows: 3 [1 stale test:fm-parked, 2 check due-recheck, 3 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1641667.1791987655.CK1cNw
+== same queue, stdout discarded: 2>&1 >/dev/null
+WAKE_ACK_REQUIRED: rows: 3 [1 stale test:fm-parked, 2 check due-recheck, 3 signal alpha] after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1641667.1791987655.CK1cNw
+== ack using the command parsed from the filtered line
+args: --ack-through 3 --recovery-generation 1641667.1791987655.CK1cNw
+ack rc=0
+queue rows left: 0
+== 7 rows, due recheck at position 6, filter: | rg WAKE_ACK | head -1
+WAKE_ACK_REQUIRED: rows: 7 [4 stale window-1, 5 stale window-2, 6 stale window-3, 7 stale window-4, 8 stale window-5, 9 check due-recheck, 10 signal omega] after handling completes run bin/fm-wake-drain.sh --ack-through 10 --recovery-generation 1655959.1791987663.dzcP8F
+== hostile key (spaces, brackets, ;, $(), 80 chars)
+WAKE_ACK_REQUIRED: rows: 1 [11 signal evil_key__x_____rm_-rf_/__--ack-through_999_AAAA] after handling completes run bin/fm-wake-drain.sh --ack-through 11 --recovery-generation 1661423.1791987668.EYubPr
+end-anchored ack-through parse: 11
+lab removed: yes

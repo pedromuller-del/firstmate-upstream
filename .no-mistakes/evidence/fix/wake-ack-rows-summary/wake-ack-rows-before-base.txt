@@ -1,0 +1,22 @@
+== empty queue: drain
+(no WAKE_ACK line)
+== 3 rows incl. due recheck, filter: 2>&1 | rg -v '^\d'
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1674273.1791987683.2k3ABr
+== same queue (undrained), filter: 2>&1 | rg WAKE_ACK | head -1
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1674273.1791987683.2k3ABr
+== same queue, filter: 2>&1 | tail -3
+1791987683	2	check	due-recheck	check: due recheck
+1791987683	3	signal	alpha	signal: alpha.status
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1674273.1791987683.2k3ABr
+== same queue, stdout discarded: 2>&1 >/dev/null
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 3 --recovery-generation 1674273.1791987683.2k3ABr
+== ack using the command parsed from the filtered line
+args: --ack-through 3 --recovery-generation 1674273.1791987683.2k3ABr
+ack rc=0
+queue rows left: 0
+== 7 rows, due recheck at position 6, filter: | rg WAKE_ACK | head -1
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 10 --recovery-generation 1684123.1791987690.xmhYuc
+== hostile key (spaces, brackets, ;, $(), 80 chars)
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 11 --recovery-generation 1689722.1791987692.oFKg9n
+end-anchored ack-through parse: 11
+lab removed: yes
