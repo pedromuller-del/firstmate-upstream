@@ -13,7 +13,7 @@ If the task will start, stop, delete, restart, profile, or otherwise drive Herdr
 Do not add Herdr lifecycle commands to this unguarded brief by hand.
 
 # Setup
-You are in a disposable git worktree of demo, at a detached HEAD on a clean default branch.
+You are in a disposable git worktree of firstmate, at a detached HEAD on a clean default branch.
 
 **Verify isolation before anything else.** Run `pwd -P` and `git rev-parse --show-toplevel`; both must resolve to the disposable task worktree you were launched in, such as a treehouse pool path or an Orca-managed worktree, not the primary checkout firstmate operates from.
 The path check is authoritative: `git rev-parse --git-dir` and `git rev-parse --git-common-dir` can help inspect the repo, but they do not prove you are outside the primary checkout.
@@ -23,12 +23,12 @@ If the top-level path is the primary checkout or not the worktree you were launc
 
 # Rules
 1. Never push to any remote and never open a PR. Work only on your `fm/bgjob` branch; firstmate handles the merge into local `main`.
-2. Keep project edits inside this worktree; keep proof and scratch output outside it, under `/tmp/fm-lab.A885cz/data/bgjob/` or a temporary directory.
+2. Keep project edits inside this worktree; keep proof and scratch output outside it, under `/tmp/fm-lab.JXVQYo/data/bgjob/` or a temporary directory.
    Outside the worktree, write only that task material and the status and steering-inbox records authorized below.
    Leave the worktree clean before reporting done.
 3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
 4. Report status by appending one line:
-   `echo "{state} [at=<epoch>]: {one short line}" >> '/tmp/fm-lab.A885cz/state/bgjob.status' && { [ ! -e '/tmp/fm-lab.A885cz/config/fleet-ledger' ] || '/home/agent/.no-mistakes/worktrees/754684345a7c/01M4Y8MGPZH9PQNM0CN728V16J/bin/fm-fleet-ledger.sh' appended '/tmp/fm-lab.A885cz/config' '/tmp/fm-lab.A885cz/state/bgjob.status' >/dev/null 2>&1 || true; }`
+   `echo "{state} [at=<epoch>]: {one short line}" >> '/tmp/fm-lab.JXVQYo/state/bgjob.status' && { [ ! -e '/tmp/fm-lab.JXVQYo/config/fleet-ledger' ] || '/home/agent/.no-mistakes/worktrees/754684345a7c/01M4YD1WBSY0J7YSFSYXX9EG83/bin/fm-fleet-ledger.sh' appended '/tmp/fm-lab.JXVQYo/config' '/tmp/fm-lab.JXVQYo/state/bgjob.status' >/dev/null 2>&1 || true; }`
    States: working, needs-decision, blocked, paused, done, failed.
    Substitute `<epoch>` with the current Unix time in seconds - run `date +%s` and write the number it printed; a stamp that is not plain digits records no time at all.
    Each append wakes firstmate, so report sparingly: only phase changes a supervisor
@@ -79,13 +79,13 @@ If the top-level path is the primary checkout or not the worktree you were launc
    `blocked [at=<epoch>]: {what you need}` and stop; firstmate arranges it.
 
 # Firstmate instruction inbox
-Firstmate steers you through durable message files in '/tmp/fm-lab.A885cz/state/bgjob.inbox'.
-When a terminal message says an instruction is waiting there - and at any natural checkpoint when you are unsure - list '/tmp/fm-lab.A885cz/state/bgjob.inbox'/*.msg, read and act on each message in numeric order, then acknowledge each handled message by moving it: `mv '/tmp/fm-lab.A885cz/state/bgjob.inbox'/NNN.msg '/tmp/fm-lab.A885cz/state/bgjob.inbox'/handled/`.
+Firstmate steers you through durable message files in '/tmp/fm-lab.JXVQYo/state/bgjob.inbox'.
+When a terminal message says an instruction is waiting there - and at any natural checkpoint when you are unsure - list '/tmp/fm-lab.JXVQYo/state/bgjob.inbox'/*.msg, read and act on each message in numeric order, then acknowledge each handled message by moving it: `mv '/tmp/fm-lab.JXVQYo/state/bgjob.inbox'/NNN.msg '/tmp/fm-lab.JXVQYo/state/bgjob.inbox'/handled/`.
 The move IS the acknowledgement: without it firstmate rings again and eventually treats you as stuck. An empty or absent inbox needs no action.
 
 # Project memory
 A project's `AGENTS.md` or `CLAUDE.md` is loaded into every agent session in that project, so edit it only to correct information that is factually wrong - including information your own change made wrong - and never to add knowledge because it is missing.
-A correction edits only the wrong text: do not run `/home/agent/.no-mistakes/worktrees/754684345a7c/01M4Y8MGPZH9PQNM0CN728V16J/bin/fm-ensure-agents-md.sh`, create either file, or add sections, headings, or pointers alongside it.
+A correction edits only the wrong text: do not run `/home/agent/.no-mistakes/worktrees/754684345a7c/01M4YD1WBSY0J7YSFSYXX9EG83/bin/fm-ensure-agents-md.sh`, create either file, or add sections, headings, or pointers alongside it.
 
 # Definition of done
 Delivery contract: mode=local-only
