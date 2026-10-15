@@ -1,0 +1,14 @@
+### round 1 start 01:32:30
+signal: /tmp/fm-lab.1FWOOG/state/bgjob.status /tmp/fm-lab.1FWOOG/state/bgnoun.status
+### round 1 watcher exit=0 at 01:33:02
+1792027982	3	signal	bgjob.status	signal: /tmp/fm-lab.1FWOOG/state/bgjob.status /tmp/fm-lab.1FWOOG/state/bgnoun.status
+1792027982	4	signal	bgnoun.status	signal: /tmp/fm-lab.1FWOOG/state/bgjob.status /tmp/fm-lab.1FWOOG/state/bgnoun.status
+wake annotation: latest wake-EVENT observed at drain, not current state: bgjob.status: paused [at=1792027882]: background job bcliyguqr (sleep 100; echo nightly-build-done) running; resume when it exits until 2026-10-15T01:34Z
+wake annotation: unread wake-EVENT since last drain, not current state: bgnoun.status: paused [at=1792027877]: waiting on background job 'sleep 100; echo nightly-build-done' (started 1792027873, 120s timeout); resume when it exits
+wake annotation: latest wake-EVENT observed at drain, not current state: bgnoun.status: done [at=1792027981]: background job finished (exit 0, printed nightly-build-done)
+STATUS OUTCOME BACKSTOP (newest captain-facing task event has no covering branch outcome):
+bgnoun done [at=1792027981]: background job finished (exit 0, printed nightly-build-done)
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 4 --recovery-generation 3772491.1792027982.9lAXLF
+WARNING: queued wakes pending - drain them with bin/fm-wake-drain.sh before anything else.
+### acked through 4
+### round 2 start 01:33:06

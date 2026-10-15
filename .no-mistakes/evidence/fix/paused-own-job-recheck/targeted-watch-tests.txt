@@ -1,0 +1,6 @@
+ok - a declared wait whose until time has passed is rechecked at once, then held to the cadence
+test_paused_until_that_passed_is_rechecked_before_the_cadence exit=0
+ok - without until, a worker paused on its own ended background job is not rechecked inside the cadence
+test_paused_bg_job_without_until_stays_silent_after_the_job_ends exit=0
+ok - until set to a background job's timeout rechecks the worker paused on it once the job must have ended
+test_paused_bg_job_until_timeout_rechecks_after_the_job_ends exit=0

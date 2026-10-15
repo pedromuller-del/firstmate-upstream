@@ -1,0 +1,2 @@
+paused [at=1792027877]: waiting on background job 'sleep 100; echo nightly-build-done' (started 1792027873, 120s timeout); resume when it exits
+done [at=1792027981]: background job finished (exit 0, printed nightly-build-done)

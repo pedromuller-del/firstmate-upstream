@@ -1,0 +1,34 @@
+### round 1 start 01:34:55
+check: rearm-resurface
+### round 1 watcher exit=0 at 01:34:56
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 0 --recovery-generation 3840986.1792028015.UV63zO
+### acked through 0
+### round 2 start 01:34:59
+signal: /tmp/fm-lab.1FWOOG/state/dj.status /tmp/fm-lab.1FWOOG/state/dn.status
+### round 2 watcher exit=0 at 01:35:31
+1792028130	7	signal	dj.status	signal: /tmp/fm-lab.1FWOOG/state/dj.status /tmp/fm-lab.1FWOOG/state/dn.status
+1792028130	8	signal	dn.status	signal: /tmp/fm-lab.1FWOOG/state/dj.status /tmp/fm-lab.1FWOOG/state/dn.status
+wake annotation: latest wake-EVENT observed at drain, not current state: dj.status: paused [at=1792028051]: background job nightly-build (timeout 120s) writing job.out; until 2026-10-15T01:37Z
+wake annotation: latest wake-EVENT observed at drain, not current state: dn.status: paused [at=1792028057]: background job nightly-build (started 1792028047, timeout 120s) writes job.out when done; resume when job.out exists or timeout expires
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 8 --recovery-generation 4044813.1792028130.OrxRAT
+WARNING: queued wakes pending - drain them with bin/fm-wake-drain.sh before anything else.
+### acked through 8
+### round 3 start 01:35:34
+stale: crew:dn
+### round 3 watcher exit=0 at 01:35:48
+1792028147	9	stale	crew:dn	stale: crew:dn
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 9 --recovery-generation 4099573.1792028147.vJJOC3
+WARNING: queued wakes pending - drain them with bin/fm-wake-drain.sh before anything else.
+### acked through 9
+### round 4 start 01:35:50
+stale: crew:dj (paused 170s, awaiting external - the declared clearing time has passed, rechecked on a long cadence not a wedge; confirm the wait cleared)
+### round 4 watcher exit=0 at 01:37:04
+1792028224	10	stale	crew:dj	stale: crew:dj (paused 170s, awaiting external - the declared clearing time has passed, rechecked on a long cadence not a wedge; confirm the wait cleared)
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 10 --recovery-generation 4132584.1792028224.ZiIJY9
+WARNING: queued wakes pending - drain them with bin/fm-wake-drain.sh before anything else.
+### acked through 10
+### round 5 start 01:37:07
+Terminated                 sleep "$POLL"
+### round 5 watcher exit=124 at 01:41:36
+WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through 0 --recovery-generation 66258.1792028496.dUZ27X
+### acked through 0

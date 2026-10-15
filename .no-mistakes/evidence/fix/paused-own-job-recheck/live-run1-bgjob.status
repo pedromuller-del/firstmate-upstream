@@ -1,0 +1,2 @@
+paused [at=1792027882]: background job bcliyguqr (sleep 100; echo nightly-build-done) running; resume when it exits until 2026-10-15T01:34Z
+done [at=1792027986]: background job bcliyguqr finished exit 0, printed nightly-build-done
