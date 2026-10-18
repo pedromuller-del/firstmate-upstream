@@ -1,0 +1,302 @@
+Input-boundary and compatibility validation
+Malformed and edge inputs were generated JSON documents supplied directly to the real worker helper via its public --snapshot argument. They were not passed through quota-axi because the producer normalizes malformed data. Resolver malformed-input rejection is additionally covered by the existing offline resolver suite, not claimed as live here.
+
+--- missing-alias-exact ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 315   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2026  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+
+--- default-fallback ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 343   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2029  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+
+--- missing-account ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 296   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+stderr:
+
+
+
+--- schema5 ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 291   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2034  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+
+--- missing-alias-exact-without-accountKeys ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "codex-home"}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/missing-alias-exact-without-accountKeys.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- default-fallback-without-accountKeys ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "unrelated"}, {"accountKey": "default"}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/default-fallback-without-accountKeys.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- missing-account-without-accountKeys ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "unrelated"}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/missing-account-without-accountKeys.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+
+
+
+--- malformed-0 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": null}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-0.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-1 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": "codex-home"}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-1.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-2 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": {}}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-2.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-3 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": 9}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-3.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-4 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": false}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-4.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-5 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": [""]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-5.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-6 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": [1]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-6.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-7 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": [null]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-7.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-8 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": [false]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-8.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-9 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": [{}]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-9.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-10 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": [[]]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-10.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- malformed-11 ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": ["codex-home", ""]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-11.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- invalid-account-key ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "work account", "accountKeys": ["credential-primary", "codex-home", "credential-alias"]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/invalid-account-key.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+
+
+
+--- empty-alias-array ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "codex-home", "accountKeys": []}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/empty-alias-array.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- empty-alias-fallback ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "unrelated", "accountKeys": []}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/empty-alias-fallback.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+
+
+
+--- duplicate-alias ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "credential-primary", "accountKeys": ["codex-home", "codex-home"]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/duplicate-alias.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- whitespace-only-alias ---
+Input schemaVersion: 6 ; codex identities: [{"accountKey": "codex-home", "accountKeys": [" ", "\t", "\n"]}, {"accountKey": "default", "accountKeys": ["default"]}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/whitespace-only-alias.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- schema5-ignores-alias-field ---
+Input schemaVersion: 5 ; codex identities: [{"accountKeys": false}]
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/schema5-ignores-alias-field.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+

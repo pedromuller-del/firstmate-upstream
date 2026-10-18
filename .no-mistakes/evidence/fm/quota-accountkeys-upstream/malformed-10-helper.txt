@@ -1,0 +1,7 @@
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/malformed-10.snapshot.json --candidate codex:default
+exit: 2
+stdout:
+
+stderr:
+error: invalid quota-axi provider data
+

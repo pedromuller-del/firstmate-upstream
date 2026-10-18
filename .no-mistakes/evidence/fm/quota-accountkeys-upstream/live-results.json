@@ -1,0 +1,110 @@
+[
+  {
+    "name": "unique-alias",
+    "description": "Codex, Pi, and Pi native credentials bind through one covered-key row before default.",
+    "result": "pass",
+    "artifacts": [
+      "unique-alias-resolver.txt",
+      "unique-alias-helper.txt",
+      "pi-alias-resolver.txt",
+      "pi-native-alias-resolver.txt"
+    ]
+  },
+  {
+    "name": "base-regression",
+    "description": "The base revision leaves an alias unranked or reads an exhausted default; the target selects the 80% row.",
+    "result": "pass",
+    "artifacts": [
+      "base-unranked-alias-resolver.txt",
+      "alias-without-default-resolver.txt",
+      "base-alias-resolver.txt",
+      "base-alias-helper.txt"
+    ]
+  },
+  {
+    "name": "exact-first",
+    "description": "An exhausted exact account wins over two healthy aliases and a healthy default in either row order.",
+    "result": "pass",
+    "artifacts": [
+      "exact-first-resolver.txt",
+      "exact-first-helper.txt",
+      "exact-first-reversed-resolver.txt"
+    ]
+  },
+  {
+    "name": "ambiguous",
+    "description": "Conflicting aliases remain eligible and unranked even with a healthy default; the helper selects none.",
+    "result": "pass",
+    "artifacts": [
+      "ambiguous-resolver.txt",
+      "ambiguous-helper.txt",
+      "ambiguous-reversed-resolver.txt"
+    ]
+  },
+  {
+    "name": "provider-scope",
+    "description": "The same alias on another provider does not conflict, independently of row order.",
+    "result": "pass",
+    "artifacts": [
+      "provider-scope-resolver.txt",
+      "provider-scope-helper.txt",
+      "provider-scope-reversed-resolver.txt"
+    ]
+  },
+  {
+    "name": "whitespace-alias",
+    "description": "Whitespace aliases remain valid for the resolver, worker helper, and quota event consumer.",
+    "result": "pass",
+    "artifacts": [
+      "whitespace-alias-resolver.txt",
+      "whitespace-alias-helper.txt",
+      "whitespace-procevent.txt"
+    ]
+  },
+  {
+    "name": "compatibility",
+    "description": "Exact rows, default fallback, missing rows, and schema 5 retain their behavior, including absent accountKeys.",
+    "result": "pass",
+    "artifacts": [
+      "missing-alias-exact-resolver.txt",
+      "default-fallback-resolver.txt",
+      "missing-account-resolver.txt",
+      "schema5-resolver.txt",
+      "missing-alias-exact-without-accountKeys-helper.txt",
+      "default-fallback-without-accountKeys-helper.txt",
+      "missing-account-without-accountKeys-helper.txt"
+    ]
+  },
+  {
+    "name": "malformed",
+    "description": "The real helper rejects all 12 malformed alias shapes and still rejects whitespace in accountKey.",
+    "result": "pass",
+    "artifacts": [
+      "malformed-0-helper.txt",
+      "malformed-1-helper.txt",
+      "malformed-2-helper.txt",
+      "malformed-3-helper.txt",
+      "malformed-4-helper.txt",
+      "malformed-5-helper.txt",
+      "malformed-6-helper.txt",
+      "malformed-7-helper.txt",
+      "malformed-8-helper.txt",
+      "malformed-9-helper.txt",
+      "malformed-10-helper.txt",
+      "malformed-11-helper.txt",
+      "invalid-account-key-helper.txt"
+    ]
+  },
+  {
+    "name": "valid-edge-inputs",
+    "description": "Empty arrays, repeated aliases in one row, whitespace strings, and schema-5 field handling remain valid.",
+    "result": "pass",
+    "artifacts": [
+      "empty-alias-array-helper.txt",
+      "empty-alias-fallback-helper.txt",
+      "duplicate-alias-helper.txt",
+      "whitespace-only-alias-helper.txt",
+      "schema5-ignores-alias-field-helper.txt"
+    ]
+  }
+]

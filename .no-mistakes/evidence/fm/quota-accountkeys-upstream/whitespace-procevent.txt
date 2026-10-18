@@ -1,0 +1,10 @@
+$ bash bin/fm-procevent-quota.sh poll --provider codex --threshold 100 --interval 0.01 --timeout 5
+exit: 0
+stdout:
+quota: quota-codex
+status: low
+detail: {"provider":"codex","accountKey":"codex-home","best":{"scope":"all_models","status":"known","effectivePercentRemaining":80,"boundedBy":["five_hour"],"limitingWindowIds":["five_hour"],"pace":{"status":"behind","worstReservePercentPoints":30.0597,"worstReserveWindowId":"five_hour"},"runway":{"status":"through_reset","projectionConfidence":"established"},"selection":{"status":"known","spendPriority":1.2024}}}
+condition_polls: 1
+
+stderr:
+

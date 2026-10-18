@@ -1,0 +1,7 @@
+$ bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/base/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/unique-alias.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+

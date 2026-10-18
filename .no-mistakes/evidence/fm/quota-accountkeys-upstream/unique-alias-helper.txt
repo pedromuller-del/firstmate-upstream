@@ -1,0 +1,7 @@
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/unique-alias.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+

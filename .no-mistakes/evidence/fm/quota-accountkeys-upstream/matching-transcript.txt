@@ -1,0 +1,262 @@
+Live account-matching validation
+Target: a3bda126f9d6280efbaabde9dc63217e9c86091d
+Base: 8ba34f1da5d19004adc3a7521dc600d1815cf380
+The real resolver called Typesafe.ai with the inherited API credential. The real quota-axi CLI read disposable generated cache data through its documented QUOTA_AXI_SNAPSHOT mode. No curl or quota-axi replacement was used. HOME, FM_HOME, XDG paths, and provider homes were isolated inside the worktree. No production quota or credentials were read by quota-axi.
+Base runs used the original shared library plus the unchanged consumer scripts and dependencies.
+
+--- unique-alias ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 312   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2001  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/unique-alias.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- pi-alias ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 290   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:credential-alias/gpt-6-astra  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2004  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'credential-alias/gpt-6-astra'
+
+stderr:
+
+
+
+--- pi-native-alias ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 289   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: pi:codex-native/gpt-6-astra  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2005  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'codex-native/gpt-6-astra'
+
+stderr:
+
+
+
+--- base-unranked-alias ---
+$ bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/base/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 310   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+stderr:
+
+
+
+--- alias-without-default ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 321   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2009  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+
+--- exact-first ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 298   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/exact-first.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+
+
+
+--- exact-first-reversed ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 301   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/exact-first-reversed.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+
+
+
+--- ambiguous ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 303   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/ambiguous.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+
+
+
+--- ambiguous-reversed ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 341   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/ambiguous-reversed.snapshot.json --candidate codex:default
+exit: 1
+stdout:
+none
+
+stderr:
+
+
+
+--- provider-scope ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 305   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2018  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/provider-scope.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- whitespace-alias ---
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 313   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2023  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+
+
+$ bash bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/evidence/01M56DZNN6PKAPQHH0SJ37VYHG/whitespace-alias.snapshot.json --candidate codex:default
+exit: 0
+stdout:
+codex default
+
+stderr:
+
+
+
+--- quota event consumer ---
+$ bash bin/fm-procevent-quota.sh poll --provider codex --threshold 100 --interval 0.01 --timeout 5
+exit: 0
+stdout:
+quota: quota-codex
+status: low
+detail: {"provider":"codex","accountKey":"codex-home","best":{"scope":"all_models","status":"known","effectivePercentRemaining":80,"boundedBy":["five_hour"],"limitingWindowIds":["five_hour"],"pace":{"status":"behind","worstReservePercentPoints":30.0597,"worstReserveWindowId":"five_hour"},"runway":{"status":"through_reset","projectionConfidence":"established"},"selection":{"status":"known","spendPriority":1.2024}}}
+condition_polls: 1
+
+stderr:
+
+
+

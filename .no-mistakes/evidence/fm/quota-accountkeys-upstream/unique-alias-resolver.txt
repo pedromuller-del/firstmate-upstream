@@ -1,0 +1,14 @@
+$ bash bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.13.0   latency_ms: 312   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=1.2001  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'gpt-5.6-sol'
+
+stderr:
+

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-10-18T02:53:44.907547Z",
+  "providers": [
+    {
+      "provider": "claude",
+      "label": "Claude",
+      "source": "oauth",
+      "windows": [
+        {
+          "id": "five_hour",
+          "label": "session",
+          "kind": "session",
+          "windowSeconds": 18000,
+          "percentUsed": 100,
+          "percentRemaining": 0,
+          "startsAt": "2026-10-18T00:23:44.907547Z",
+          "resetsAt": "2026-10-18T05:23:44.907547Z"
+        }
+      ],
+      "state": {
+        "status": "fresh",
+        "sourcesTried": [
+          "oauth"
+        ],
+        "refreshedAt": "2026-10-18T02:53:44.907547Z"
+      },
+      "accountKey": "other-provider",
+      "reuse": {
+        "context": "0000000000000000000000000000000000000000000000000000000000000000",
+        "inputs": [],
+        "inputsDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "readingAt": "2026-10-18T02:53:44.907547Z",
+        "lanes": 1,
+        "lane": 0,
+        "accountKeys": [
+          "codex-home"
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "label": "Codex",
+      "source": "oauth",
+      "windows": [
+        {
+          "id": "five_hour",
+          "label": "session",
+          "kind": "session",
+          "windowSeconds": 18000,
+          "percentUsed": 20,
+          "percentRemaining": 80,
+          "startsAt": "2026-10-18T00:23:44.907547Z",
+          "resetsAt": "2026-10-18T05:23:44.907547Z"
+        }
+      ],
+      "state": {
+        "status": "fresh",
+        "sourcesTried": [
+          "oauth"
+        ],
+        "refreshedAt": "2026-10-18T02:53:44.907547Z"
+      },
+      "accountKey": "credential-primary",
+      "reuse": {
+        "context": "0000000000000000000000000000000000000000000000000000000000000000",
+        "inputs": [],
+        "inputsDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "readingAt": "2026-10-18T02:53:44.907547Z",
+        "lanes": 1,
+        "lane": 0,
+        "accountKeys": [
+          "codex-home",
+          "codex-home"
+        ]
+      }
+    }
+  ]
+}

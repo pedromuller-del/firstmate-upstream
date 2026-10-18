@@ -1,0 +1,14 @@
+$ bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/base/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M56DZNN6PKAPQHH0SJ37VYHG/.quota-validation/brief.md
+exit: 0
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 322   tokens: 419/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+stderr:
+

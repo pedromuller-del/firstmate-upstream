@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-10-18T02:53:44.907547Z",
+  "providers": [
+    {
+      "provider": "codex",
+      "label": "Codex",
+      "source": "oauth",
+      "windows": [
+        {
+          "id": "five_hour",
+          "label": "session",
+          "kind": "session",
+          "windowSeconds": 18000,
+          "percentUsed": 100,
+          "percentRemaining": 0,
+          "startsAt": "2026-10-18T00:23:44.907547Z",
+          "resetsAt": "2026-10-18T05:23:44.907547Z"
+        }
+      ],
+      "state": {
+        "status": "fresh",
+        "sourcesTried": [
+          "oauth"
+        ],
+        "refreshedAt": "2026-10-18T02:53:44.907547Z"
+      },
+      "accountKey": "unrelated"
+    },
+    {
+      "provider": "codex",
+      "label": "Codex",
+      "source": "oauth",
+      "windows": [
+        {
+          "id": "five_hour",
+          "label": "session",
+          "kind": "session",
+          "windowSeconds": 18000,
+          "percentUsed": 20,
+          "percentRemaining": 80,
+          "startsAt": "2026-10-18T00:23:44.907547Z",
+          "resetsAt": "2026-10-18T05:23:44.907547Z"
+        }
+      ],
+      "state": {
+        "status": "fresh",
+        "sourcesTried": [
+          "oauth"
+        ],
+        "refreshedAt": "2026-10-18T02:53:44.907547Z"
+      },
+      "accountKey": "default"
+    }
+  ]
+}
