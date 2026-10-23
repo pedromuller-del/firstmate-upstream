@@ -1,0 +1,6 @@
+Real resolver + live TypeSafe + real quota-axi on a disposable snapshot
+Run 1: profile: --harness 'claude' --model 'sonnet' --effort 'high'
+Run 2: profile: --harness 'claude' --model 'sonnet' --effort 'high'
+Run 3: profile: --harness 'claude' --model 'sonnet' --effort 'high'
+Run 4: profile: --harness 'claude' --model 'sonnet' --effort 'high'
+Run 5: profile: --harness 'claude' --model 'sonnet' --effort 'high'

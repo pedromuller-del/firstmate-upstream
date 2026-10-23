@@ -1,0 +1,14 @@
+[
+  {
+    "command": "bash tests/fm-secondmate-harness.test.sh",
+    "exit_code": 1,
+    "passed": 9,
+    "failed": 1
+  },
+  {
+    "command": "bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 1,
+    "passed": 4,
+    "failed": 1
+  }
+]

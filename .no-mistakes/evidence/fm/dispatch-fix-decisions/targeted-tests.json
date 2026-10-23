@@ -1,0 +1,56 @@
+[
+  {
+    "command": "bash tests/fm-dispatch-resolve.test.sh",
+    "exit_code": 0,
+    "passed": 36,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-quota-choose.test.sh",
+    "exit_code": 0,
+    "passed": 58,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-bootstrap.test.sh",
+    "exit_code": 0,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-procevent-quota.test.sh",
+    "exit_code": 0,
+    "passed": 33,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-startup-memory-budget.test.sh",
+    "exit_code": 0,
+    "passed": 4,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-secondmate-sync.test.sh",
+    "exit_code": 0,
+    "passed": 33,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-secondmate-harness.test.sh",
+    "exit_code": 1,
+    "passed": 9,
+    "failed": 1
+  },
+  {
+    "command": "bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 1,
+    "passed": 4,
+    "failed": 1
+  },
+  {
+    "command": "bash tests/fm-shared-captain-inheritance.test.sh",
+    "exit_code": 0,
+    "passed": 13,
+    "failed": 0
+  }
+]

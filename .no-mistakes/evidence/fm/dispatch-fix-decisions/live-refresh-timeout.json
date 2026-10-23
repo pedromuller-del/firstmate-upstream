@@ -1,0 +1,9 @@
+{
+  "command": "bash bin/fm-dispatch-resolve.sh <disposable-brief>",
+  "fault": "SIGSTOP sent only to this run's real Pi auth-check child after launch",
+  "exit_code": 0,
+  "elapsed_seconds": 10.608,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 240   tokens: 404/35\n  rule: rule_1 (Fix a simple bug.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.5121  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+  "stderr": "",
+  "pi_child_stat_after_return": "absent"
+}

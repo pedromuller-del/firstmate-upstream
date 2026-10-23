@@ -1,0 +1,482 @@
+[
+  {
+    "name": "determinism-1",
+    "exit_code": 0,
+    "elapsed_seconds": 0.97,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 233   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4588  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789060.403293,
+        "end": 1792789060.501835,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "determinism-2",
+    "exit_code": 0,
+    "elapsed_seconds": 0.638,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 261   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.459  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789061.050111,
+        "end": 1792789061.141422,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "determinism-3",
+    "exit_code": 0,
+    "elapsed_seconds": 0.644,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 249   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4591  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789061.679133,
+        "end": 1792789061.786483,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "determinism-4",
+    "exit_code": 0,
+    "elapsed_seconds": 0.894,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 256   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4595  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789062.544802,
+        "end": 1792789062.6796641,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "determinism-5",
+    "exit_code": 0,
+    "elapsed_seconds": 0.711,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 311   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4596  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789063.282371,
+        "end": 1792789063.3905122,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "expired-rule-removed-and-valid-leap-day",
+    "exit_code": 0,
+    "elapsed_seconds": 0.755,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 266   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4598  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789064.0305831,
+        "end": 1792789064.1460748,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "all-rules-expired",
+    "exit_code": 0,
+    "elapsed_seconds": 0.121,
+    "stdout": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
+    "stderr": "",
+    "calls": [],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "malformed-until-2999-13-40T25:61:61Z",
+    "exit_code": 2,
+    "elapsed_seconds": 0.066,
+    "stdout": "",
+    "stderr": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "calls": [],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "malformed-until-2100-02-29T00:00:00Z",
+    "exit_code": 2,
+    "elapsed_seconds": 0.063,
+    "stdout": "",
+    "stderr": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "calls": [],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "malformed-until-2999-01-01T24:00:00Z",
+    "exit_code": 2,
+    "elapsed_seconds": 0.065,
+    "stdout": "",
+    "stderr": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "calls": [],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "malformed-until-soon",
+    "exit_code": 2,
+    "elapsed_seconds": 0.059,
+    "stdout": "",
+    "stderr": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/config/crew-dispatch.json - until must be an ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ) when present\n",
+    "calls": [],
+    "temporary_file_modes": [
+      "0o400"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "real-pi-failed-refresh-pinned-rule-and-default",
+    "exit_code": 0,
+    "elapsed_seconds": 2.507,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 334   tokens: 445/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 default=0.0\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4607  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "pi",
+        "args": [
+          "auth",
+          "check",
+          "--provider",
+          "anthropic"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/pi",
+        "start": 1792789065.617631,
+        "end": 1792789066.118199,
+        "exit": 1
+      },
+      {
+        "tool": "pi",
+        "args": [
+          "auth",
+          "check",
+          "--provider",
+          "openai-codex"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/pi",
+        "start": 1792789066.245357,
+        "end": 1792789066.672235,
+        "exit": 1
+      },
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789066.76652,
+        "end": 1792789067.007211,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "captain-approval-refuses-profile",
+    "exit_code": 0,
+    "elapsed_seconds": 2.535,
+    "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 558   tokens: 429/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4615  runway=through_reset  -> eligible\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789069.240449,
+        "end": 1792789069.574656,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "declared-floor-miss",
+    "exit_code": 0,
+    "elapsed_seconds": 0.758,
+    "stdout": "dispatch-resolve:\n  status: ambiguous\n  model: jev-1.14.0   latency_ms: 242   tokens: 452/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.58\n  probabilities: rule_1=0.72 rule_2=0.27 default=0.01\n  reason: rule_1 probability 0.72 below its floor 1; no other option clears its own floor\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4618  runway=through_reset  -> eligible\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789070.217887,
+        "end": 1792789070.3395588,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "low-confidence-duplicate-options",
+    "exit_code": 0,
+    "elapsed_seconds": 0.639,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 253   tokens: 452/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.55\n  probabilities: rule_1=0.7 rule_2=0.29 default=0.01\n  note: rule matched (low confidence: answer confidence 0.55 below floor 0.6)\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4619  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789070.876401,
+        "end": 1792789070.9792588,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "borderline-live-answer-1",
+    "exit_code": 0,
+    "elapsed_seconds": 0.649,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 263   tokens: 464/53\n  rule: rule_3 (Refactor or reorganize existing code without changing behavi)   confidence: 0.99\n  probabilities: rule_1=0.0 rule_2=0.01 rule_3=0.99 default=0.0\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4621  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789071.52147,
+        "end": 1792789071.6307971,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "borderline-live-answer-2",
+    "exit_code": 0,
+    "elapsed_seconds": 0.611,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 229   tokens: 459/53\n  rule: rule_3 (Refactor or reorganize existing code without changing behavi)   confidence: 0.72\n  probabilities: rule_1=0.19 rule_2=0.01 rule_3=0.79 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4623  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789072.139777,
+        "end": 1792789072.242608,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "borderline-live-answer-3",
+    "exit_code": 0,
+    "elapsed_seconds": 0.623,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 254   tokens: 459/53\n  rule: rule_1 (Implement a new feature or extend existing behavior.)   confidence: 0.43\n  probabilities: rule_1=0.5700000000000001 rule_2=0.43 rule_3=0.0 default=0.0\n  note: rule matched (low confidence: answer confidence 0.43 below floor 0.6)\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4625  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789072.764362,
+        "end": 1792789072.867031,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "low-confidence-captain-approval",
+    "exit_code": 0,
+    "elapsed_seconds": 0.664,
+    "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 253   tokens: 459/53\n  rule: rule_1 (Implement a new feature or extend existing behavior.)   confidence: 0.48\n  probabilities: rule_1=0.61 rule_2=0.39 rule_3=0.0 default=0.0\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4627  runway=through_reset  -> eligible\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789073.433269,
+        "end": 1792789073.530826,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  },
+  {
+    "name": "adversarial-equal-probabilities-request",
+    "exit_code": 0,
+    "elapsed_seconds": 0.669,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 287   tokens: 440/44\n  rule: rule_1 (Fix the pager bug.)   confidence: 0.22\n  probabilities: rule_1=0.48 rule_2=0.44 default=0.08\n  note: rule matched (low confidence: answer confidence 0.22 below floor 0.6)\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.4629  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "stderr": "",
+    "calls": [
+      {
+        "tool": "quota-axi",
+        "args": [
+          "--json",
+          "--max-age",
+          "2m"
+        ],
+        "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5N6J8T25K4QSKXFP8K9SW18/.live-dispatch-abr8xxbw/ambient-pi",
+        "start": 1792789074.108694,
+        "end": 1792789074.197808,
+        "exit": 0
+      }
+    ],
+    "temporary_file_modes": [
+      "0o400",
+      "0o600"
+    ],
+    "temporary_files_after_exit": []
+  }
+]

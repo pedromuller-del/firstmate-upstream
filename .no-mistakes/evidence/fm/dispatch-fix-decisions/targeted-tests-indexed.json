@@ -1,0 +1,8 @@
+[
+  {
+    "command": "bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 0,
+    "passed": 22,
+    "failed": 0
+  }
+]
