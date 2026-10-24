@@ -1,0 +1,57 @@
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-pinned argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-empty argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-pinned argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-pinned argv=auth check --provider anthropic 
+quota argv=--json --max-age 2m 
+quota argv=--json --max-age 2m 
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-empty argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-pinned argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 

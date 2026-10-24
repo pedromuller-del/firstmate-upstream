@@ -1,0 +1,139 @@
+Real resolver, real TypeSafe jev-1.14.0, and installed quota-axi 0.1.55.
+Quota came from a synthetic dataset through quota-axi's documented QUOTA_AXI_SNAPSHOT mode.
+The 80% value is test data, not an operator account measurement.
+No operator credentials were copied or refreshed.
+
+Five repeated requests returned identical profile lines:
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+case=repeat-1
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=home/config
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 266   tokens: 472/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.52s
+
+case=repeat-2
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=home/config
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 252   tokens: 472/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.47s
+
+case=repeat-3
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=home/config
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 288   tokens: 472/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.52s
+
+case=repeat-4
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=home/config
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 235   tokens: 472/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.48s
+
+case=repeat-5
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=home/config
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 260   tokens: 472/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.49s
+
+case=tie
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=tie
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 256   tokens: 475/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.56
+  probabilities: rule_1=0.71 rule_2=0.28 default=0.01
+  note: rule matched (low confidence: answer confidence 0.56 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.50s
+
+case=ambiguous
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/ambiguous.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=ambiguous
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 229   tokens: 491/51
+  rule: default (No listed rule applies to this task.)   confidence: 0.37
+  probabilities: rule_1=0.0 rule_2=0.47 rule_3=0.0 default=0.53
+  note: no rule matched (low confidence: answer confidence 0.37 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.45s
+
+case=approval
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=approval
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 232   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+exit=0 elapsed=0.48s
+
+case=low-confidence-approval
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=low-confidence-approval
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 291   tokens: 475/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.55
+  probabilities: rule_1=0.7 rule_2=0.29 default=0.01
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+exit=0 elapsed=0.53s
+
+case=declared-floor
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=declared-floor
+dispatch-resolve:
+  status: ambiguous
+  model: jev-1.14.0   latency_ms: 241   tokens: 475/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.56
+  probabilities: rule_1=0.71 rule_2=0.28 default=0.01
+  reason: rule_1 probability 0.71 below its floor 1; no other option clears its own floor
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+exit=0 elapsed=0.48s
+

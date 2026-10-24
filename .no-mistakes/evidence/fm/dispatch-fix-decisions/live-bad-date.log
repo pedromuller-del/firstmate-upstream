@@ -1,0 +1,5 @@
+case=bad-date
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=bad-date
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/configs/bad-date/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+exit=2 elapsed=0.07s

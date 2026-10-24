@@ -1,0 +1,38 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "dispatch-live-lab",
+      "brief": "## Captain's intent\nFix the off-by-one in pager.sh. Its known root cause is the <= comparison on line 40. Replace it with <.\n## Firstmate spec\nMake that one-line change and check that exactly one page is emitted per call.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "Fix a simple bug with a known root cause.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "dispatch-live-lab",
+      "brief": "## Captain's intent\nFix the off-by-one in pager.sh. Its known root cause is the <= comparison on line 40. Replace it with <.\n## Firstmate spec\nMake that one-line change and check that exactly one page is emitted per call.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "Fix a simple bug with a known root cause.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+case=approval
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=approval
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 232   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+exit=0 elapsed=0.48s

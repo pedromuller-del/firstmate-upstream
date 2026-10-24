@@ -1,0 +1,7 @@
+case=all-expired
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=all-expired
+dispatch-resolve:
+  status: escalate
+  reason: no rules to match
+exit=0 elapsed=0.14s

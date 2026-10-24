@@ -1,0 +1,12 @@
+case=balanced-2
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/balanced.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=balanced
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 252   tokens: 489/44
+  rule: rule_1 (The task includes fixing a Python pagination bug, even if it)   confidence: 0.4
+  probabilities: rule_1=0.6 rule_2=0.26 default=0.14
+  note: rule matched (low confidence: answer confidence 0.4 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.49s

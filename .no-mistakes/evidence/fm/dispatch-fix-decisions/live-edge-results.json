@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "name": "pin-refused",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "signed-missing",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    }
+  ],
+  "deterministic": false,
+  "profiles": [],
+  "observed_nonempty_file_modes": [],
+  "temporary_files_remaining": 0
+}

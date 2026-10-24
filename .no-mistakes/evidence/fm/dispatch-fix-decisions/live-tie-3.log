@@ -1,0 +1,12 @@
+case=tie-3
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=tie-3
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 266   tokens: 498/53
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.51
+  probabilities: rule_1=0.63 rule_2=0.21 rule_3=0.15 default=0.01
+  note: rule matched (low confidence: answer confidence 0.51 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.55s

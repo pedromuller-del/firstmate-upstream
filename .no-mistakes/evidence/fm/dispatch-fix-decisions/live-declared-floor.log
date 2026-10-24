@@ -1,0 +1,11 @@
+case=declared-floor
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=declared-floor
+dispatch-resolve:
+  status: ambiguous
+  model: jev-1.14.0   latency_ms: 241   tokens: 475/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.56
+  probabilities: rule_1=0.71 rule_2=0.28 default=0.01
+  reason: rule_1 probability 0.71 below its floor 1; no other option clears its own floor
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+exit=0 elapsed=0.48s

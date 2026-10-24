@@ -1,0 +1,12 @@
+case=ambiguous
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/ambiguous.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=ambiguous
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 229   tokens: 491/51
+  rule: default (No listed rule applies to this task.)   confidence: 0.37
+  probabilities: rule_1=0.0 rule_2=0.47 rule_3=0.0 default=0.53
+  note: no rule matched (low confidence: answer confidence 0.37 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.45s

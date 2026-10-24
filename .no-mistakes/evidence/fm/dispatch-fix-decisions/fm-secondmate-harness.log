@@ -1,3 +1,6 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/bin/fm-wake-lib.sh: line 114: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
 ok - A1 fm-harness.sh secondmate resolves the fallback chain; crew mode unchanged
 ok - fm-harness detects only Cursor Agent CLI's exact invocation marker
 ok - C1 fm-harness.sh secondmate-model/secondmate-effort resolve the optional tokens; bare harness stays empty (backward-compat)
@@ -6,5 +9,4 @@ ok - D2 malformed config/secondmate-harness refuses with its line number on ever
 ok - D3 a config/secondmate-harness that declares no mate line is never refused
 ok - pi-signed identity: authoritative launch selection distinguishes shared wrapper ancestry
 ok - harness identity: dash-leading ps command names are basename operands, not options
-ok - B1 propagate_inheritable_config: copy, idempotence, convergence, absence-mirror, exclusion, no-op, skip diagnostics
-not ok - split: no meta written
+not ok - clean copy wrote to stderr

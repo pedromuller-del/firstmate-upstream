@@ -1,0 +1,835 @@
+{
+  "quota": {
+    "schemaVersion": 3,
+    "providers": [
+      {
+        "provider": "claude",
+        "label": "Claude",
+        "source": "oauth",
+        "state": {
+          "status": "fresh",
+          "stale": false,
+          "refreshedAt": "2026-10-23T12:00:00Z",
+          "sourcesTried": [
+            "disposable-snapshot"
+          ]
+        },
+        "windows": [
+          {
+            "id": "seven_day",
+            "label": "week",
+            "kind": "weekly",
+            "percentUsed": 20,
+            "percentRemaining": 80,
+            "startsAt": "2026-10-22T00:00:00Z",
+            "resetsAt": "2099-10-29T00:00:00Z",
+            "windowSeconds": 604800
+          }
+        ]
+      }
+    ]
+  },
+  "rules": {
+    "configs/signed-missing": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "pi-signed",
+        "model": "anthropic/claude-sonnet-5",
+        "provider": "claude"
+      }
+    },
+    "configs/balanced": {
+      "rules": [
+        {
+          "when": "The task includes fixing a Python pagination bug, even if it also includes other fixes.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "The task includes fixing a CSS layout bug, even if it also includes other fixes.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/tie-8": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/low-confidence-approval": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "approval": "captain",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "approval": "captain",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/all-expired": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "until": "2000-01-01T00:00:00Z",
+          "use": {
+            "harness": "pi",
+            "model": "expired-provider/model",
+            "provider": "claude"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/refresh": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Generate an image.",
+          "use": {
+            "harness": "pi",
+            "model": "anthropic/claude-sonnet-5",
+            "provider": "claude"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "until": "2000-01-01T00:00:00Z",
+          "use": {
+            "harness": "pi",
+            "model": "expired-provider/model",
+            "provider": "claude"
+          }
+        }
+      ],
+      "default": {
+        "harness": "pi",
+        "model": "anthropic/claude-sonnet-5",
+        "provider": "claude"
+      }
+    },
+    "configs/tie-12": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/declared-floor": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "min_confidence": 1
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "min_confidence": 1
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/bad-leap": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "until": "2100-02-29T00:00:00Z"
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/valid-leap": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "until": "2400-02-29T00:00:00Z"
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/ambiguous": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Implement a routine feature in an existing app.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Investigate a bug whose cause is unknown.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/tie": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/bad-date": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "until": "2999-13-40T25:61:61Z"
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/tie-5": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/tie-3": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/expiry": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "until": "2000-01-01T00:00:00Z",
+          "use": {
+            "harness": "pi",
+            "model": "expired-provider/model",
+            "provider": "claude"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "until": "2999-01-01T00:00:00Z"
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/refresh-default": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": [
+        {
+          "harness": "pi",
+          "model": "anthropic/claude-sonnet-5",
+          "provider": "claude"
+        }
+      ]
+    },
+    "configs/tie-20": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "configs/pin-refused": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "pi",
+        "model": "anthropic/claude-sonnet-5",
+        "provider": "claude"
+      }
+    },
+    "configs/approval": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          },
+          "approval": "captain"
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    },
+    "home/config": {
+      "rules": [
+        {
+          "when": "Fix a simple bug with a known root cause.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "Design an unusually difficult new architecture.",
+          "approval": "captain",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "claude",
+        "model": "sonnet",
+        "effort": "high"
+      }
+    }
+  },
+  "briefs": {
+    "balanced.md": "## Captain's intent\nFix the Python pagination bug and fix the CSS layout bug. Both are equally important. Both have the same scope and known root cause. Neither takes priority.\n## Firstmate spec\nTreat the Python pagination fix and the CSS layout fix equally.\n",
+    "ambiguous.md": "## Captain's intent\nSplit the existing 1200-line file into smaller files. Keep the behavior unchanged, but decide where the module boundaries belong.\n## Firstmate spec\nUse the existing public interface. Check the result.\n",
+    "brief.md": "## Captain's intent\nFix the off-by-one in pager.sh. Its known root cause is the <= comparison on line 40. Replace it with <.\n## Firstmate spec\nMake that one-line change and check that exactly one page is emitted per call.\n"
+  }
+}

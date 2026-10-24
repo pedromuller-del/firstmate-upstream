@@ -1,0 +1,118 @@
+{
+  "results": [
+    {
+      "name": "repeat-1",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "repeat-2",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "repeat-3",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "repeat-4",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "repeat-5",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "expiry",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "all-expired",
+      "checked_expectation": "escalate",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "bad-date",
+      "checked_expectation": "exit 2 only",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "name": "bad-leap",
+      "checked_expectation": "exit 2 only",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "name": "valid-leap",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "approval",
+      "checked_expectation": "escalate",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "tie",
+      "checked_expectation": "exit 0 only",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "declared-floor",
+      "checked_expectation": "ambiguous",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "low-confidence-approval",
+      "checked_expectation": "escalate",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "refresh",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "refresh-default",
+      "checked_expectation": "clear",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "name": "ambiguous",
+      "checked_expectation": "exit 0 only",
+      "passed": true,
+      "exit": 0
+    }
+  ],
+  "deterministic": true,
+  "profiles": [
+    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
+    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
+    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
+    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
+    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'"
+  ],
+  "observed_nonempty_file_modes": [
+    "600"
+  ],
+  "temporary_files_remaining": 0
+}

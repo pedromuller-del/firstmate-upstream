@@ -1,0 +1,143 @@
+Real resolver, real TypeSafe jev-1.14.0, and installed quota-axi 0.1.55.
+Quota came from a synthetic dataset through quota-axi's documented QUOTA_AXI_SNAPSHOT mode.
+The 80% value is test data, not an operator account measurement.
+No operator credentials were copied or refreshed.
+
+case=expiry
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=expiry
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 319   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.61s
+
+Observed dependency calls:
+quota argv=--json --max-age 2m 
+
+case=all-expired
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=all-expired
+dispatch-resolve:
+  status: escalate
+  reason: no rules to match
+exit=0 elapsed=0.14s
+
+case=bad-date
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=bad-date
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/configs/bad-date/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+exit=2 elapsed=0.07s
+
+case=bad-leap
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=bad-leap
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/configs/bad-leap/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+exit=2 elapsed=0.04s
+
+case=valid-leap
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=valid-leap
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 275   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.59s
+
+case=refresh
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=refresh
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 240   tokens: 469/44
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.77s
+
+Observed dependency calls:
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-empty argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 
+
+case=refresh-default
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=refresh-default
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 254   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.68s
+
+Observed dependency calls:
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/.dispatch-validation/pi-pinned argv=auth check --provider anthropic 
+pi exit=1
+quota argv=--json --max-age 2m 
+
+case=pin-refused
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=pin-refused
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 297   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.57s
+
+Observed dependency calls:
+quota argv=--json --max-age 2m 
+
+case=signed-missing
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=signed-missing
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 239   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=0.46s
+
+Observed dependency calls:
+quota argv=--json --max-age 2m 
+
+Actual expiry request criteria:
+{
+  "rule_1": "Fix a simple bug with a known root cause.",
+  "default": "No listed rule applies to this task."
+}
+All-expired and malformed configurations produced no HTTP request.
+Nonempty temporary files sampled with mode 600; no temporary regular files remained after resolver exits.
+
+Fault-injection check: a wrapper delayed Pi for 30 seconds. This is supplemental, not proof of live OAuth renewal.
+case=timeout
+$ bin/fm-dispatch-resolve.sh .dispatch-validation/brief.md --project dispatch-live-lab
+FM_CONFIG_OVERRIDE=refresh-default
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 287   tokens: 452/35
+  rule: rule_1 (Fix a simple bug with a known root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=-100  runway=projected_exhaustion  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+exit=0 elapsed=10.68s

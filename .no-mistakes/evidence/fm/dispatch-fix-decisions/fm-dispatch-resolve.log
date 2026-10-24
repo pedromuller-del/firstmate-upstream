@@ -1,37 +1,9 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
+/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/bin/fm-wake-lib.sh: line 114: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
 ok - absent key is off: one stderr line, exit 0, no network call
 ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
 ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
 ok - OpenRouter clear uses the same output contract and keeps its key out of argv and child environments
 ok - OpenRouter low-confidence, malformed, HTTP, and missing-model paths are handled
-ok - never-send list withholds the request on a match or a bad list, and never prints the value
-ok - rules snapshots and shell quoting preserve the profile protocol
-ok - no-rule fallback, Agy, Gemini, and documented configurations resolve
-ok - below the global floor the most probable option resolves with a low-confidence note
-ok - per-rule confidence floors fall to the most probable runner-up that clears its own floor
-ok - low confidence never overrides approval, a tie, or a missing candidate
-ok - low confidence skips a top option that misses its own declared floor
-ok - only the brief's task sections and scout tag reach the model, with a whole-brief fallback
-ok - escalate: a rule declared approval: captain never yields a profile
-ok - rule floor: known shortfall falls through while unavailable evidence escalates
-ok - declared provider and profile floor evidence are applied in code
-ok - nonnumeric spendPriority evidence is never ranked
-ok - partial and missing quota evidence remain eligible but unranked
-ok - provider-wide and exact quota rows combine into one limiting candidate
-ok - default: no rule matched resolves among the default profiles
-ok - tie: equal spendPriority never breaks by array order
-ok - no rankable candidate: the tool escalates instead of guessing
-ok - native Codex binds to codex-home before default, independently of Pi accounts and row order
-ok - Pi native adapters bind to codex-home with existing fallbacks and schema 5 compatibility
-ok - schema 6: each candidate binds to its account row; schema 5 is unchanged
-ok - quota evidence comes from one quota-axi --json read, and its failure is an error outcome
-ok - Pi provider sessions refresh before the quota read, once each, never fatal
-ok - Pi refresh includes root defaults in both forms and both fallback paths
-ok - Pi refresh preserves executable and account selection without ambient fallback on pin refusal
-ok - determinism: five runs on one fixture return the same profile line
-ok - until: expired rules leave the option list before the model sees them
-ok - until rejects invalid calendar dates and clock values before expiry filtering
-ok - rule snapshots stay private before writing and are removed on success and failures
-ok - both decision providers reject unknown choices before confidence fallback
-ok - API, transport, and response failures are error outcomes with exit 0
-ok - configuration errors exit 2 before any network call
-# all fm-dispatch-resolve tests passed
+not ok - a case-insensitive literal match prints one diagnostic line (expected '1', got '2')
