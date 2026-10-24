@@ -1,0 +1,13 @@
+{
+  "scenario": "live-clear-1",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
+  "exit_code": 0,
+  "seconds": 1.757,
+  "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 450   tokens: 459/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 default=0.0\n  reason: no rankable eligible candidate\n  note: rule matched\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  -> eligible, unranked: no applicable quota row for provider cursor: disclosed uncertainty\n",
+  "stderr": ""
+}

@@ -1,0 +1,27 @@
+{
+  "scenario": "live-all-expired",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
+  "exit_code": 0,
+  "seconds": 0.064,
+  "stdout": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
+  "stderr": "",
+  "rules": {
+    "rules": [
+      {
+        "when": "A simple bug fix with a stated root cause.",
+        "until": "2000-01-01T00:00:00Z",
+        "use": {
+          "harness": "pi",
+          "model": "expired-provider/model",
+          "provider": "codex"
+        }
+      }
+    ]
+  },
+  "brief": "# Task\n## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
+}

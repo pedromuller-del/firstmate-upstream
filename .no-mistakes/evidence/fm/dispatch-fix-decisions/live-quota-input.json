@@ -1,0 +1,1 @@
+{"schemaVersion":3,"providers":[{"provider":"cursor","label":"Cursor","source":"api","windows":[{"id":"included_usage","label":"Monthly included usage","kind":"monthly","percentUsed":10,"percentRemaining":90,"resetsAt":"2026-11-01T00:00:00Z","windowSeconds":2592000}],"state":{"status":"fresh","stale":false,"sourcesTried":["api"],"refreshedAt":"2026-10-24T01:57:00Z"}}]}

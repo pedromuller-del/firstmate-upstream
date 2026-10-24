@@ -1,0 +1,30 @@
+{
+  "scenario": "live-pin-refusal",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
+  "exit_code": 0,
+  "seconds": 0.536,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 300   tokens: 441/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2751  runway=through_reset  -> eligible\n  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'\n",
+  "stderr": "",
+  "rules": {
+    "rules": [
+      {
+        "when": "A simple bug fix with a stated root cause.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      }
+    ],
+    "default": {
+      "harness": "pi",
+      "model": "anthropic/claude-sonnet-5",
+      "provider": "claude"
+    }
+  },
+  "brief": "# Task\n## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
+}

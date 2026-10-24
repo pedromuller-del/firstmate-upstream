@@ -1,0 +1,13 @@
+{
+  "scenario": "live-declared-floor-miss",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
+  "exit_code": 0,
+  "seconds": 0.795,
+  "stdout": "dispatch-resolve:\n  status: ambiguous\n  model: jev-1.14.0   latency_ms: 303   tokens: 464/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.56\n  probabilities: rule_1=0.71 rule_2=0.28 default=0.01\n  reason: rule_1 probability 0.71 below its floor 1; no other option clears its own floor\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2749  runway=through_reset  -> eligible\n",
+  "stderr": ""
+}

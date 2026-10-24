@@ -1,0 +1,46 @@
+{
+  "scenario": "live-tie-attempt",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
+  "exit_code": 0,
+  "seconds": 0.602,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 278   tokens: 494/62\n  rule: rule_1 (The task is software engineering.)   confidence: 0.46\n  probabilities: rule_1=0.57 rule_2=0.19 rule_3=0.1 rule_4=0.12 default=0.02\n  note: rule matched (low confidence: answer confidence 0.46 below floor 0.6)\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2754  runway=through_reset  -> eligible\n  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'\n",
+  "stderr": "",
+  "rules": {
+    "rules": [
+      {
+        "when": "The task is software engineering.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      },
+      {
+        "when": "The task is software engineering.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-high"
+        }
+      },
+      {
+        "when": "The task is software engineering.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      },
+      {
+        "when": "The task is software engineering.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-high"
+        }
+      }
+    ]
+  },
+  "brief": "# Task\n## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
+}

@@ -1,0 +1,69 @@
+{
+  "scenario": "live-private-snapshot",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
+  "exit_code": 0,
+  "seconds": 1.256,
+  "stdout": "dispatch-resolve:\n  status: ambiguous\n  model: jev-1.14.0   latency_ms: 339   tokens: 464/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.51\n  probabilities: rule_1=0.67 rule_2=0.32 default=0.01\n  reason: rule_1 probability 0.67 below its floor 1; no other option clears its own floor\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2755  runway=through_reset  -> eligible\n",
+  "stderr": "",
+  "temporary_files_after_exit": [
+    "node-compile-cache",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/4307e16a",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/bb393bf0",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/ea9f3420",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/ecb78ae0",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/c1091d9b",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/9bbc7345",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/fb70c496",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/1b747568",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/80a565c0",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/7e7e4e4a",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/7d325047",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/2f6461c1",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/6a799787",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/21740400",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/c617faa0",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/c5d6915e",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/f9eabfc0",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/f1ccd83b",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/4fdce201",
+    "node-compile-cache/v24.15.0-arm64-cf738c9d-501/991fae97"
+  ],
+  "rules": {
+    "rules": [
+      {
+        "when": "A simple bug fix with a stated root cause.",
+        "min_confidence": 1,
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      },
+      {
+        "when": "A simple bug fix with a stated root cause.",
+        "min_confidence": 1,
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-high"
+        }
+      }
+    ],
+    "default": [
+      {
+        "harness": "pi",
+        "model": "anthropic/claude-sonnet-5",
+        "provider": "claude"
+      },
+      {
+        "harness": "cursor",
+        "model": "cursor-grok-4.6-high"
+      }
+    ]
+  },
+  "brief": "# Task\n## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
+}

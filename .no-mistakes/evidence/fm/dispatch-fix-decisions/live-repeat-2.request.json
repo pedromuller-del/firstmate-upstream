@@ -1,0 +1,20 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "disposable-pager",
+      "brief": "## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "A simple bug fix with a stated root cause.",
+        "rule_2": "The task generates images.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}

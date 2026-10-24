@@ -1,0 +1,97 @@
+[
+  {
+    "command": "LC_ALL=C bash tests/fm-dispatch-resolve.test.sh",
+    "exit_code": 0,
+    "pass_count": 36,
+    "fail_count": 0,
+    "seconds": 26.8
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-procevent-quota.test.sh",
+    "exit_code": 0,
+    "pass_count": 33,
+    "fail_count": 0,
+    "seconds": 25.1
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-startup-memory-budget.test.sh",
+    "exit_code": 0,
+    "pass_count": 4,
+    "fail_count": 0,
+    "seconds": 12.5
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-secondmate-sync.test.sh",
+    "exit_code": 0,
+    "pass_count": 33,
+    "fail_count": 0,
+    "seconds": 75.7
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-secondmate-harness.test.sh",
+    "exit_code": 1,
+    "pass_count": 9,
+    "fail_count": 1,
+    "seconds": 11.4
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 1,
+    "pass_count": 4,
+    "fail_count": 1,
+    "seconds": 6.5
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-shared-captain-inheritance.test.sh",
+    "exit_code": 0,
+    "pass_count": 13,
+    "fail_count": 0,
+    "seconds": 14.6
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-bootstrap.test.sh",
+    "exit_code": 0,
+    "pass_count": 30,
+    "fail_count": 0,
+    "seconds": 288.8
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-quota-choose.test.sh",
+    "exit_code": 0,
+    "pass_count": 58,
+    "fail_count": 0,
+    "seconds": 4.0
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-secondmate-harness.test.sh",
+    "exit_code": 1,
+    "pass_count": 9,
+    "fail_count": 1,
+    "seconds": 10.7,
+    "log": "/Users/pedromuller/.no-mistakes/evidence/01M5NSNS7M0WEH0T84FH2RD0D8/fm-secondmate-harness-10.log"
+  },
+  {
+    "command": "LC_ALL=C bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 1,
+    "pass_count": 4,
+    "fail_count": 1,
+    "seconds": 6.8,
+    "log": "/Users/pedromuller/.no-mistakes/evidence/01M5NSNS7M0WEH0T84FH2RD0D8/fm-secondmate-liveness-11.log"
+  },
+  {
+    "command": "LC_ALL=C TMPDIR=/tmp bash tests/fm-secondmate-harness.test.sh",
+    "exit_code": 0,
+    "pass_count": 56,
+    "fail_count": 0,
+    "seconds": 271.7,
+    "log": "/Users/pedromuller/.no-mistakes/evidence/01M5NSNS7M0WEH0T84FH2RD0D8/fm-secondmate-harness-12.log"
+  },
+  {
+    "command": "LC_ALL=C TMPDIR=/tmp bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 0,
+    "pass_count": 22,
+    "fail_count": 0,
+    "seconds": 58.1,
+    "log": "/Users/pedromuller/.no-mistakes/evidence/01M5NSNS7M0WEH0T84FH2RD0D8/fm-secondmate-liveness-13.log"
+  }
+]

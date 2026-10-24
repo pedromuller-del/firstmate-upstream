@@ -1,0 +1,20 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "disposable-pager",
+      "brief": "## Captain's intent\nFix the off-by-one comparison in the pager and add regression tests for it. Both parts have equal priority.\n\n## Firstmate spec\nChange <= to <. Add a regression test for the boundary case.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "The task fixes an off-by-one comparison in application code.",
+        "rule_2": "The task adds regression tests for an off-by-one comparison.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}

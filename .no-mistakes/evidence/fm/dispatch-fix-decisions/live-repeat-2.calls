@@ -1,0 +1,5 @@
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider openai-codex
+pi exit=1
+quota-axi argv=--json --max-age 2m

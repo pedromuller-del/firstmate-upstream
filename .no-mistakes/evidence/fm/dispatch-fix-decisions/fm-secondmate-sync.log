@@ -1,6 +1,3 @@
-bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
-bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
-/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NNTGWN22EQ409E7Z0TK0QY/bin/fm-wake-lib.sh: line 114: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
 ok - T1 updated: a behind home fast-forwards to the primary's local HEAD
 ok - T2 current: an already-current home is a no-op and reports no instruction change
 ok - T3 dirty: an uncommitted home is skipped, its edit preserved
@@ -15,7 +12,6 @@ ok - T8f bootstrap nudge retry rejects malformed marker ids
 ok - T8c failed bootstrap nudge is surfaced and recorded for retry
 ok - T8d bootstrap nudge retry is idempotent after success
 ok - T8e bootstrap nudge retry refuses a changed home instead of guessing
-bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8): No such file or directory
 ok - T8b a stale herdr endpoint cannot lose a durably enqueued nudge, and fm-<id> resolves through post-respawn metadata
 ok - T9 bootstrap surfaces a skipped dirty live secondmate home
 ok - T10 spawn fast-forwards a secondmate worktree to the primary's local HEAD before launch

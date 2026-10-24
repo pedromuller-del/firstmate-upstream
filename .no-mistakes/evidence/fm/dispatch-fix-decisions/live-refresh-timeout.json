@@ -1,9 +1,31 @@
 {
-  "command": "bash bin/fm-dispatch-resolve.sh <disposable-brief>",
-  "fault": "SIGSTOP sent only to this run's real Pi auth-check child after launch",
+  "scenario": "live-refresh-timeout",
+  "command": [
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "--project",
+    "disposable-pager"
+  ],
   "exit_code": 0,
-  "elapsed_seconds": 10.608,
-  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 240   tokens: 404/35\n  rule: rule_1 (Fix a simple bug.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=75%  spendPriority=1.5121  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+  "seconds": 10.836,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 244   tokens: 441/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2758  runway=through_reset  -> eligible\n  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'\n",
   "stderr": "",
-  "pi_child_stat_after_return": "absent"
+  "temporary_files_after_exit": [],
+  "rules": {
+    "rules": [
+      {
+        "when": "A simple bug fix with a stated root cause.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      }
+    ],
+    "default": {
+      "harness": "pi",
+      "model": "anthropic/claude-sonnet-5",
+      "provider": "claude"
+    }
+  },
+  "brief": "# Task\n## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
 }

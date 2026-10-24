@@ -1,0 +1,191 @@
+Live dispatch validation
+
+The real resolver called the live Typesafe API and the installed Pi and quota-axi CLIs.
+Quota input was synthetic data supplied through QUOTA_AXI_SNAPSHOT; this is not live vendor quota or normal cache-reuse proof.
+Pi used an empty disposable account. Successful OAuth renewal and pi-signed were not exercised.
+PATH wrappers forwarded calls unchanged and captured only synthetic requests and non-secret outputs.
+The timeout scenario sent SIGSTOP to the real Pi child and observed the resolver continue after its 10-second bound.
+
+live-repeat-1
+exit=0 elapsed=1.074s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 289   tokens: 459/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2744  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider openai-codex
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-repeat-2
+exit=0 elapsed=0.97s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 242   tokens: 459/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2744  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider openai-codex
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-repeat-3
+exit=0 elapsed=1.025s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 307   tokens: 459/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2744  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider openai-codex
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-repeat-4
+exit=0 elapsed=1.048s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 322   tokens: 459/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2744  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider openai-codex
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-repeat-5
+exit=0 elapsed=1.021s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 298   tokens: 459/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2745  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider openai-codex
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-top-tie
+exit=0 elapsed=0.943s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 275   tokens: 464/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.56
+  probabilities: rule_1=0.71 rule_2=0.28 default=0.01
+  note: rule matched (low confidence: answer confidence 0.56 below floor 0.6)
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2747  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-approval-low-confidence
+exit=0 elapsed=0.839s
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 256   tokens: 464/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.51
+  probabilities: rule_1=0.67 rule_2=0.32 default=0.01
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2748  runway=through_reset  -> eligible
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-declared-floor-miss
+exit=0 elapsed=0.795s
+dispatch-resolve:
+  status: ambiguous
+  model: jev-1.14.0   latency_ms: 303   tokens: 464/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.56
+  probabilities: rule_1=0.71 rule_2=0.28 default=0.01
+  reason: rule_1 probability 0.71 below its floor 1; no other option clears its own floor
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2749  runway=through_reset  -> eligible
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+pi exit=1
+quota-axi argv=--json --max-age 2m
+
+live-all-expired
+exit=0 elapsed=0.064s
+dispatch-resolve:
+  status: escalate
+  reason: no rules to match
+
+live-invalid-calendar
+exit=2 elapsed=0.044s
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/scenarios/live-invalid-calendar/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+live-invalid-past
+exit=2 elapsed=0.041s
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/scenarios/live-invalid-past/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+live-valid-leap-day
+exit=0 elapsed=0.592s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 278   tokens: 441/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2751  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+quota-axi argv=--json --max-age 2m
+
+live-pin-refusal
+exit=0 elapsed=0.536s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 300   tokens: 441/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2751  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+quota-axi argv=--json --max-age 2m
+
+live-refresh-timeout
+exit=0 elapsed=10.836s
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 244   tokens: 441/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2758  runway=through_reset  -> eligible
+  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'
+
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/pi argv=auth check --provider anthropic
+stopped real pi child=45322
+quota-axi argv=--json --max-age 2m
+
