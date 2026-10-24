@@ -1,0 +1,10 @@
+$ bin/fm-dispatch-resolve.sh borderline.md --project disposable-dispatch-validation
+exit=0; seconds=0.475
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 246   tokens: 500/53
+  rule: rule_3 (Review an existing implementation and produce a written asse)   confidence: 0.76
+  probabilities: rule_1=0.16 rule_2=0.02 rule_3=0.82 default=0.0
+  note: rule matched
+  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=1.0009  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'opus' --effort 'xhigh'

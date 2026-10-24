@@ -1,0 +1,5 @@
+$ bin/fm-dispatch-resolve.sh brief.md --project disposable-dispatch-validation
+exit=0; seconds=0.062
+dispatch-resolve:
+  status: escalate
+  reason: no rules to match

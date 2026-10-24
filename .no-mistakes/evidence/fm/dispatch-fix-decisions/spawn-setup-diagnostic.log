@@ -1,0 +1,3 @@
+probe
+error: secondmate home cannot be inside the firstmate repo: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NXS9N9F82NR0VRKA3AYF8G/.dispatch-phase/tmp/fm-secondmate-harness.oWTrdE/spawn-split/sm
+error: secondmate home cannot be inside the firstmate repo: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NXS9N9F82NR0VRKA3AYF8G/.dispatch-phase/tmp/fm-secondmate-liveness.tOMqBO/sweep-dead/sm1

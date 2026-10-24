@@ -1,0 +1,9 @@
+$ bin/fm-dispatch-resolve.sh brief.md --project disposable-dispatch-validation
+exit=0; seconds=0.531
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 279   tokens: 442/35
+  rule: rule_1 (Fix a simple off-by-one bug whose root cause is already iden)   confidence: 1.0
+  probabilities: rule_1=1.0 default=0.0
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=1.0009  runway=through_reset  -> eligible

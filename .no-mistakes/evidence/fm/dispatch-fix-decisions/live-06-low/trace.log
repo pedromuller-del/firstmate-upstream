@@ -1,0 +1,2 @@
+curl -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.6ahezqWokS -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+quota-axi --json --max-age 2m

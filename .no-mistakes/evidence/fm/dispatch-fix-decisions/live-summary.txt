@@ -1,0 +1,14 @@
+Five live API resolver calls returned identical profile lines:
+1:   profile: --harness 'claude' --model 'sonnet' --effort 'high'
+2:   profile: --harness 'claude' --model 'sonnet' --effort 'high'
+3:   profile: --harness 'claude' --model 'sonnet' --effort 'high'
+4:   profile: --harness 'claude' --model 'sonnet' --effort 'high'
+5:   profile: --harness 'claude' --model 'sonnet' --effort 'high'
+Low-confidence live answer 0.43 selected the most probable rule and printed its note.
+Approval-required rules withheld the profile at high and low answer confidence.
+A declared-floor miss with no qualifying runner-up withheld the profile.
+Expired rules were absent from the live request; no expired Pi provider was refreshed. Filter output started at mode 600 and was removed.
+Invalid dates and a non-leap February 29 exited 2 before the API call; temporary files were removed.
+Live rule/default Pi providers refreshed once before quota; failed auth was nonfatal. The account pin overrode the ambient root and an invalid pin skipped refresh.
+Suspending the real Pi process did not block dispatch: a clear profile returned after 10.865s; the suspended processes no longer exist.
+Live evidence assertions: 8 behavior groups passed, 0 failed.

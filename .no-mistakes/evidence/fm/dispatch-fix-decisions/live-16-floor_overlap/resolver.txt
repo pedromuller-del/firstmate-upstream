@@ -1,0 +1,9 @@
+$ bin/fm-dispatch-resolve.sh borderline.md --project disposable-dispatch-validation
+exit=0; seconds=0.616
+dispatch-resolve:
+  status: ambiguous
+  model: jev-1.14.0   latency_ms: 271   tokens: 483/44
+  rule: rule_2 (Investigate the retry helper, review its behavior, and recom)   confidence: 0.67
+  probabilities: rule_1=0.21 rule_2=0.78 default=0.01
+  reason: rule_2 probability 0.78 below its floor 1; no other option clears its own floor
+  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=1.0014  runway=through_reset  -> eligible

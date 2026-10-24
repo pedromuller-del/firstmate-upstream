@@ -1,0 +1,21 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "disposable-dispatch-validation",
+      "brief": "# Task\nInvestigate the retry helper and design a small change if needed. Read the existing retry loop, identify how its policy works, and write an assessment with the minimal implementation plan. The implementation is not yet specified.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "Implementation work that designs the solution to a small application change.",
+        "rule_2": "Investigate a problem to identify its root cause without changing code.",
+        "rule_3": "Review an existing implementation and produce a written assessment.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}

@@ -1,0 +1,3 @@
+$ bin/fm-dispatch-resolve.sh brief.md --project disposable-dispatch-validation
+exit=2; seconds=0.045
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NXS9N9F82NR0VRKA3AYF8G/.dispatch-phase/live/invalid_leap/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)

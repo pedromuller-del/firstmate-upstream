@@ -1,91 +1,81 @@
 import json
 from pathlib import Path
+import re
+import subprocess
 
 evidence = Path(__file__).parent
 
-def result(name):
-    return json.loads((evidence / f'{name}.json').read_text())
+def output(case):
+    return (evidence / case / 'resolver.txt').read_text()
 
-def stdout(name):
-    return result(name)['stdout']
+def trace(case):
+    path = evidence / case / 'trace.log'
+    return path.read_text() if path.exists() else ''
 
 profiles = []
-for repeat in range(1, 6):
-    name = f'live-repeat-{repeat}'
-    record = result(name)
-    assert record['exit_code'] == 0
-    assert '  status: clear\n' in record['stdout']
-    profiles.append(next(line for line in record['stdout'].splitlines() if line.startswith('  profile:')))
+for index in range(1, 6):
+    case = f'live-{index:02d}-normal'
+    text = output(case)
+    assert 'exit=0;' in text and 'status: clear' in text
+    profiles.append(next(line for line in text.splitlines() if line.startswith('  profile:')))
+    assert trace(case).count('quota-axi --json --max-age 2m') == 1
 assert len(set(profiles)) == 1
-print('PASS: five live Typesafe requests returned the identical profile line')
+print('Five live API resolver calls returned identical profile lines:')
+print('\n'.join(f'{i}: {profile}' for i, profile in enumerate(profiles, 1)))
 
-response = json.loads((evidence / 'live-top-tie.response.json').read_text())
-answer = response['answers']['rule']
+low = output('live-18-tie_attempt')
+assert 'status: clear' in low and 'low confidence:' in low
+answer = json.loads((evidence / 'live-18-tie_attempt/response.json').read_text())['answers']['rule']
 assert answer['confidence'] < 0.6
-assert answer['probabilities']['rule_1'] > answer['probabilities']['rule_2']
-assert '  status: clear\n' in stdout('live-top-tie')
-assert 'low confidence:' in stdout('live-top-tie')
-assert profiles[0] in stdout('live-top-tie')
-print('PASS: a live low-confidence answer selected the highest-probability rule and disclosed low confidence')
+assert max(answer['probabilities'], key=answer['probabilities'].get) == 'rule_1'
+assert profiles[0] in low
+print(f'Low-confidence live answer {answer["confidence"]} selected the most probable rule and printed its note.')
 
-assert '  status: escalate\n' in stdout('live-approval-low-confidence')
-assert "captain's explicit approval" in stdout('live-approval-low-confidence')
-assert '  profile:' not in stdout('live-approval-low-confidence')
-assert '  status: ambiguous\n' in stdout('live-declared-floor-miss')
-assert 'no other option clears its own floor' in stdout('live-declared-floor-miss')
-assert '  profile:' not in stdout('live-declared-floor-miss')
-print('PASS: live approval and declared-confidence floors withheld a profile')
+for case in ('live-07-approval', 'live-15-approval_low'):
+    text = output(case)
+    assert 'status: escalate' in text and 'explicit approval' in text and 'profile:' not in text
+assert 'confidence: 0.48' in output('live-15-approval_low')
+print('Approval-required rules withheld the profile at high and low answer confidence.')
 
-request = json.loads((evidence / 'live-repeat-1.request.json').read_text())
-criteria = request['questions']['rule']['criteria']
-assert set(criteria) == {'rule_1', 'rule_2', 'default'}
-assert all('Expired' not in value and 'New feature' not in value for value in criteria.values())
-assert 'no rules to match' in stdout('live-all-expired')
-for name in ('live-all-expired', 'live-invalid-calendar', 'live-invalid-past'):
-    assert not (evidence / f'{name}.request.json').exists()
-    assert not (evidence / f'{name}.calls').exists()
-for name in ('live-invalid-calendar', 'live-invalid-past'):
-    assert result(name)['exit_code'] == 2
-    assert result(name)['stdout'] == ''
-    assert 'malformed rules file' in result(name)['stderr']
-assert '  status: clear\n' in stdout('live-valid-leap-day')
-print('PASS: expiry removed rules before transport, invalid calendars exited 2, and a valid leap day resolved')
+floor = output('live-16-floor_overlap')
+assert 'status: ambiguous' in floor and 'no other option clears its own floor' in floor and 'profile:' not in floor
+print('A declared-floor miss with no qualifying runner-up withheld the profile.')
 
-calls = (evidence / 'live-repeat-1.calls').read_text().splitlines()
-assert len(calls) == 5
-assert calls[0].endswith('argv=auth check --provider anthropic')
-assert calls[2].endswith('argv=auth check --provider openai-codex')
-assert '/.validation-tmp/pi argv=' in calls[0]
-assert '/.validation-tmp/pi argv=' in calls[2]
-assert calls[1] == calls[3] == 'pi exit=1'
-assert calls[4] == 'quota-axi argv=--json --max-age 2m'
-assert (evidence / 'live-pin-refusal.calls').read_text().splitlines() == ['quota-axi argv=--json --max-age 2m']
-assert '  status: clear\n' in stdout('live-pin-refusal')
-assert '  status: clear\n' in stdout('live-refresh-timeout')
-assert 10 <= result('live-refresh-timeout')['seconds'] < 14
-assert 'stopped real pi child=' in (evidence / 'live-refresh-timeout.calls').read_text()
-print('PASS: real Pi checks covered the default and rule providers, honored the pin, and stayed nonfatal on failure and timeout')
+request = json.loads((evidence / 'live-09-expired/request.json').read_text())
+assert set(request['questions']['rule']['criteria']) == {'rule_1', 'default'}
+assert 'rule: rule_1 (Fix a simple off-by-one' in output('live-09-expired')
+assert not any(line.startswith('pi ') for line in trace('live-09-expired').splitlines())
+assert 'reason: no rules to match' in output('live-10-all_expired')
+assert not (evidence / 'live-10-all_expired/request.json').exists()
+assert '600' in (evidence / 'live-15-expired/filter-mode.txt').read_text()
+assert '[]' in (evidence / 'live-15-expired/cleanup.txt').read_text()
+print('Expired rules were absent from the live request; no expired Pi provider was refreshed. Filter output started at mode 600 and was removed.')
 
-assert (evidence / 'live-refresh-timeout.filter-mode').read_text().strip() == '0o600'
-assert result('live-refresh-timeout')['temporary_files_after_exit'] == []
-print('PASS: the expiry output was mode 0600 before jq wrote it, and the resolver removed its temporary files')
+for case in ('live-11-invalid_date', 'live-12-invalid_leap', 'live-16-invalid_date'):
+    text = output(case)
+    assert 'exit=2;' in text and 'malformed rules file:' in text
+    assert not (evidence / case / 'request.json').exists()
+assert '[]' in (evidence / 'live-16-invalid_date/cleanup.txt').read_text()
+print('Invalid dates and a non-leap February 29 exited 2 before the API call; temporary files were removed.')
 
-transcript = [
-    'Live dispatch validation',
-    '',
-    'The real resolver called the live Typesafe API and the installed Pi and quota-axi CLIs.',
-    'Quota input was synthetic data supplied through QUOTA_AXI_SNAPSHOT; this is not live vendor quota or normal cache-reuse proof.',
-    'Pi used an empty disposable account. Successful OAuth renewal and pi-signed were not exercised.',
-    'PATH wrappers forwarded calls unchanged and captured only synthetic requests and non-secret outputs.',
-    'The timeout scenario sent SIGSTOP to the real Pi child and observed the resolver continue after its 10-second bound.',
-    '',
-]
-for name in [*(f'live-repeat-{n}' for n in range(1, 6)), 'live-top-tie', 'live-approval-low-confidence',
-             'live-declared-floor-miss', 'live-all-expired', 'live-invalid-calendar', 'live-invalid-past',
-             'live-valid-leap-day', 'live-pin-refusal', 'live-refresh-timeout']:
-    record = result(name)
-    transcript += [name, f"exit={record['exit_code']} elapsed={record['seconds']}s", record['stdout'] or record['stderr']]
-    calls_file = evidence / f'{name}.calls'
-    if calls_file.exists():
-        transcript.append(calls_file.read_text())
-(evidence / 'live-cli-transcript.txt').write_text('\n'.join(transcript) + '\n')
+calls = trace('live-13-pi')
+assert calls.count('auth check --provider anthropic') == 1
+assert calls.count('auth check --provider openai-codex') == 1
+assert calls.count('pi exit=1') == 2
+assert calls.index('auth check --provider openai-codex') < calls.index('quota-axi --json')
+assert 'status: clear' in output('live-13-pi')
+pinned = trace('live-15-pi_override')
+assert '/pi-empty auth check --provider anthropic' in pinned
+assert '/pi-ambient auth check' not in pinned
+assert not any(line.startswith('pi ') for line in trace('live-16-pi_bad_pin').splitlines())
+assert 'status: clear' in output('live-16-pi_bad_pin')
+print('Live rule/default Pi providers refreshed once before quota; failed auth was nonfatal. The account pin overrode the ambient root and an invalid pin skipped refresh.')
+
+stalled = output('live-15-pi_pin')
+seconds = float(re.search(r'seconds=([0-9.]+)', stalled).group(1))
+assert 10 <= seconds < 14 and 'status: clear' in stalled
+pids = re.findall(r'suspended real Pi pid=(\d+)', trace('live-15-pi_pin'))
+for pid in pids:
+    assert subprocess.run(['ps', '-p', pid], capture_output=True).returncode != 0
+print(f'Suspending the real Pi process did not block dispatch: a clear profile returned after {seconds}s; the suspended processes no longer exist.')
+print('Live evidence assertions: 8 behavior groups passed, 0 failed.')

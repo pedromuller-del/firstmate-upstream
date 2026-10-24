@@ -1,0 +1,4 @@
+curl -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.NPIJWeFh53 -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+pi root=/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NXS9N9F82NR0VRKA3AYF8G/.dispatch-phase/live/pi-empty auth check --provider anthropic
+pi exit=1
+quota-axi --json --max-age 2m

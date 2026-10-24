@@ -1,0 +1,10 @@
+$ bin/fm-dispatch-resolve.sh borderline.md --project disposable-dispatch-validation
+exit=0; seconds=0.974
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 276   tokens: 446/35
+  rule: rule_1 (Inspect a retry helper and propose a change.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=1.0029  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'

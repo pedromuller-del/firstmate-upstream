@@ -1,0 +1,19 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "disposable-dispatch-validation",
+      "brief": "# Task\nFix the pager off-by-one bug. The root cause is `<=` instead of `<` in the loop. Change that comparison and verify one page is returned per call.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "Fix a simple off-by-one bug whose root cause is already identified.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}

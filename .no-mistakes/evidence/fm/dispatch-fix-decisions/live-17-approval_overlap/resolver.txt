@@ -1,0 +1,9 @@
+$ bin/fm-dispatch-resolve.sh borderline.md --project disposable-dispatch-validation
+exit=0; seconds=0.595
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 249   tokens: 483/44
+  rule: rule_2 (Investigate the retry helper, review its behavior, and recom)   confidence: 0.72
+  probabilities: rule_1=0.18 rule_2=0.81 default=0.01
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=1.0014  runway=through_reset  -> eligible
