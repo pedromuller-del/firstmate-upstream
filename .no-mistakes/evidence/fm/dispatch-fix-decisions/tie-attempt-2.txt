@@ -1,0 +1,23 @@
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.644
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 272   tokens: 450/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.54
+  probabilities: rule_1=0.6900000000000001 rule_2=0.3 default=0.01
+  note: rule matched (low confidence: answer confidence 0.54 below floor 0.6)
+  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.835  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'model-0' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.xA3Y6DrGTg -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0

@@ -1,118 +1,339 @@
-{
-  "results": [
-    {
-      "name": "repeat-1",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+[
+  {
+    "name": "clear",
+    "exit": 0,
+    "seconds": 1.497,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "repeat-2",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 393   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8338  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.M1DcRlxR9Z -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "expired-and-future",
+    "exit": 0,
+    "seconds": 0.643,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "repeat-3",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 249   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8339  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.QDmZ4YTvdN -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "all-expired",
+    "exit": 0,
+    "seconds": 0.134,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "repeat-4",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
+    "events": ""
+  },
+  {
+    "name": "invalid-until-1",
+    "exit": 2,
+    "seconds": 0.073,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "repeat-5",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "",
+    "events": ""
+  },
+  {
+    "name": "invalid-until-2",
+    "exit": 2,
+    "seconds": 0.066,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "expiry",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "",
+    "events": ""
+  },
+  {
+    "name": "invalid-until-3",
+    "exit": 2,
+    "seconds": 0.066,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "all-expired",
-      "checked_expectation": "escalate",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "",
+    "events": ""
+  },
+  {
+    "name": "invalid-until-4",
+    "exit": 2,
+    "seconds": 0.05,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "bad-date",
-      "checked_expectation": "exit 2 only",
-      "passed": true,
-      "exit": 2
+    "pass": true,
+    "stdout": "",
+    "events": ""
+  },
+  {
+    "name": "invalid-until-5",
+    "exit": 2,
+    "seconds": 0.093,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "bad-leap",
-      "checked_expectation": "exit 2 only",
-      "passed": true,
-      "exit": 2
+    "pass": true,
+    "stdout": "",
+    "events": ""
+  },
+  {
+    "name": "invalid-until-6",
+    "exit": 2,
+    "seconds": 0.047,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "no_subprocesses": true
     },
-    {
-      "name": "valid-leap",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "",
+    "events": ""
+  },
+  {
+    "name": "valid-leap-day",
+    "exit": 0,
+    "seconds": 0.579,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "approval",
-      "checked_expectation": "escalate",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 243   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8341  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.VcSjqmgKpW -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "captain-approval",
+    "exit": 0,
+    "seconds": 0.563,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "tie",
-      "checked_expectation": "exit 0 only",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 271   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8342  runway=through_reset  -> eligible\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.ElvDuFva3Q -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "low-confidence-1",
+    "exit": 0,
+    "seconds": 0.57,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "declared-floor",
-      "checked_expectation": "ambiguous",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 269   tokens: 440/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.74\n  probabilities: rule_1=0.83 rule_2=0.0 default=0.17\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8344  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.YopNAUuOSp -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "low-confidence-2",
+    "exit": 0,
+    "seconds": 0.573,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "low-confidence-approval",
-      "checked_expectation": "escalate",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 253   tokens: 448/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.64\n  probabilities: rule_1=0.76 rule_2=0.06 default=0.18\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8344  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.OQFQ8Sxya5 -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "low-confidence-3",
+    "exit": 0,
+    "seconds": 0.551,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "refresh",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 242   tokens: 443/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.76\n  probabilities: rule_1=0.84 rule_2=0.02 default=0.14\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8345  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.8f0ZtpwgCp -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "low-confidence-4",
+    "exit": 0,
+    "seconds": 0.531,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "refresh-default",
-      "checked_expectation": "clear",
-      "passed": true,
-      "exit": 0
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 238   tokens: 440/44\n  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.85\n  probabilities: rule_1=0.05 rule_2=0.9 default=0.05\n  note: rule matched\n  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8347  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'opus' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.7ldPzci0Tq -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "low-confidence-5",
+    "exit": 0,
+    "seconds": 0.558,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
     },
-    {
-      "name": "ambiguous",
-      "checked_expectation": "exit 0 only",
-      "passed": true,
-      "exit": 0
-    }
-  ],
-  "deterministic": true,
-  "profiles": [
-    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
-    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
-    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
-    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'",
-    "  profile: --harness 'claude' --model 'sonnet' --effort 'high'"
-  ],
-  "observed_nonempty_file_modes": [
-    "600"
-  ],
-  "temporary_files_remaining": 0
-}
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 239   tokens: 440/44\n  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.25\n  probabilities: rule_1=0.22 rule_2=0.5 default=0.28\n  note: rule matched (low confidence: answer confidence 0.25 below floor 0.6)\n  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8347  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'opus' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.eC1sGd4KbC -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "low-confidence-approval",
+    "exit": 0,
+    "seconds": 0.557,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 244   tokens: 440/44\n  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.18\n  probabilities: rule_1=0.3 rule_2=0.45 default=0.25\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8349  runway=through_reset  -> eligible\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.7iOFknHTcS -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "tie-attempt-2",
+    "exit": 0,
+    "seconds": 0.644,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 272   tokens: 450/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.54\n  probabilities: rule_1=0.6900000000000001 rule_2=0.3 default=0.01\n  note: rule matched (low confidence: answer confidence 0.54 below floor 0.6)\n  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.835  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'model-0' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.xA3Y6DrGTg -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "tie-attempt-3",
+    "exit": 0,
+    "seconds": 0.573,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 244   tokens: 473/53\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.52\n  probabilities: rule_1=0.64 rule_2=0.21 rule_3=0.13 default=0.02\n  note: rule matched (low confidence: answer confidence 0.52 below floor 0.6)\n  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8351  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'model-0' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.ci6cZ2cuFV -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "declared-floor",
+    "exit": 0,
+    "seconds": 0.577,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: ambiguous\n  model: jev-1.14.0   latency_ms: 263   tokens: 448/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.73\n  probabilities: rule_1=0.82 rule_2=0.04 default=0.14\n  reason: rule_1 probability 0.82 below its floor 1; no other option clears its own floor\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8352  runway=through_reset  -> eligible\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.bq1xyeXzIB -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "pi-failure-nonfatal",
+    "exit": 0,
+    "seconds": 1.259,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 243   tokens: 444/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 default=0.0\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8355  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.dd8Vs0Hqbq -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\npi start auth check --provider anthropic\npi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/pi-failure-nonfatal/pi\npi exit 1\npi start auth check --provider openai-codex\npi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/pi-failure-nonfatal/pi\npi exit 1\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  },
+  {
+    "name": "pi-refused-pin",
+    "exit": 0,
+    "seconds": 0.664,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 266   tokens: 444/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 default=0.0\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8356  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.0qxqgN66kU -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  }
+]

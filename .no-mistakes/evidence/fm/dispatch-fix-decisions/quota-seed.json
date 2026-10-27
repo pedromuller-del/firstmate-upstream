@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 3,
+  "providers": [
+    {
+      "provider": "claude",
+      "label": "Claude",
+      "source": "oauth",
+      "windows": [
+        {
+          "id": "five_hour",
+          "label": "session",
+          "kind": "session",
+          "percentUsed": 20,
+          "percentRemaining": 80,
+          "startsAt": "2026-10-27T02:21:58Z",
+          "resetsAt": "2026-10-27T07:21:58Z",
+          "windowSeconds": 18000
+        }
+      ],
+      "state": {
+        "status": "fresh",
+        "stale": false,
+        "refreshedAt": "2026-10-27T04:21:58Z",
+        "sourcesTried": [
+          "disposable-test-data"
+        ]
+      }
+    }
+  ]
+}

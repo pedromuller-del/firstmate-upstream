@@ -1,0 +1,14 @@
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.134
+stdout:
+dispatch-resolve:
+  status: escalate
+  reason: no rules to match
+
+stderr:
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600']
+resolver_temporary_files_after_exit: 0

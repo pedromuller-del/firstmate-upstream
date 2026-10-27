@@ -1,0 +1,20 @@
+{
+  "model": "jev-latest",
+  "state": {
+    "task": {
+      "project": "dispatch-validation",
+      "brief": "## Captain's intent\nConsider whether to split the module; make a small change if useful.\n"
+    }
+  },
+  "questions": {
+    "rule": {
+      "type": "choice",
+      "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+      "criteria": {
+        "rule_1": "Implementation where the worker must design parts of the solution itself within an existing codebase.",
+        "rule_2": "Read-only investigations or audits without code changes.",
+        "default": "No listed rule applies to this task."
+      }
+    }
+  }
+}

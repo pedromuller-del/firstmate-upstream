@@ -1,0 +1,18 @@
+[
+  {
+    "name": "pi-timeout",
+    "exit": 0,
+    "seconds": 11.138,
+    "checks": {
+      "exit": true,
+      "output": true,
+      "no_profile": true,
+      "private_temporaries": true,
+      "cleanup": true,
+      "bounded_wait": true
+    },
+    "pass": true,
+    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 379   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8355  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
+    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.tZ87mW8bbL -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\npi start auth check --provider anthropic\npi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-hp3vel_q/pi-timeout/pi\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+  }
+]

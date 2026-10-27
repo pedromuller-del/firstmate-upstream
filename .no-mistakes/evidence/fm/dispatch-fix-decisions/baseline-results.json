@@ -1,0 +1,82 @@
+[
+  {
+    "command": [
+      "bash",
+      "tests/fm-quota-choose.test.sh"
+    ],
+    "exit": 0,
+    "pass": 58,
+    "fail": 0,
+    "seconds": 4.86
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-procevent-quota.test.sh"
+    ],
+    "exit": 0,
+    "pass": 33,
+    "fail": 0,
+    "seconds": 23.66
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-startup-memory-budget.test.sh"
+    ],
+    "exit": 0,
+    "pass": 4,
+    "fail": 0,
+    "seconds": 13.25
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-secondmate-sync.test.sh"
+    ],
+    "exit": 0,
+    "pass": 33,
+    "fail": 0,
+    "seconds": 79.72
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-secondmate-harness.test.sh"
+    ],
+    "exit": 0,
+    "pass": 56,
+    "fail": 0,
+    "seconds": 287.17
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-secondmate-liveness.test.sh"
+    ],
+    "exit": 0,
+    "pass": 23,
+    "fail": 0,
+    "seconds": 64.75
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-shared-captain-inheritance.test.sh"
+    ],
+    "exit": 0,
+    "pass": 13,
+    "fail": 0,
+    "seconds": 17.72
+  },
+  {
+    "command": [
+      "bash",
+      "tests/fm-bootstrap.test.sh"
+    ],
+    "exit": 0,
+    "pass": 30,
+    "fail": 0,
+    "seconds": 309.94
+  }
+]

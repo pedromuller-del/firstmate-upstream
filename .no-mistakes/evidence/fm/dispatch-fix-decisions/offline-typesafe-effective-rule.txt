@@ -1,0 +1,25 @@
+OFFLINE response injection; not a live model result.
+provider: typesafe
+exit: 0
+dispatch-resolve:
+  status: clear
+  model: synthetic-response   latency_ms: 176   tokens: -/-
+  rule: rule_2 (Investigate without code changes.)   confidence: 0.41
+  probabilities: rule_1=0.55 rule_2=0.42 default=0.03
+  fallback: rule_1 (Implement a feature.) probability 0.55 replaces rule_2; answer confidence 0.41 is below floor 0.6
+  note: rule matched (low confidence: answer confidence 0.41 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.5  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet'
+
+Before fix 59b5165a, same response and quota:
+exit: 0
+dispatch-resolve:
+  status: clear
+  model: synthetic-response   latency_ms: 12   tokens: -/-
+  rule: rule_2 (Investigate without code changes.)   confidence: 0.41
+  probabilities: rule_1=0.55 rule_2=0.42 default=0.03
+  note: rule matched (low confidence: answer confidence 0.41 below floor 0.6)
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.5  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet'
+
+Regression reproduced: True

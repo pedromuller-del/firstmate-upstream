@@ -1,0 +1,388 @@
+Real dispatch CLI evidence
+
+The decision API calls used the existing TYPESAFE_API_KEY without copying it.
+The installed quota-axi 0.1.55 consumed newly generated synthetic quota windows through its documented QUOTA_AXI_SNAPSHOT input. These runs do not prove vendor cache reuse or expired-token renewal.
+The installed Pi CLI used disposable empty account roots. Logging wrappers delegated to the real executables and did not replace their responses.
+Every disposable home was removed. No primary or worker was launched.
+
+===== clear =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 1.497
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 393   tokens: 427/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8338  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.M1DcRlxR9Z -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== expired-and-future =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.643
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 249   tokens: 427/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8339  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.QDmZ4YTvdN -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== all-expired =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.134
+stdout:
+dispatch-resolve:
+  status: escalate
+  reason: no rules to match
+
+stderr:
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== invalid-until-1 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.073
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-1/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
+
+===== invalid-until-2 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.066
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-2/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
+
+===== invalid-until-3 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.066
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-3/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
+
+===== invalid-until-4 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.05
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-4/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
+
+===== invalid-until-5 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.093
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-5/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
+
+===== invalid-until-6 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.047
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-6/home/config/crew-dispatch.json - until must be an ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ) when present
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
+
+===== valid-leap-day =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.579
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 243   tokens: 427/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8341  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.VcSjqmgKpW -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== low-confidence-5 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.558
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 239   tokens: 440/44
+  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.25
+  probabilities: rule_1=0.22 rule_2=0.5 default=0.28
+  note: rule matched (low confidence: answer confidence 0.25 below floor 0.6)
+  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8347  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'opus' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.eC1sGd4KbC -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== low-confidence-approval =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.557
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 244   tokens: 440/44
+  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.18
+  probabilities: rule_1=0.3 rule_2=0.45 default=0.25
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8349  runway=through_reset  -> eligible
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.7iOFknHTcS -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== declared-floor =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.577
+stdout:
+dispatch-resolve:
+  status: ambiguous
+  model: jev-1.14.0   latency_ms: 263   tokens: 448/44
+  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.73
+  probabilities: rule_1=0.82 rule_2=0.04 default=0.14
+  reason: rule_1 probability 0.82 below its floor 1; no other option clears its own floor
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8352  runway=through_reset  -> eligible
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.bq1xyeXzIB -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== pi-failure-nonfatal =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 1.259
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 243   tokens: 444/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8355  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.dd8Vs0Hqbq -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+pi start auth check --provider anthropic
+pi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/pi-failure-nonfatal/pi
+pi exit 1
+pi start auth check --provider openai-codex
+pi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/pi-failure-nonfatal/pi
+pi exit 1
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== pi-refused-pin =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.664
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 266   tokens: 444/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0
+  probabilities: rule_1=1.0 rule_2=0.0 default=0.0
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8356  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.0qxqgN66kU -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== pi-timeout =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 11.138
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 379   tokens: 427/35
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98
+  probabilities: rule_1=0.99 default=0.01
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8355  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.tZ87mW8bbL -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+pi start auth check --provider anthropic
+pi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-hp3vel_q/pi-timeout/pi
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== tie-attempt-2 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.644
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 272   tokens: 450/44
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.54
+  probabilities: rule_1=0.6900000000000001 rule_2=0.3 default=0.01
+  note: rule matched (low confidence: answer confidence 0.54 below floor 0.6)
+  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.835  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'model-0' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.xA3Y6DrGTg -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+
+===== tie-attempt-3 =====
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.573
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 244   tokens: 473/53
+  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.52
+  probabilities: rule_1=0.64 rule_2=0.21 rule_3=0.13 default=0.02
+  note: rule matched (low confidence: answer confidence 0.52 below floor 0.6)
+  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8351  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'model-0' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.ci6cZ2cuFV -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0
+

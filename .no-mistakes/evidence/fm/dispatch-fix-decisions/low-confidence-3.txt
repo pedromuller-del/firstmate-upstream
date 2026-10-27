@@ -1,0 +1,23 @@
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.551
+stdout:
+dispatch-resolve:
+  status: clear
+  model: jev-1.14.0   latency_ms: 242   tokens: 443/44
+  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.76
+  probabilities: rule_1=0.84 rule_2=0.02 default=0.14
+  note: rule matched
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8345  runway=through_reset  -> eligible
+  profile: --harness 'claude' --model 'sonnet' --effort 'high'
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.8f0ZtpwgCp -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0

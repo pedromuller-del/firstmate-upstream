@@ -1,0 +1,7 @@
+OFFLINE response injection; not a live model result.
+provider: typesafe
+exit: 0
+dispatch-resolve:
+  status: error
+  reason: response is not a rule Choice answer
+dispatch-resolve: error (response is not a rule Choice answer)

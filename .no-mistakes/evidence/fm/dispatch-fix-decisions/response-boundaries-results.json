@@ -1,0 +1,38 @@
+[
+  {
+    "provider": "typesafe",
+    "case": "effective-rule",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "provider": "typesafe",
+    "case": "probability-tie",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "provider": "typesafe",
+    "case": "unoffered-choice",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "provider": "openrouter",
+    "case": "effective-rule",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "provider": "openrouter",
+    "case": "probability-tie",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "provider": "openrouter",
+    "case": "unoffered-choice",
+    "exit": 0,
+    "pass": true
+  }
+]

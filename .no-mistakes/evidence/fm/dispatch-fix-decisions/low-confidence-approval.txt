@@ -1,0 +1,22 @@
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 0
+elapsed_seconds: 0.557
+stdout:
+dispatch-resolve:
+  status: escalate
+  model: jev-1.14.0   latency_ms: 244   tokens: 440/44
+  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.18
+  probabilities: rule_1=0.3 rule_2=0.45 default=0.25
+  reason: rule requires the captain's explicit approval before dispatch
+  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8349  runway=through_reset  -> eligible
+
+stderr:
+
+real subprocesses:
+curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.7iOFknHTcS -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-
+curl exit 0
+quota-axi start --json --max-age 2m
+quota-axi exit 0
+
+resolver_temporary_file_modes_at_allocation: ['0o600', '0o600', '0o600', '0o600', '0o600', '0o600']
+resolver_temporary_files_after_exit: 0

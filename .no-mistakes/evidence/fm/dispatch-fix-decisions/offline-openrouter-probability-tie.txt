@@ -1,0 +1,10 @@
+OFFLINE response injection; not a live model result.
+provider: openrouter
+exit: 0
+dispatch-resolve:
+  status: ambiguous
+  model: synthetic-response   latency_ms: 13   tokens: -/-
+  rule: rule_1 (Implement a feature.)   confidence: 0.41
+  probabilities: rule_1=0.49 rule_2=0.49 default=0.02
+  reason: confidence 0.41 below floor 0.6; top-probability tie
+  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.5  runway=through_reset  -> eligible

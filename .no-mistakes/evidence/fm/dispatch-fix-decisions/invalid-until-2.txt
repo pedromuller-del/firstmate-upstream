@@ -1,0 +1,12 @@
+$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation
+exit: 2
+elapsed_seconds: 0.066
+stdout:
+
+stderr:
+error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/invalid-until-2/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)
+
+real subprocesses:
+
+resolver_temporary_file_modes_at_allocation: ['0o600']
+resolver_temporary_files_after_exit: 0
