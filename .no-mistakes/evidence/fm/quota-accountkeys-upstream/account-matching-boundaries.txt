@@ -1,0 +1,124 @@
+CASE empty-array-default-fallback
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json codex:default
+codex default
+
+exit=0 expected_exit=0 result=pass
+
+CASE absent-array-default-fallback
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json codex:default
+codex default
+
+exit=0 expected_exit=0 result=pass
+
+CASE duplicate-alias-same-row
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json codex:default
+codex default
+
+exit=0 expected_exit=0 result=pass
+
+CASE whitespace-only-alias-accepted
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json codex:default
+codex default
+
+exit=0 expected_exit=0 result=pass
+
+CASE malformed-unrelated-provider-rejects-entire-snapshot
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 expected_exit=2 result=pass
+
+CASE schema5-still-ignores-accountKeys
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json codex:default
+codex default
+
+exit=0 expected_exit=0 result=pass
+
+CASE quota-event-accepts-whitespace-alias
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-procevent-quota.sh poll --provider codex --threshold 90 --interval 1 --timeout 3
+quota: quota-codex
+status: low
+detail: {"provider":"codex","accountKey":"codex-home","best":{"scope":"all_models","status":"known","effectivePercentRemaining":80,"boundedBy":["five_hour"],"limitingWindowIds":["five_hour"],"pace":{"status":"behind","worstReservePercentPoints":20.5876,"worstReserveWindowId":"five_hour"},"runway":{"status":"through_reset","projectionConfidence":"established"},"selection":{"status":"known","spendPriority":0.8537}}}
+condition_polls: 1
+
+exit=0 expected_exit=0 result=pass
+
+CASE quota-event-rejects-malformed-alias
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-procevent-quota.sh poll --provider codex --threshold 90 --interval 1 --timeout 3
+quota: quota-codex
+status: error
+detail: {"provider":"codex","accountKey":"codex-home","best":{"scope":"all_models","status":"known","effectivePercentRemaining":80,"boundedBy":["five_hour"],"limitingWindowIds":["five_hour"],"pace":{"status":"behind","worstReservePercentPoints":20.5888,"worstReserveWindowId":"five_hour"},"runway":{"status":"through_reset","projectionConfidence":"established"},"selection":{"status":"known","spendPriority":0.8538}}}
+condition_polls: 1
+
+exit=0 expected_exit=0 result=pass
+
+CASE current-resolver-test-rejects-original-matcher
+$ bash /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/base-with-current-tests/tests/fm-dispatch-resolve.test.sh
+ok - invalid preferred_provider: null
+ok - invalid preferred_provider: false
+ok - invalid preferred_provider: 42
+ok - invalid preferred_provider: []
+ok - invalid preferred_provider: {}
+ok - invalid preferred_provider: ""
+ok - invalid preferred_provider: "Codex"
+ok - invalid preferred_provider: "codex\\n"
+ok - invalid preferred_provider: " codex"
+ok - preferred provider: astra-82-claude-26
+ok - preferred provider: work-account
+ok - preferred provider: exhausted
+ok - preferred provider: unknown
+ok - preferred provider: unknown-one-known-one
+ok - preferred provider: claude-only
+ok - preferred provider: config-override
+ok - preferred provider: prose-why
+ok - preferred provider: absent
+ok - preferred provider: approval
+ok - preferred provider: tie
+ok - preferred provider: floor
+ok - absent key is off: one stderr line, exit 0, no network call
+ok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work
+ok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate
+ok - OpenRouter clear uses the same output contract and keeps its key out of argv and child environments
+ok - OpenRouter ambiguous, malformed, HTTP, and missing-model paths are handled
+ok - mapping: a declared macos-keychain service and optional account become the lookup, and the key rides the fd header
+ok - precedence: environment, then .env, then the declared source, which is read only when needed
+ok - provider isolation: each provider reads only its own declared service, and a declaration never selects a provider
+ok - effective-home isolation: only the effective config directory's declaration is consulted
+ok - failure distinctions: off, a configuration error, and an unavailable source each read differently and send nothing
+ok - secret containment: the declared key is on no argv, in no output, environment, or file, and only on the fd header
+ok - capability probe: supported or unsupported, with no declaration read and no credential tool run
+ok - with no provider set, other providers' settings leave the original off line unchanged
+ok - systemone posts the unchanged request to its base URL with an optional fd-3 key
+ok - systemone configuration errors, never-send base URL, partial response, and transport failure are handled
+ok - openai maps the Choice request to the Decisions API and its answer back, key on fd 3 only
+ok - the never-send check runs on the final openai request body
+ok - openai malformed, partial, refused, ambiguous, HTTP, and transport paths return to normal intake
+ok - never-send list withholds the request on a match or a bad list, and never prints the value
+ok - rules snapshots and shell quoting preserve the profile protocol
+ok - quota_scope binds an agy candidate to its declared tier row
+ok - no-rule fallback, Agy, Gemini, and documented configurations resolve
+ok - ambiguous: confidence below the fixed floor hands the decision back
+ok - per-rule confidence floors fall to the most probable runner-up that clears its own floor
+ok - only the brief's task sections and scout tag reach the model, with a whole-brief fallback
+ok - escalate: a rule declared approval: captain never yields a profile
+ok - rule floor: known shortfall falls through while unavailable evidence escalates
+ok - declared provider and profile floor evidence are applied in code
+ok - nonnumeric spendPriority evidence is never ranked
+ok - partial and missing quota evidence remain eligible but unranked
+ok - provider-wide and exact quota rows combine into one limiting candidate
+ok - default: no rule matched resolves among the default profiles
+ok - tie: equal spendPriority never breaks by array order
+ok - no rankable candidate: the tool escalates instead of guessing
+ok - schema 6 accepts whitespace in accountKeys without changing exact matching
+ok - native Codex binds to codex-home before default, independently of Pi accounts and row order
+not ok - a credential key covered only by accountKeys binds to its producer row (missing: '  status: clear')
+--- output ---
+dispatch-resolve:
+  status: escalate
+  model: jev-1.13.0   latency_ms: 14   tokens: 812/60
+  rule: rule_1 (Codex work.)   confidence: 0.9
+  probabilities: rule_1=0.97 default=0.03
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: pi:credential-alias/gpt-6-astra  provider=codex  -> eligible, unranked: provider codex has no quota row for account credential-alias: disclosed uncertainty
+exit=1 expected_exit=1 result=pass

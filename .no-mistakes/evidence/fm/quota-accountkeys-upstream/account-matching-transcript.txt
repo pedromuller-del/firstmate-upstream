@@ -1,0 +1,364 @@
+CASE unique-alias-without-default/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 11   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8334  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE unique-alias-without-default/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE pi-lane-alias/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: pi:credential-alias/gpt-6-astra  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8334  runway=through_reset  -> eligible
+  profile: --harness 'pi' --model 'credential-alias/gpt-6-astra'
+
+exit=0 result=pass
+
+CASE stdin-snapshot/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh codex:default
+codex default
+
+exit=0 result=pass
+
+CASE unique-alias-reversed/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8335  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE unique-alias-reversed/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE unique-alias-before-exhausted-default/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8336  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE unique-alias-before-exhausted-default/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE exact-wins-over-two-aliases-and-default/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: escalate
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+exit=0 result=pass
+
+CASE exact-wins-over-two-aliases-and-default/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+none
+
+exit=1 result=pass
+
+CASE exact-wins-reversed/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: escalate
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models
+
+exit=0 result=pass
+
+CASE exact-wins-reversed/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+none
+
+exit=1 result=pass
+
+CASE ambiguous-alias-with-default/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: escalate
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:default  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+exit=0 result=pass
+
+CASE ambiguous-alias-with-default/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+none
+
+exit=1 result=pass
+
+CASE ambiguous-alias-reversed/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: escalate
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:default  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+exit=0 result=pass
+
+CASE ambiguous-alias-reversed/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+none
+
+exit=1 result=pass
+
+CASE ambiguous-alias-without-default/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: escalate
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:default  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+exit=0 result=pass
+
+CASE ambiguous-alias-without-default/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+none
+
+exit=1 result=pass
+
+CASE absent-alias-default-fallback/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=91%  spendPriority=1.2922  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE absent-alias-default-fallback/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE empty-alias-default-fallback/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=91%  spendPriority=1.2923  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE empty-alias-default-fallback/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE missing-row-remains-unranked/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: escalate
+  model: local-rule-fixture   latency_ms: 10   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  reason: no rankable eligible candidate
+  note: rule matched
+  candidate: codex:default  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty
+
+exit=0 result=pass
+
+CASE missing-row-remains-unranked/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+none
+
+exit=1 result=pass
+
+CASE whitespace-alias-exact-match/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8341  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE whitespace-alias-exact-match/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE duplicate-alias-in-one-row/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8342  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE duplicate-alias-in-one-row/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE schema5-provider-match/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: clear
+  model: local-rule-fixture   latency_ms: 9   tokens: -/-
+  rule: rule_1 (Validate account matching.)   confidence: 1
+  probabilities: rule_1=1 default=0
+  note: rule matched
+  candidate: codex:default  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8342  runway=through_reset  -> eligible
+  profile: --harness 'codex' --model 'default'
+
+exit=0 result=pass
+
+CASE schema5-provider-match/worker
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json --candidate codex:default
+codex default
+
+exit=0 result=pass
+
+CASE malformed-accountKeys=null
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys="codex-home"
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys=1
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys=false
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys={}
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys=[""]
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys=["codex-home", 7]
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys=[null]
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-accountKeys=[[]]
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE accountKey-whitespace-still-invalid
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+
+error: invalid quota-axi provider data
+exit=2 result=pass
+
+CASE malformed-empty-alias/resolver
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-dispatch-resolve.sh /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/brief.md
+dispatch-resolve:
+  status: error
+  reason: quota-axi --json returned an invalid snapshot
+dispatch-resolve: error (quota-axi --json returned an invalid snapshot)
+exit=0 result=pass
+
+CASE regression-before-fix
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/base/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+none
+
+exit=1 result=pass
+
+CASE regression-after-fix
+$ /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh --snapshot /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.account-live-eb09gbe0/quota.json codex:default
+codex default
+
+exit=0 result=pass

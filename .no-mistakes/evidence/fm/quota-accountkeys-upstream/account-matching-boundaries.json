@@ -1,0 +1,147 @@
+[
+  {
+    "case": "empty-array-default-fallback",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh",
+      "--snapshot",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json",
+      "codex:default"
+    ],
+    "exit_code": 0,
+    "stdout": "codex default\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "codex default",
+    "result": "pass"
+  },
+  {
+    "case": "absent-array-default-fallback",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh",
+      "--snapshot",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json",
+      "codex:default"
+    ],
+    "exit_code": 0,
+    "stdout": "codex default\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "codex default",
+    "result": "pass"
+  },
+  {
+    "case": "duplicate-alias-same-row",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh",
+      "--snapshot",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json",
+      "codex:default"
+    ],
+    "exit_code": 0,
+    "stdout": "codex default\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "codex default",
+    "result": "pass"
+  },
+  {
+    "case": "whitespace-only-alias-accepted",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh",
+      "--snapshot",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json",
+      "codex:default"
+    ],
+    "exit_code": 0,
+    "stdout": "codex default\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "codex default",
+    "result": "pass"
+  },
+  {
+    "case": "malformed-unrelated-provider-rejects-entire-snapshot",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh",
+      "--snapshot",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json",
+      "codex:default"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "error: invalid quota-axi provider data\n",
+    "expected_exit": 2,
+    "expected_text": "invalid quota-axi provider data",
+    "result": "pass"
+  },
+  {
+    "case": "schema5-still-ignores-accountKeys",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-quota-choose.sh",
+      "--snapshot",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/quota.json",
+      "codex:default"
+    ],
+    "exit_code": 0,
+    "stdout": "codex default\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "codex default",
+    "result": "pass"
+  },
+  {
+    "case": "quota-event-accepts-whitespace-alias",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-procevent-quota.sh",
+      "poll",
+      "--provider",
+      "codex",
+      "--threshold",
+      "90",
+      "--interval",
+      "1",
+      "--timeout",
+      "3"
+    ],
+    "exit_code": 0,
+    "stdout": "quota: quota-codex\nstatus: low\ndetail: {\"provider\":\"codex\",\"accountKey\":\"codex-home\",\"best\":{\"scope\":\"all_models\",\"status\":\"known\",\"effectivePercentRemaining\":80,\"boundedBy\":[\"five_hour\"],\"limitingWindowIds\":[\"five_hour\"],\"pace\":{\"status\":\"behind\",\"worstReservePercentPoints\":20.5876,\"worstReserveWindowId\":\"five_hour\"},\"runway\":{\"status\":\"through_reset\",\"projectionConfidence\":\"established\"},\"selection\":{\"status\":\"known\",\"spendPriority\":0.8537}}}\ncondition_polls: 1\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "status: low",
+    "result": "pass"
+  },
+  {
+    "case": "quota-event-rejects-malformed-alias",
+    "command": [
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/bin/fm-procevent-quota.sh",
+      "poll",
+      "--provider",
+      "codex",
+      "--threshold",
+      "90",
+      "--interval",
+      "1",
+      "--timeout",
+      "3"
+    ],
+    "exit_code": 0,
+    "stdout": "quota: quota-codex\nstatus: error\ndetail: {\"provider\":\"codex\",\"accountKey\":\"codex-home\",\"best\":{\"scope\":\"all_models\",\"status\":\"known\",\"effectivePercentRemaining\":80,\"boundedBy\":[\"five_hour\"],\"limitingWindowIds\":[\"five_hour\"],\"pace\":{\"status\":\"behind\",\"worstReservePercentPoints\":20.5888,\"worstReserveWindowId\":\"five_hour\"},\"runway\":{\"status\":\"through_reset\",\"projectionConfidence\":\"established\"},\"selection\":{\"status\":\"known\",\"spendPriority\":0.8538}}}\ncondition_polls: 1\n",
+    "stderr": "",
+    "expected_exit": 0,
+    "expected_text": "status: error",
+    "result": "pass"
+  },
+  {
+    "case": "current-resolver-test-rejects-original-matcher",
+    "command": [
+      "bash",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RK7HKTP4V9N5AFHA4EYYMY/.quota-boundaries-iavd1oul/base-with-current-tests/tests/fm-dispatch-resolve.test.sh"
+    ],
+    "exit_code": 1,
+    "stdout": "ok - invalid preferred_provider: null\nok - invalid preferred_provider: false\nok - invalid preferred_provider: 42\nok - invalid preferred_provider: []\nok - invalid preferred_provider: {}\nok - invalid preferred_provider: \"\"\nok - invalid preferred_provider: \"Codex\"\nok - invalid preferred_provider: \"codex\\\\n\"\nok - invalid preferred_provider: \" codex\"\nok - preferred provider: astra-82-claude-26\nok - preferred provider: work-account\nok - preferred provider: exhausted\nok - preferred provider: unknown\nok - preferred provider: unknown-one-known-one\nok - preferred provider: claude-only\nok - preferred provider: config-override\nok - preferred provider: prose-why\nok - preferred provider: absent\nok - preferred provider: approval\nok - preferred provider: tie\nok - preferred provider: floor\nok - absent key is off: one stderr line, exit 0, no network call\nok - TYPESAFE_API_KEY= in .env activates the tool; environment and config overrides work\nok - clear: one rule Choice request, key on the fd header only, spendPriority argmax over every candidate\nok - OpenRouter clear uses the same output contract and keeps its key out of argv and child environments\nok - OpenRouter ambiguous, malformed, HTTP, and missing-model paths are handled\nok - mapping: a declared macos-keychain service and optional account become the lookup, and the key rides the fd header\nok - precedence: environment, then .env, then the declared source, which is read only when needed\nok - provider isolation: each provider reads only its own declared service, and a declaration never selects a provider\nok - effective-home isolation: only the effective config directory's declaration is consulted\nok - failure distinctions: off, a configuration error, and an unavailable source each read differently and send nothing\nok - secret containment: the declared key is on no argv, in no output, environment, or file, and only on the fd header\nok - capability probe: supported or unsupported, with no declaration read and no credential tool run\nok - with no provider set, other providers' settings leave the original off line unchanged\nok - systemone posts the unchanged request to its base URL with an optional fd-3 key\nok - systemone configuration errors, never-send base URL, partial response, and transport failure are handled\nok - openai maps the Choice request to the Decisions API and its answer back, key on fd 3 only\nok - the never-send check runs on the final openai request body\nok - openai malformed, partial, refused, ambiguous, HTTP, and transport paths return to normal intake\nok - never-send list withholds the request on a match or a bad list, and never prints the value\nok - rules snapshots and shell quoting preserve the profile protocol\nok - quota_scope binds an agy candidate to its declared tier row\nok - no-rule fallback, Agy, Gemini, and documented configurations resolve\nok - ambiguous: confidence below the fixed floor hands the decision back\nok - per-rule confidence floors fall to the most probable runner-up that clears its own floor\nok - only the brief's task sections and scout tag reach the model, with a whole-brief fallback\nok - escalate: a rule declared approval: captain never yields a profile\nok - rule floor: known shortfall falls through while unavailable evidence escalates\nok - declared provider and profile floor evidence are applied in code\nok - nonnumeric spendPriority evidence is never ranked\nok - partial and missing quota evidence remain eligible but unranked\nok - provider-wide and exact quota rows combine into one limiting candidate\nok - default: no rule matched resolves among the default profiles\nok - tie: equal spendPriority never breaks by array order\nok - no rankable candidate: the tool escalates instead of guessing\nok - schema 6 accepts whitespace in accountKeys without changing exact matching\nok - native Codex binds to codex-home before default, independently of Pi accounts and row order\n",
+    "stderr": "not ok - a credential key covered only by accountKeys binds to its producer row (missing: '  status: clear')\n--- output ---\ndispatch-resolve:\n  status: escalate\n  model: jev-1.13.0   latency_ms: 14   tokens: 812/60\n  rule: rule_1 (Codex work.)   confidence: 0.9\n  probabilities: rule_1=0.97 default=0.03\n  reason: no rankable eligible candidate\n  note: rule matched\n  candidate: pi:credential-alias/gpt-6-astra  provider=codex  -> eligible, unranked: provider codex has no quota row for account credential-alias: disclosed uncertainty\n",
+    "expected_exit": 1,
+    "expected_text": "a credential key covered only by accountKeys binds to its producer row",
+    "result": "pass"
+  }
+]
