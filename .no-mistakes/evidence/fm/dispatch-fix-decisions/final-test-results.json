@@ -1,0 +1,98 @@
+{
+  "revision": "763b7a02f94a2157e82e2b9455c39c92bcfe1c25",
+  "final_suites": [
+    {
+      "command": "bash tests/fm-dispatch-resolve.test.sh",
+      "exit_code": 0,
+      "passed": 77,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-quota-choose.test.sh",
+      "exit_code": 0,
+      "passed": 58,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-bootstrap.test.sh",
+      "exit_code": 0,
+      "passed": 31,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-procevent-quota.test.sh",
+      "exit_code": 0,
+      "passed": 33,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-startup-memory-budget.test.sh",
+      "exit_code": 0,
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-secondmate-sync.test.sh",
+      "exit_code": 0,
+      "passed": 33,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-secondmate-harness.test.sh",
+      "exit_code": 0,
+      "passed": 56,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-secondmate-liveness.test.sh",
+      "exit_code": 0,
+      "passed": 28,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-shared-captain-inheritance.test.sh",
+      "exit_code": 0,
+      "passed": 13,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-spawn-dispatch-profile.test.sh",
+      "exit_code": 0,
+      "passed": 102,
+      "failed": 0
+    }
+  ],
+  "passed_groups": 435,
+  "failed_groups": 0,
+  "initial_setup_failures": [
+    "The initial dispatch run inherited TYPESAFE_API_KEY: 21 groups passed, 1 failed, exit 1. Cleared inherited keys before the successful rerun.",
+    "The initial quota run inherited unsupported LC_ALL=C.UTF-8: 7 groups passed, 1 failed, exit 1. Bootstrap also reported a locale-caused failure; the baseline runner was interrupted before its exit could be collected. Successful reruns used LC_ALL=C.",
+    "Three clean-environment suites initially placed secondmate fixtures inside this repository, violating their home-isolation guard. Harness: 9 passed, 1 failed; liveness: 4 passed, 1 failed; spawn profile: 9 passed, 1 failed. All exited 1. The reruns used /tmp for incidental disposable test-toolchain files."
+  ],
+  "optional_skip": "The spawn-profile suite skipped the native fish-pane launch because fish is not on PATH; this unchanged shell variant is outside the dispatch-routing change.",
+  "source_changes": [],
+  "refreshed_suites": [
+    {
+      "command": "bash tests/fm-dispatch-resolve.test.sh",
+      "exit_code": 0,
+      "passed": 77,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-quota-choose.test.sh",
+      "exit_code": 0,
+      "passed": 58,
+      "failed": 0
+    },
+    {
+      "command": "bash tests/fm-bootstrap.test.sh",
+      "exit_code": 0,
+      "passed": 31,
+      "failed": 0
+    }
+  ],
+  "live_evidence": "round2/live-cli-transcript.md",
+  "live_version_floor": "Real quota-axi 0.1.53 rejected and 0.1.54 accepted by detect-only bootstrap; both commands exited 0. Disposable packages were removed.",
+  "live_limits": "Exact probability ties, invalid raw choices, raw/effective choice disagreement, successful expired-token renewal, healthy quota reuse, Pi-signed-only refresh, alternate provider credentials, and autonomous profile forwarding remain unproved live. The recorded live-validation exception remains unchanged.",
+  "working_tree_status_after_cleanup": ""
+}

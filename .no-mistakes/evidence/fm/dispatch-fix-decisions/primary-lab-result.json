@@ -1,0 +1,12 @@
+{
+  "grid": {
+    "columns": 120,
+    "rows": 40
+  },
+  "cli": "codex 0.166.0, normal existing login, no credential edits",
+  "result": "untested",
+  "reason": "The live primary could not create resolver temporary files. Its command sandbox returned Operation not permitted at the default macOS temporary directory, even after an explicit TMPDIR=$FM_HOME prefix. No clear profile was produced; its initial config-based spawn attempt is not evidence for forwarding a clear profile.",
+  "stop_exit_code": 0,
+  "teardown_exit_code": 0,
+  "teardown_output": ""
+}

@@ -1,0 +1,69 @@
+{
+  "name": "invalid-until-2",
+  "command": [
+    "bash",
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+    "--project",
+    "dispatch-validation"
+  ],
+  "exit_code": 2,
+  "elapsed_seconds": 0.043,
+  "passed": true,
+  "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+  "rules": {
+    "shared_quota": true,
+    "rules": [
+      {
+        "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+        "use": {
+          "harness": "claude",
+          "model": "opus",
+          "effort": "xhigh"
+        },
+        "approval": "captain",
+        "until": "2999-13-40T25:61:61Z"
+      },
+      {
+        "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "high"
+        }
+      },
+      {
+        "when": "A bug fix whose root cause the brief states.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      },
+      {
+        "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+        "use": {
+          "harness": "claude",
+          "model": "sonnet",
+          "effort": "low"
+        }
+      },
+      {
+        "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "xhigh"
+        }
+      }
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-5.6-sol",
+      "effort": "low"
+    }
+  },
+  "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+  "remaining_temporary_files": [
+    "node-compile-cache"
+  ]
+}

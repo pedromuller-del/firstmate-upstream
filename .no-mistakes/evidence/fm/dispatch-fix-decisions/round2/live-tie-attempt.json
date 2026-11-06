@@ -1,0 +1,44 @@
+{
+  "name": "tie-attempt",
+  "command": [
+    "bash",
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+    "--project",
+    "dispatch-validation"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.4,
+  "passed": false,
+  "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 270   tokens: 419/44\n  rule: rule_1 (The task changes software code.)   confidence: 0.35\n  probabilities: rule_1=0.57 rule_2=0.42 default=0.01\n  note: rule matched (low confidence: answer confidence 0.35 below floor 0.6)\n  candidate: claude:opus  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'claude' --model 'opus' --effort 'xhigh'\n",
+  "rules": {
+    "shared_quota": true,
+    "rules": [
+      {
+        "when": "The task changes software code.",
+        "use": {
+          "harness": "claude",
+          "model": "opus",
+          "effort": "xhigh"
+        }
+      },
+      {
+        "when": "The task changes software code.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "high"
+        }
+      }
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-5.6-sol",
+      "effort": "low"
+    }
+  },
+  "brief": "Change software code.",
+  "remaining_temporary_files": [
+    "node-compile-cache"
+  ]
+}

@@ -1,177 +1,105 @@
 import copy
-import datetime as dt
 import json
 import os
 from pathlib import Path
 import re
-import shlex
 import shutil
 import subprocess
-import tempfile
 import time
 
-ROOT = Path.cwd()
-EVIDENCE = Path(__file__).parent
-REAL = {name: shutil.which(name) for name in ("curl", "pi", "quota-axi", "bash", "mktemp")}
-LAB = Path(tempfile.mkdtemp(prefix=".dispatch-live-", dir=ROOT))
-RESULTS = []
-ONLY = os.environ.get("DISPATCH_LIVE_ONLY")
-RESULT_NAME = "live-results-extra.json" if ONLY else "live-results.json"
+root = Path.cwd()
+evidence = Path(__file__).parent / 'round2'
+evidence.mkdir(exist_ok=True)
+lab = root / '.dispatch-live-lab'
+for part in ['home/config', 'tmp', 'pi-empty', 'xdg-config', 'xdg-cache', 'bin']:
+    (lab / part).mkdir(parents=True, exist_ok=True)
+env = {key: value for key, value in os.environ.items()
+       if key in ['PATH', 'TYPESAFE_API_KEY', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'USER', 'LOGNAME']}
+env.update(HOME=str(lab / 'home'), FM_HOME=str(lab / 'home'),
+           TMPDIR=str(lab / 'tmp'), LC_ALL='C', LANG='C',
+           XDG_CONFIG_HOME=str(lab / 'xdg-config'), XDG_CACHE_HOME=str(lab / 'xdg-cache'),
+           PI_CODING_AGENT_DIR=str(lab / 'pi-empty'),
+           FM_DISPATCH_PROVIDER='typesafe', FM_DISPATCH_MODEL='jev-latest')
 
+def write_input(path, value):
+    old = path.read_text() if path.exists() else None
+    body = value if isinstance(value, str) else json.dumps(value, indent=2) + '\n'
+    if old == body:
+        return
+    patch = '*** Begin Patch\n'
+    if old is None:
+        patch += f'*** Add File: {path}\n' + ''.join('+' + line + '\n' for line in body.splitlines())
+    else:
+        patch += f'*** Update File: {path}\n@@\n'
+        patch += ''.join('-' + line + '\n' for line in old.splitlines())
+        patch += ''.join('+' + line + '\n' for line in body.splitlines())
+    patch += '*** End Patch\n'
+    subprocess.run(['apply_patch', patch], check=True, stdout=subprocess.DEVNULL)
 
-def write(path, value):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(value if isinstance(value, str) else json.dumps(value, indent=2))
+profiles = [
+    {'harness': 'claude', 'model': 'opus', 'effort': 'xhigh'},
+    {'harness': 'codex', 'model': 'gpt-5.6-sol', 'effort': 'high'},
+    {'harness': 'cursor', 'model': 'cursor-grok-4.6-medium'},
+    {'harness': 'claude', 'model': 'sonnet', 'effort': 'low'},
+    {'harness': 'codex', 'model': 'gpt-5.6-sol', 'effort': 'xhigh'},
+]
+conditions = [
+    'Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.',
+    'Routine feature work, a port, or an installer build inside an existing codebase.',
+    'A bug fix whose root cause the brief states.',
+    'A trivial mechanical edit such as a rename, typo, version bump, or wording fix.',
+    'A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.',
+]
+base = {'shared_quota': True,
+        'rules': [{'when': c, 'use': p} for c, p in zip(conditions, profiles)],
+        'default': {'harness': 'codex', 'model': 'gpt-5.6-sol', 'effort': 'low'}}
+base['rules'][0]['approval'] = 'captain'
+records = []
 
-
-def profile(model="sonnet"):
-    return {"harness": "claude", "model": model, "effort": "high"}
-
-
-def run_case(name, rules, brief, expected, extra_env=None):
-    if ONLY and name not in ONLY.split(","):
-        return {"stdout": ""}
-    case = LAB / name
-    home = case / "home"
-    for directory in (home / "config", case / "tmp", case / "pi", case / "xdg", case / "cache", case / "trace"):
-        directory.mkdir(parents=True, exist_ok=True)
-    write(home / "config/crew-dispatch.json", rules)
-    write(case / "brief.md", "# Task\n\n## Captain's intent\n" + brief + "\n")
-    env = {k: os.environ[k] for k in ("PATH", "TYPESAFE_API_KEY", "USER", "LOGNAME") if k in os.environ}
-    env.update(HOME=str(home), FM_HOME=str(home), TMPDIR=str(case / "tmp"), XDG_CONFIG_HOME=str(case / "xdg"), XDG_CACHE_HOME=str(case / "cache"), PI_CODING_AGENT_DIR=str(case / "pi"), PI_OFFLINE="1", PI_TELEMETRY="0", LC_ALL="C", QUOTA_AXI_SNAPSHOT=str(LAB / "quota-seed.json"), TRACE_DIR=str(case / "trace"))
-    env["PATH"] = str(LAB / "trace-bin") + os.pathsep + env["PATH"]
-    if extra_env:
-        env.update(extra_env(case))
+def run(name, rules, brief, expected, extra=None):
+    write_input(lab / 'home/config/crew-dispatch.json', rules)
+    write_input(lab / 'brief.md', '## Captain\'s intent\n' + brief + '\n')
+    command = ['bash', 'bin/fm-dispatch-resolve.sh', str(lab / 'brief.md'), '--project', 'dispatch-validation']
     start = time.monotonic()
-    process = subprocess.Popen([REAL["bash"], "bin/fm-dispatch-resolve.sh", str(case / "brief.md"), "--project", "dispatch-validation"], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    while process.poll() is None:
-        time.sleep(0.01)
-    stdout, stderr = process.communicate()
+    result = subprocess.run(command, env=env | (extra or {}), text=True, capture_output=True, timeout=65)
     elapsed = round(time.monotonic() - start, 3)
-    events = (case / "trace/events").read_text() if (case / "trace/events").exists() else ""
-    temporaries = (case / "trace/tempfiles").read_text().splitlines()
-    modes = [int(line.split("\t", 1)[0], 8) for line in temporaries]
-    remaining = [line for line in temporaries if Path(line.split("\t", 1)[1]).exists()]
-    output = f"$ bash bin/fm-dispatch-resolve.sh <isolated-brief> --project dispatch-validation\nexit: {process.returncode}\nelapsed_seconds: {elapsed}\nstdout:\n{stdout}\nstderr:\n{stderr}\nreal subprocesses:\n{events}\nresolver_temporary_file_modes_at_allocation: {[oct(m) for m in modes]}\nresolver_temporary_files_after_exit: {len(remaining)}\n"
-    checks = {"exit": process.returncode == expected.get("exit", 0), "output": all(text in stdout + stderr for text in expected.get("contains", [])), "no_profile": not expected.get("no_profile") or "  profile:" not in stdout, "private_temporaries": bool(modes) and all(m & 0o077 == 0 for m in modes), "cleanup": not remaining}
-    if expected.get("no_subprocesses"):
-        checks["no_subprocesses"] = not events
-    if "elapsed_between" in expected:
-        low, high = expected["elapsed_between"]
-        checks["bounded_wait"] = low <= elapsed <= high
-    (EVIDENCE / f"{name}.txt").write_text(output)
-    for path in (case / "trace").iterdir():
-        if path.name != "events":
-            shutil.copyfile(path, EVIDENCE / f"{name}-{path.name}")
-    record = {"name": name, "exit": process.returncode, "seconds": elapsed, "checks": checks, "pass": all(checks.values()), "stdout": stdout, "events": events}
-    RESULTS.append(record)
-    print(json.dumps(record), flush=True)
-    (EVIDENCE / RESULT_NAME).write_text(json.dumps(RESULTS, indent=2) + "\n")
+    text = result.stdout + result.stderr
+    passed = expected(result.returncode, text)
+    record = {'name': name, 'command': command, 'exit_code': result.returncode,
+              'elapsed_seconds': elapsed, 'passed': passed, 'output': text,
+              'rules': rules, 'brief': brief,
+              'remaining_temporary_files': [p.name for p in (lab / 'tmp').iterdir()]}
+    records.append(record)
+    (evidence / f'live-{name}.json').write_text(json.dumps(record, indent=2) + '\n')
+    print(f'{name}: exit={result.returncode} expected={passed}\n{text}', flush=True)
     return record
 
-
-try:
-    now = dt.datetime.now(dt.timezone.utc)
-    iso = lambda value: value.isoformat(timespec="seconds").replace("+00:00", "Z")
-    seed = {"schemaVersion": 3, "providers": [{"provider": "claude", "label": "Claude", "source": "oauth", "windows": [{"id": "five_hour", "label": "session", "kind": "session", "percentUsed": 20, "percentRemaining": 80, "startsAt": iso(now - dt.timedelta(hours=2)), "resetsAt": iso(now + dt.timedelta(hours=3)), "windowSeconds": 18000}], "state": {"status": "fresh", "stale": False, "refreshedAt": iso(now), "sourcesTried": ["disposable-test-data"]}}]}
-    write(LAB / "quota-seed.json", seed)
-    write(EVIDENCE / ("quota-seed-extra.json" if ONLY else "quota-seed.json"), seed)
-    wrapper = '''#!/usr/bin/env bash
-set -u
-name=${0##*/}
-if [ "$name" = mktemp ]; then
-  path=$(REAL_MKTEMP "$@") || exit $?
-  printf '%s\\t%s\\n' "$(stat -f '%Lp' "$path")" "$path" >> "$TRACE_DIR/tempfiles"
-  printf '%s\\n' "$path"
-  exit 0
-fi
-printf '%s start %s\\n' "$name" "$*" >> "$TRACE_DIR/events"
-case "$name" in
-  curl)
-    output=''
-    args=("$@")
-    while [ "$#" -gt 0 ]; do
-      case "$1" in -o) output=$2; shift 2 ;; *) shift ;; esac
-    done
-    cat > "$TRACE_DIR/request.json"
-    REAL_CURL "${args[@]}" < "$TRACE_DIR/request.json"
-    code=$?
-    [ ! -f "$output" ] || cp "$output" "$TRACE_DIR/response.json"
-    ;;
-  pi)
-    printf 'pi root %s\\n' "${PI_CODING_AGENT_DIR-unset}" >> "$TRACE_DIR/events"
-    REAL_PI "$@" > "$TRACE_DIR/pi-output.txt" 2>&1
-    code=$?
-    cat "$TRACE_DIR/pi-output.txt"
-    ;;
-  quota-axi)
-    REAL_QUOTA "$@" > "$TRACE_DIR/quota.json"
-    code=$?
-    cat "$TRACE_DIR/quota.json"
-    ;;
-esac
-printf '%s exit %s\\n' "$name" "$code" >> "$TRACE_DIR/events"
-exit "$code"
-'''
-    for token, command in (("REAL_CURL", "curl"), ("REAL_PI", "pi"), ("REAL_QUOTA", "quota-axi"), ("REAL_MKTEMP", "mktemp")):
-        wrapper = wrapper.replace(token, shlex.quote(REAL[command]))
-    for name in ("curl", "pi", "quota-axi", "mktemp"):
-        write(LAB / "trace-bin" / name, wrapper)
-        (LAB / "trace-bin" / name).chmod(0o700)
-    normal = {"rules": [{"when": "A simple bug fix with a stated root cause.", "use": profile()}], "default": profile("opus")}
-    bug = "Fix an off-by-one in pager.sh. The root cause is <= instead of < on line 40. Change that operator."
-    run_case("clear", normal, bug, {"contains": ["status: clear", "profile: --harness 'claude' --model 'sonnet' --effort 'high'"]})
-    expired = copy.deepcopy(normal)
-    expired["rules"].insert(0, {"when": normal["rules"][0]["when"], "use": profile("expired-model"), "until": "2000-01-01T00:00:00Z"})
-    expired["rules"][1]["until"] = "2999-01-01T00:00:00Z"
-    run_case("expired-and-future", expired, bug, {"contains": ["status: clear", "--model 'sonnet'"]})
-    all_expired = copy.deepcopy(normal)
-    all_expired["rules"][0]["until"] = "2000-01-01T00:00:00Z"
-    run_case("all-expired", all_expired, bug, {"contains": ["no rules to match"], "no_profile": True, "no_subprocesses": True})
-    for index, until in enumerate(("2999-13-40T25:61:61Z", "2025-02-29T00:00:00Z", "2024-02-30T00:00:00Z", "2028-02-29T24:00:00Z", "2028-02-29T00:00:60Z", "2028-02-29T00:00:00+00:00")):
-        malformed = copy.deepcopy(normal)
-        malformed["rules"][0]["until"] = until
-        run_case(f"invalid-until-{index + 1}", malformed, bug, {"exit": 2, "contains": ["malformed rules file", "until"], "no_profile": True, "no_subprocesses": True})
-    leap = copy.deepcopy(normal)
-    leap["rules"][0]["until"] = "2028-02-29T00:00:00Z"
-    run_case("valid-leap-day", leap, bug, {"contains": ["status: clear"]})
-    approval = copy.deepcopy(normal)
-    approval["rules"][0]["approval"] = "captain"
-    run_case("captain-approval", approval, bug, {"contains": ["status: escalate", "explicit approval"], "no_profile": True})
-    uncertain = {"rules": [{"when": "Implementation where the worker must design parts of the solution itself within an existing codebase.", "use": profile()}, {"when": "Read-only investigations or audits without code changes.", "use": profile("opus")}], "default": profile("haiku")}
-    ambiguous_briefs = ["Split a large file into smaller files without changing behavior.", "Investigate a slow function and apply a small fix if the root cause is obvious.", "Consider whether to split the module; make a small change if useful.", "Fix documentation and inspect the parser, with implementation optional.", "Review the retry policy and adjust it only if necessary."]
-    for index, brief in enumerate(ambiguous_briefs):
-        result = run_case(f"low-confidence-{index + 1}", uncertain, brief, {"contains": ["status: clear"]})
-        if "low confidence:" in result["stdout"]:
-            break
-    low_approval = copy.deepcopy(uncertain)
-    low_approval["rules"][1]["approval"] = "captain"
-    run_case("low-confidence-approval", low_approval, ambiguous_briefs[4], {"contains": ["status: escalate", "explicit approval"], "no_profile": True})
-    for count in (2, 3):
-        equal_rules = {"rules": [{"when": normal["rules"][0]["when"], "use": profile(f"model-{index}")} for index in range(count)], "default": profile()}
-        run_case(f"tie-attempt-{count}", equal_rules, bug, {})
-    declared = copy.deepcopy(uncertain)
-    for rule in declared["rules"]:
-        rule["min_confidence"] = 1
-    run_case("declared-floor", declared, ambiguous_briefs[1], {"contains": ["status: ambiguous", "below its floor"], "no_profile": True})
-    pi_rules = copy.deepcopy(normal)
-    pi_rules["rules"].append({"when": "Generate an image.", "use": [{"harness": "pi", "model": "openai-codex/gpt-5.6-sol", "provider": "codex"}, {"harness": "pi", "model": "openai-codex/gpt-5.6-luna", "provider": "codex"}]})
-    pi_rules["default"] = [{"harness": "pi", "model": "anthropic/claude-sonnet-4-6", "provider": "claude"}]
-    def pin(case):
-        write(case / "home/config/pi-account", str(case / "pi") + "\nanthropic openai-codex\n")
-        return {}
-    run_case("pi-failure-nonfatal", pi_rules, bug, {"contains": ["status: clear"]}, pin)
-    def refused_pin(case):
-        write(case / "home/config/pi-account", str(case / "missing-account") + "\nanthropic openai-codex\n")
-        return {}
-    run_case("pi-refused-pin", pi_rules, bug, {"contains": ["status: clear"]}, refused_pin)
-    timed_rules = copy.deepcopy(normal)
-    timed_rules["default"] = {"harness": "pi", "model": "anthropic/claude-sonnet-4-6", "provider": "claude"}
-    def hung_store(case):
-        write(case / "home/config/pi-account", str(case / "pi") + "\nanthropic\n")
-        os.mkfifo(case / "pi/auth.json", 0o600)
-        return {}
-    run_case("pi-timeout", timed_rules, bug, {"contains": ["status: clear"], "elapsed_between": [10, 15]}, hung_store)
-finally:
-    shutil.rmtree(LAB)
-    print("Disposable live-test home removed.", flush=True)
+bug = 'Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.'
+run('clear-profile', base, bug, lambda c,t: c == 0 and 'status: clear' in t and "--harness 'cursor'" in t)
+run('captain-approval', base, 'Redesign the authentication system. This is unusually difficult and security-sensitive; a mistake exposes all accounts.', lambda c,t: c == 0 and 'status: escalate' in t and 'explicit approval' in t and 'profile:' not in t)
+run('low-confidence', base, 'Split a large service file into smaller modules without changing its behavior. Some boundaries are unclear; identify them while moving the code.', lambda c,t: c == 0 and 'status: clear' in t and 'low confidence:' in t)
+floor_rules = copy.deepcopy(base)
+for rule in floor_rules['rules']:
+    rule['min_confidence'] = 1
+run('declared-floor', floor_rules, 'Split a large service file into smaller modules without changing behavior. Infer boundaries during the work.', lambda c,t: c == 0 and 'status: ambiguous' in t and 'below its floor' in t and 'profile:' not in t)
+expiry = copy.deepcopy(base)
+expiry['rules'][2]['until'] = '2000-01-01T00:00:00Z'
+run('expired-rule', expiry, bug, lambda c,t: c == 0 and 'status: clear' in t and "--harness 'cursor'" not in t and 'rule_5=' not in t)
+future = copy.deepcopy(base)
+future['rules'][2]['until'] = '2400-02-29T23:59:59Z'
+run('future-leap-day', future, bug, lambda c,t: c == 0 and 'status: clear' in t and "--harness 'cursor'" in t)
+expired = copy.deepcopy(base)
+for rule in expired['rules']:
+    rule['until'] = '2000-01-01T00:00:00Z'
+run('all-expired', expired, bug, lambda c,t: c == 0 and 'no rules to match' in t and 'profile:' not in t)
+for index, until in enumerate(['soon', 42, '2999-13-40T25:61:61Z', '2999-02-29T00:00:00Z', '2000-13-01T00:00:00Z', '2999-01-01T24:00:00Z', '2999-01-01T00:00:60Z']):
+    invalid = copy.deepcopy(base)
+    invalid['rules'][0]['until'] = until
+    run(f'invalid-until-{index}', invalid, bug, lambda c,t: c == 2 and 'malformed rules file' in t and 'profile:' not in t)
+ties = copy.deepcopy(base)
+ties['rules'] = [{'when': 'The task changes software code.', 'use': p} for p in profiles[:2]]
+run('tie-attempt', ties, 'Change software code.', lambda c,t: c == 0 and 'top-probability tie' in t and 'profile:' not in t)
+for provider, model in [('openrouter', 'typesafe/jev-1.13'), ('openai', 'gpt-6-luna')]:
+    run(f'{provider}-availability', base, bug, lambda c,t: c == 0 and 'status: clear' in t,
+        {'FM_DISPATCH_PROVIDER': provider, 'FM_DISPATCH_MODEL': model})
+(evidence / 'live-results.json').write_text(json.dumps(records, indent=2) + '\n')

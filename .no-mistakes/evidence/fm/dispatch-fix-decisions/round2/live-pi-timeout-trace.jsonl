@@ -1,0 +1,4 @@
+{"tool": "pi", "argv": ["auth", "check", "--provider", "anthropic"], "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/pi-pinned", "started": 1793975783.845315}
+{"tool": "fault-injection", "pid": 13697, "signal": "SIGSTOP", "group": 13682, "started": 1793975783.981236}
+{"tool": "pi", "argv": ["auth", "check", "--provider", "openai-codex"], "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/pi-pinned", "started": 1793975794.0274692}
+{"tool": "quota-axi", "argv": ["--json", "--max-age", "2m"], "started": 1793975794.2312682, "isolation": "only the unconfigured zai provider is read"}

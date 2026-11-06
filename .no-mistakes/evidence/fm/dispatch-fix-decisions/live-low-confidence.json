@@ -1,0 +1,66 @@
+{
+  "name": "low-confidence",
+  "command": [
+    "bash",
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+    "--project",
+    "dispatch-validation"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.422,
+  "passed": true,
+  "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 295   tokens: 574/71\n  rule: rule_2 (Routine feature work, a port, or an installer build inside a)   confidence: 0.45\n  probabilities: rule_1=0.13 rule_2=0.54 rule_3=0.0 rule_4=0.01 rule_5=0.0 default=0.32\n  note: rule matched (low confidence: answer confidence 0.45 below floor 0.6)\n  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'codex' --model 'gpt-5.6-sol' --effort 'high'\n",
+  "rules": {
+    "shared_quota": true,
+    "rules": [
+      {
+        "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+        "use": {
+          "harness": "claude",
+          "model": "opus",
+          "effort": "xhigh"
+        },
+        "approval": "captain"
+      },
+      {
+        "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "high"
+        }
+      },
+      {
+        "when": "A bug fix whose root cause the brief states.",
+        "use": {
+          "harness": "cursor",
+          "model": "cursor-grok-4.6-medium"
+        }
+      },
+      {
+        "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+        "use": {
+          "harness": "claude",
+          "model": "sonnet",
+          "effort": "low"
+        }
+      },
+      {
+        "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "xhigh"
+        }
+      }
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-5.6-sol",
+      "effort": "low"
+    }
+  },
+  "brief": "Split a large service file into smaller modules without changing its behavior. Some boundaries are unclear; identify them while moving the code.",
+  "remaining_temporary_files": []
+}

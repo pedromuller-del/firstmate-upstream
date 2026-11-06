@@ -1,0 +1,56 @@
+{
+  "command": [
+    "bash",
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 11.201,
+  "output": "dispatch-resolve:\n  status: error\n  reason: quota-axi --json failed\ndispatch-resolve: error (quota-axi --json failed)\n",
+  "trace": [
+    {
+      "tool": "pi",
+      "argv": [
+        "auth",
+        "check",
+        "--provider",
+        "anthropic"
+      ],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/pi-pinned",
+      "started": 1793975783.845315
+    },
+    {
+      "tool": "fault-injection",
+      "pid": 13697,
+      "signal": "SIGSTOP",
+      "group": 13682,
+      "started": 1793975783.981236
+    },
+    {
+      "tool": "pi",
+      "argv": [
+        "auth",
+        "check",
+        "--provider",
+        "openai-codex"
+      ],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/pi-pinned",
+      "started": 1793975794.0274692
+    },
+    {
+      "tool": "quota-axi",
+      "argv": [
+        "--json",
+        "--max-age",
+        "2m"
+      ],
+      "started": 1793975794.2312682,
+      "isolation": "only the unconfigured zai provider is read"
+    }
+  ],
+  "probe_exit_code": 1,
+  "probe_output": "{\"status\":\"not_ready\",\"provider\":\"openai-codex\",\"reason\":\"credentials_not_configured\"}\n",
+  "quota_exit_code": 1,
+  "quota_output": "{\n  \"generatedAt\": \"2026-11-06T14:36:34.574Z\",\n  \"schemaVersion\": 5,\n  \"providers\": [\n    {\n      \"provider\": \"zai\",\n      \"windows\": [],\n      \"state\": {\n        \"status\": \"auth_required\",\n        \"stale\": false,\n        \"error\": \"zai_credential_unavailable\"\n      },\n      \"quotaSemantics\": {\n        \"status\": \"unknown\",\n        \"effectiveAvailability\": []\n      },\n      \"accountKeys\": [\n        \"default\"\n      ],\n      \"notSetUp\": true\n    }\n  ]\n}\n",
+  "isolation": "Real Pi and quota-axi executables. Empty Pi account roots. quota-axi limited to the unconfigured zai provider, with credential refresh disabled. No fake responses."
+}

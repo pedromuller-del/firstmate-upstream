@@ -1,339 +1,1119 @@
 [
   {
-    "name": "clear",
-    "exit": 0,
-    "seconds": 1.497,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
+    "name": "clear-profile",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.563,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 421   tokens: 575/71\n  rule: rule_3 (A bug fix whose root cause the brief states.)   confidence: 0.99\n  probabilities: rule_1=0.0 rule_2=0.0 rule_3=0.99 rule_4=0.01 rule_5=0.0 default=0.0\n  note: rule matched\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
     },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 393   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8338  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.M1DcRlxR9Z -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "expired-and-future",
-    "exit": 0,
-    "seconds": 0.643,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 249   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8339  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.QDmZ4YTvdN -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "all-expired",
-    "exit": 0,
-    "seconds": 0.134,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
-    "events": ""
-  },
-  {
-    "name": "invalid-until-1",
-    "exit": 2,
-    "seconds": 0.073,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "",
-    "events": ""
-  },
-  {
-    "name": "invalid-until-2",
-    "exit": 2,
-    "seconds": 0.066,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "",
-    "events": ""
-  },
-  {
-    "name": "invalid-until-3",
-    "exit": 2,
-    "seconds": 0.066,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "",
-    "events": ""
-  },
-  {
-    "name": "invalid-until-4",
-    "exit": 2,
-    "seconds": 0.05,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "",
-    "events": ""
-  },
-  {
-    "name": "invalid-until-5",
-    "exit": 2,
-    "seconds": 0.093,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "",
-    "events": ""
-  },
-  {
-    "name": "invalid-until-6",
-    "exit": 2,
-    "seconds": 0.047,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true,
-      "no_subprocesses": true
-    },
-    "pass": true,
-    "stdout": "",
-    "events": ""
-  },
-  {
-    "name": "valid-leap-day",
-    "exit": 0,
-    "seconds": 0.579,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 243   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8341  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.VcSjqmgKpW -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
   },
   {
     "name": "captain-approval",
-    "exit": 0,
-    "seconds": 0.563,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.445,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 306   tokens: 570/71\n  rule: rule_1 (Work the brief itself calls unusually difficult or high-risk)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 rule_3=0.0 rule_4=0.0 rule_5=0.0 default=0.0\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:opus  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
     },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 271   tokens: 427/35\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.98\n  probabilities: rule_1=0.99 default=0.01\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8342  runway=through_reset  -> eligible\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.ElvDuFva3Q -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+    "brief": "Redesign the authentication system. This is unusually difficult and security-sensitive; a mistake exposes all accounts.",
+    "remaining_temporary_files": []
   },
   {
-    "name": "low-confidence-1",
-    "exit": 0,
-    "seconds": 0.57,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
+    "name": "low-confidence",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.422,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 295   tokens: 574/71\n  rule: rule_2 (Routine feature work, a port, or an installer build inside a)   confidence: 0.45\n  probabilities: rule_1=0.13 rule_2=0.54 rule_3=0.0 rule_4=0.01 rule_5=0.0 default=0.32\n  note: rule matched (low confidence: answer confidence 0.45 below floor 0.6)\n  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'codex' --model 'gpt-5.6-sol' --effort 'high'\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
     },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 269   tokens: 440/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.74\n  probabilities: rule_1=0.83 rule_2=0.0 default=0.17\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8344  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.YopNAUuOSp -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "low-confidence-2",
-    "exit": 0,
-    "seconds": 0.573,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 253   tokens: 448/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.64\n  probabilities: rule_1=0.76 rule_2=0.06 default=0.18\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8344  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.OQFQ8Sxya5 -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "low-confidence-3",
-    "exit": 0,
-    "seconds": 0.551,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 242   tokens: 443/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.76\n  probabilities: rule_1=0.84 rule_2=0.02 default=0.14\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8345  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.8f0ZtpwgCp -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "low-confidence-4",
-    "exit": 0,
-    "seconds": 0.531,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 238   tokens: 440/44\n  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.85\n  probabilities: rule_1=0.05 rule_2=0.9 default=0.05\n  note: rule matched\n  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8347  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'opus' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.7ldPzci0Tq -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "low-confidence-5",
-    "exit": 0,
-    "seconds": 0.558,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 239   tokens: 440/44\n  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.25\n  probabilities: rule_1=0.22 rule_2=0.5 default=0.28\n  note: rule matched (low confidence: answer confidence 0.25 below floor 0.6)\n  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8347  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'opus' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.eC1sGd4KbC -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "low-confidence-approval",
-    "exit": 0,
-    "seconds": 0.557,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 244   tokens: 440/44\n  rule: rule_2 (Read-only investigations or audits without code changes.)   confidence: 0.18\n  probabilities: rule_1=0.3 rule_2=0.45 default=0.25\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:opus  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8349  runway=through_reset  -> eligible\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.7iOFknHTcS -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "tie-attempt-2",
-    "exit": 0,
-    "seconds": 0.644,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 272   tokens: 450/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.54\n  probabilities: rule_1=0.6900000000000001 rule_2=0.3 default=0.01\n  note: rule matched (low confidence: answer confidence 0.54 below floor 0.6)\n  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.835  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'model-0' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.xA3Y6DrGTg -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
-  },
-  {
-    "name": "tie-attempt-3",
-    "exit": 0,
-    "seconds": 0.573,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
-    },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 244   tokens: 473/53\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 0.52\n  probabilities: rule_1=0.64 rule_2=0.21 rule_3=0.13 default=0.02\n  note: rule matched (low confidence: answer confidence 0.52 below floor 0.6)\n  candidate: claude:model-0  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8351  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'model-0' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.ci6cZ2cuFV -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+    "brief": "Split a large service file into smaller modules without changing its behavior. Some boundaries are unclear; identify them while moving the code.",
+    "remaining_temporary_files": []
   },
   {
     "name": "declared-floor",
-    "exit": 0,
-    "seconds": 0.577,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.432,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: ambiguous\n  model: jev-1.14.0   latency_ms: 294   tokens: 567/71\n  rule: rule_2 (Routine feature work, a port, or an installer build inside a)   confidence: 0.48\n  probabilities: rule_1=0.05 rule_2=0.57 rule_3=0.0 rule_4=0.01 rule_5=0.0 default=0.37\n  reason: rule_2 probability 0.57 below its floor 1; no other option clears its own floor\n  candidate: codex:gpt-5.6-sol  provider=codex  -> eligible (quota ranking off: home declares a single shared quota)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "min_confidence": 1
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          },
+          "min_confidence": 1
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          },
+          "min_confidence": 1
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          },
+          "min_confidence": 1
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "min_confidence": 1
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
     },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: ambiguous\n  model: jev-1.14.0   latency_ms: 263   tokens: 448/44\n  rule: rule_1 (Implementation where the worker must design parts of the sol)   confidence: 0.73\n  probabilities: rule_1=0.82 rule_2=0.04 default=0.14\n  reason: rule_1 probability 0.82 below its floor 1; no other option clears its own floor\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8352  runway=through_reset  -> eligible\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.bq1xyeXzIB -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+    "brief": "Split a large service file into smaller modules without changing behavior. Infer boundaries during the work.",
+    "remaining_temporary_files": []
   },
   {
-    "name": "pi-failure-nonfatal",
-    "exit": 0,
-    "seconds": 1.259,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
+    "name": "expired-rule",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.441,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 309   tokens: 552/62\n  rule: rule_3 (A trivial mechanical edit such as a rename, typo, version bu)   confidence: 0.32\n  probabilities: rule_1=0.0 rule_2=0.41 rule_3=0.46 rule_4=0.0 default=0.13\n  note: rule matched (low confidence: answer confidence 0.32 below floor 0.6)\n  candidate: claude:sonnet  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'claude' --model 'sonnet' --effort 'low'\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          },
+          "until": "2000-01-01T00:00:00Z"
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
     },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 243   tokens: 444/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 default=0.0\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8355  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.dd8Vs0Hqbq -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\npi start auth check --provider anthropic\npi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/pi-failure-nonfatal/pi\npi exit 1\npi start auth check --provider openai-codex\npi root /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5XS0P0K4GWF8N1NVBQFZVX0/.dispatch-live-7v6m_sl0/pi-failure-nonfatal/pi\npi exit 1\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
   },
   {
-    "name": "pi-refused-pin",
-    "exit": 0,
-    "seconds": 0.664,
-    "checks": {
-      "exit": true,
-      "output": true,
-      "no_profile": true,
-      "private_temporaries": true,
-      "cleanup": true
+    "name": "future-leap-day",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.423,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 298   tokens: 575/71\n  rule: rule_3 (A bug fix whose root cause the brief states.)   confidence: 0.99\n  probabilities: rule_1=0.0 rule_2=0.0 rule_3=0.99 rule_4=0.01 rule_5=0.0 default=0.0\n  note: rule matched\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          },
+          "until": "2400-02-29T23:59:59Z"
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
     },
-    "pass": true,
-    "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 266   tokens: 444/44\n  rule: rule_1 (A simple bug fix with a stated root cause.)   confidence: 1.0\n  probabilities: rule_1=1.0 rule_2=0.0 default=0.0\n  note: rule matched\n  candidate: claude:sonnet  provider=claude  scope=all_models  remaining=80%  spendPriority=0.8356  runway=through_reset  -> eligible\n  profile: --harness 'claude' --model 'sonnet' --effort 'high'\n",
-    "events": "curl start -sS --max-time 5 -o /var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.0qxqgN66kU -w %{http_code} -X POST https://api.typesafe.ai/v1/systemone -H Content-Type: application/json -H @/dev/fd/3 --data-binary @-\ncurl exit 0\nquota-axi start --json --max-age 2m\nquota-axi exit 0\n"
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "all-expired",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.073,
+    "passed": true,
+    "output": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "2000-01-01T00:00:00Z"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          },
+          "until": "2000-01-01T00:00:00Z"
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          },
+          "until": "2000-01-01T00:00:00Z"
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          },
+          "until": "2000-01-01T00:00:00Z"
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "until": "2000-01-01T00:00:00Z"
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-0",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.036,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be an ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ) when present\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "soon"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-1",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.035,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be an ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ) when present\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": 42
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-2",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.042,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "2999-13-40T25:61:61Z"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-3",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.041,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "2999-02-29T00:00:00Z"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-4",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.042,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "2000-13-01T00:00:00Z"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-5",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.042,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "2999-01-01T24:00:00Z"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "invalid-until-6",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 2,
+    "elapsed_seconds": 0.04,
+    "passed": true,
+    "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain",
+          "until": "2999-01-01T00:00:60Z"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "tie-attempt",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.412,
+    "passed": false,
+    "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 285   tokens: 419/44\n  rule: rule_1 (The task changes software code.)   confidence: 0.35\n  probabilities: rule_1=0.57 rule_2=0.41 default=0.02\n  note: rule matched (low confidence: answer confidence 0.35 below floor 0.6)\n  candidate: claude:opus  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'claude' --model 'opus' --effort 'xhigh'\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "The task changes software code.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          }
+        },
+        {
+          "when": "The task changes software code.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Change software code.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "openrouter-availability",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.018,
+    "passed": false,
+    "output": "dispatch-resolve: off (OPENROUTER_API_KEY absent from the environment and /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/.env)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
+  },
+  {
+    "name": "openai-availability",
+    "command": [
+      "bash",
+      "bin/fm-dispatch-resolve.sh",
+      "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
+      "--project",
+      "dispatch-validation"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.018,
+    "passed": false,
+    "output": "dispatch-resolve: off (OPENAI_API_KEY absent from the environment and /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/.env)\n",
+    "rules": {
+      "shared_quota": true,
+      "rules": [
+        {
+          "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+          "use": {
+            "harness": "claude",
+            "model": "opus",
+            "effort": "xhigh"
+          },
+          "approval": "captain"
+        },
+        {
+          "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          }
+        },
+        {
+          "when": "A bug fix whose root cause the brief states.",
+          "use": {
+            "harness": "cursor",
+            "model": "cursor-grok-4.6-medium"
+          }
+        },
+        {
+          "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+          "use": {
+            "harness": "claude",
+            "model": "sonnet",
+            "effort": "low"
+          }
+        },
+        {
+          "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+          "use": {
+            "harness": "codex",
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          }
+        }
+      ],
+      "default": {
+        "harness": "codex",
+        "model": "gpt-5.6-sol",
+        "effort": "low"
+      }
+    },
+    "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
+    "remaining_temporary_files": []
   }
 ]

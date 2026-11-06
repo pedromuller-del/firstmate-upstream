@@ -1,46 +1,42 @@
 {
-  "scenario": "live-tie-attempt",
+  "name": "tie-attempt",
   "command": [
+    "bash",
     "bin/fm-dispatch-resolve.sh",
-    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M5NSNS7M0WEH0T84FH2RD0D8/.validation-tmp/brief.md",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
     "--project",
-    "disposable-pager"
+    "dispatch-validation"
   ],
   "exit_code": 0,
-  "seconds": 0.602,
-  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 278   tokens: 494/62\n  rule: rule_1 (The task is software engineering.)   confidence: 0.46\n  probabilities: rule_1=0.57 rule_2=0.19 rule_3=0.1 rule_4=0.12 default=0.02\n  note: rule matched (low confidence: answer confidence 0.46 below floor 0.6)\n  candidate: cursor:cursor-grok-4.6-medium  provider=cursor  scope=all_models  remaining=90%  spendPriority=3.2754  runway=through_reset  -> eligible\n  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'\n",
-  "stderr": "",
+  "elapsed_seconds": 0.412,
+  "passed": false,
+  "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 285   tokens: 419/44\n  rule: rule_1 (The task changes software code.)   confidence: 0.35\n  probabilities: rule_1=0.57 rule_2=0.41 default=0.02\n  note: rule matched (low confidence: answer confidence 0.35 below floor 0.6)\n  candidate: claude:opus  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'claude' --model 'opus' --effort 'xhigh'\n",
   "rules": {
+    "shared_quota": true,
     "rules": [
       {
-        "when": "The task is software engineering.",
+        "when": "The task changes software code.",
         "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-medium"
+          "harness": "claude",
+          "model": "opus",
+          "effort": "xhigh"
         }
       },
       {
-        "when": "The task is software engineering.",
+        "when": "The task changes software code.",
         "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-high"
-        }
-      },
-      {
-        "when": "The task is software engineering.",
-        "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-medium"
-        }
-      },
-      {
-        "when": "The task is software engineering.",
-        "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-high"
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "high"
         }
       }
-    ]
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-5.6-sol",
+      "effort": "low"
+    }
   },
-  "brief": "# Task\n## Captain's intent\nFix the off-by-one comparison in the pager. The cause is a <= comparison that must be <.\n\n## Firstmate spec\nChange the comparison and verify one page per call.\n"
+  "brief": "Change software code.",
+  "remaining_temporary_files": []
 }

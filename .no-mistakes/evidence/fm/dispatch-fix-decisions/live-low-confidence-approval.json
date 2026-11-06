@@ -1,0 +1,42 @@
+{
+  "name": "low-confidence-approval",
+  "command": [
+    "bash",
+    "bin/fm-dispatch-resolve.sh",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md"
+  ],
+  "exit_code": 0,
+  "output": "dispatch-resolve:\n  status: escalate\n  model: jev-1.14.0   latency_ms: 355   tokens: 412/44\n  rule: rule_1 (The task changes software code.)   confidence: 0.44\n  probabilities: rule_1=0.63 rule_2=0.35 default=0.02\n  reason: rule requires the captain's explicit approval before dispatch\n  candidate: claude:opus  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n",
+  "rules": {
+    "shared_quota": true,
+    "rules": [
+      {
+        "when": "The task changes software code.",
+        "approval": "captain",
+        "use": {
+          "harness": "claude",
+          "model": "opus",
+          "effort": "xhigh"
+        }
+      },
+      {
+        "when": "The task changes software code.",
+        "approval": "captain",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-5.6-sol",
+          "effort": "high"
+        }
+      }
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-5.6-sol",
+      "effort": "low"
+    }
+  },
+  "brief": "Change software code.",
+  "remaining_temporary_files": [
+    "node-compile-cache"
+  ]
+}

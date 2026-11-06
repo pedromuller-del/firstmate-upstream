@@ -1,0 +1,20 @@
+[
+  {
+    "command": "bash tests/fm-secondmate-harness.test.sh",
+    "exit_code": 0,
+    "passed": 56,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-secondmate-liveness.test.sh",
+    "exit_code": 0,
+    "passed": 28,
+    "failed": 0
+  },
+  {
+    "command": "bash tests/fm-spawn-dispatch-profile.test.sh",
+    "exit_code": 0,
+    "passed": 102,
+    "failed": 0
+  }
+]
