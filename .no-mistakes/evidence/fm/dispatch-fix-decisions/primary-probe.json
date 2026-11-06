@@ -1,0 +1,42 @@
+{
+  "lab": "/Users/pedromuller/.no-mistakes/evidence/01M6RS0XKP6V2CRD7BTHY8Z0NH/p1nvwsor0",
+  "command": [
+    "tmux",
+    "-L",
+    "fm-lab",
+    "new-session",
+    "-d",
+    "-x",
+    "120",
+    "-y",
+    "40",
+    "-s",
+    "primary",
+    "-c",
+    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH",
+    "-e",
+    "FM_HOME=/Users/pedromuller/.no-mistakes/evidence/01M6RS0XKP6V2CRD7BTHY8Z0NH/p1nvwsor0",
+    "claude"
+  ],
+  "create": {
+    "exit_code": 0,
+    "stdout": "/Users/pedromuller/.no-mistakes/evidence/01M6RS0XKP6V2CRD7BTHY8Z0NH/p1nvwsor0\n",
+    "stderr": ""
+  },
+  "launch": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "capture": {
+    "exit_code": 0,
+    "stdout": "\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n Accessing workspace:\n\n /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH\n\n Quick safety check: Is this a project you created or one you trust? (Like your own code, a well-known open source\n project, or work from your team). If not, take a moment to review what's in this folder first.\n\n Claude Code'll be able to read, edit, and execute files here.\n\n Security guide\n\n \u276f No, exit\n   Yes, I trust this folder\n\n Enter to confirm \u00b7 Esc to cancel\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    "stderr": ""
+  },
+  "stop": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "lab_removed": true
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "name": "live-clear",
+    "exit_code": 0,
+    "elapsed_seconds": 0.651
+  },
+  {
+    "name": "live-borderline-1",
+    "exit_code": 0,
+    "elapsed_seconds": 0.614
+  },
+  {
+    "name": "live-borderline-2",
+    "exit_code": 0,
+    "elapsed_seconds": 0.646
+  },
+  {
+    "name": "live-borderline-3",
+    "exit_code": 0,
+    "elapsed_seconds": 0.674
+  },
+  {
+    "name": "live-borderline-4",
+    "exit_code": 0,
+    "elapsed_seconds": 0.643
+  },
+  {
+    "name": "live-captain-approval",
+    "exit_code": 0,
+    "elapsed_seconds": 0.595
+  },
+  {
+    "name": "live-declared-floor",
+    "exit_code": 0,
+    "elapsed_seconds": 0.626
+  },
+  {
+    "name": "live-expired-rule",
+    "exit_code": 0,
+    "elapsed_seconds": 0.619
+  },
+  {
+    "name": "live-all-expired",
+    "exit_code": 0,
+    "elapsed_seconds": 0.07
+  },
+  {
+    "name": "live-invalid-until-1",
+    "exit_code": 2,
+    "elapsed_seconds": 0.045
+  },
+  {
+    "name": "live-invalid-until-2",
+    "exit_code": 2,
+    "elapsed_seconds": 0.043
+  },
+  {
+    "name": "live-invalid-until-3",
+    "exit_code": 2,
+    "elapsed_seconds": 0.036
+  },
+  {
+    "name": "live-invalid-until-4",
+    "exit_code": 2,
+    "elapsed_seconds": 0.038
+  },
+  {
+    "name": "live-invalid-until-5",
+    "exit_code": 2,
+    "elapsed_seconds": 0.045
+  },
+  {
+    "name": "live-pi-refresh-failure",
+    "exit_code": 0,
+    "elapsed_seconds": 2.0
+  },
+  {
+    "name": "live-invalid-account-pin",
+    "exit_code": 0,
+    "elapsed_seconds": 0.907
+  },
+  {
+    "name": "live-openrouter-availability",
+    "exit_code": 0,
+    "elapsed_seconds": 0.02
+  },
+  {
+    "name": "live-openai-availability",
+    "exit_code": 0,
+    "elapsed_seconds": 0.017
+  }
+]

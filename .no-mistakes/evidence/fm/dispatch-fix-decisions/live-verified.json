@@ -1,0 +1,81 @@
+[
+  {
+    "name": "Resolve a known bug to its exact profile without quota calls under shared quota",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-clear.json"
+    ]
+  },
+  {
+    "name": "Resolve a below-global-floor answer to its probability leader with a low-confidence note",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-borderline-4.json"
+    ]
+  },
+  {
+    "name": "Require captain approval even when the selected answer has low confidence",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-captain-approval.json",
+      "live-low-captain-approval.json"
+    ]
+  },
+  {
+    "name": "Withhold a profile when its declared confidence floor has no qualifying alternative",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-declared-floor.json",
+      "live-low-declared-floor.json"
+    ]
+  },
+  {
+    "name": "Remove expired rules, retain a future leap-day rule, and stop when all rules expire",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-expired-rule.json",
+      "live-all-expired.json"
+    ]
+  },
+  {
+    "name": "Reject malformed and calendar-invalid expiry values before calling any service",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-invalid-until-1.json",
+      "live-invalid-until-2.json",
+      "live-invalid-until-3.json",
+      "live-invalid-until-4.json",
+      "live-invalid-until-5.json"
+    ]
+  },
+  {
+    "name": "Create private rule snapshots and remove them after resolution",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-private-snapshots.json"
+    ]
+  },
+  {
+    "name": "Check each live Pi provider and the root default through the pinned account, then read quota despite auth failure",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-pi-refresh-failure.json"
+    ]
+  },
+  {
+    "name": "Avoid ambient-account refresh when the configured Pi account root is invalid",
+    "result": "pass",
+    "live": true,
+    "files": [
+      "live-invalid-account-pin.json"
+    ]
+  }
+]

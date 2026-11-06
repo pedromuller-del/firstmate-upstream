@@ -1,0 +1,28 @@
+[
+  {
+    "suite": "tests/fm-secondmate-harness.test.sh",
+    "selected_existing_cases": [
+      "test_config_reread_cleanup_runs_after_mixed_delivery_failure",
+      "test_config_reread_stops_after_failed_generation",
+      "test_config_reread_skips_when_unchanged_and_reads_after_push",
+      "test_config_reread_bootstrap_path_and_spawn_flexibility",
+      "test_bootstrap_respawns_before_config_reread",
+      "test_spawn_quarantines_pending_rereads_on_cleanup_failure",
+      "test_bootstrap_detect_only_does_not_create_state"
+    ],
+    "exit_code": 0,
+    "passed": 7,
+    "failed": 0,
+    "seconds": 47.27
+  },
+  {
+    "suite": "tests/fm-bootstrap.test.sh",
+    "selected_existing_cases": [
+      "test_crew_dispatch_validation"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "seconds": 112.94
+  }
+]

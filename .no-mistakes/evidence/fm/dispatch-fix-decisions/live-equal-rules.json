@@ -1,0 +1,102 @@
+{
+  "name": "live-equal-rules",
+  "exit_code": 0,
+  "elapsed_seconds": 0.616,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 483   tokens: 454/44\n  rule: rule_1 (A mechanical typo fix in documentation.)   confidence: 0.55\n  probabilities: rule_1=0.7 rule_2=0.27 default=0.03\n  note: rule matched (low confidence: answer confidence 0.55 below floor 0.6)\n  candidate: codex:gpt-6.1-sol  provider=codex  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'codex' --model 'gpt-6.1-sol' --effort 'low'\n",
+  "stderr": "",
+  "rules": {
+    "shared_quota": true,
+    "rules": [
+      {
+        "when": "A mechanical typo fix in documentation.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        }
+      },
+      {
+        "when": "A mechanical typo fix in documentation.",
+        "use": {
+          "harness": "claude",
+          "model": "sonnet"
+        }
+      }
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "low"
+    }
+  },
+  "brief": "Fix the spelling of documentation in README. Both matching rules have exactly the same condition.",
+  "events": [
+    {
+      "tool": "curl",
+      "args": [
+        "--globoff",
+        "-sS",
+        "--max-time",
+        "5",
+        "-o",
+        "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.3XKnyrTZAE",
+        "-w",
+        "%{http_code}",
+        "-X",
+        "POST",
+        "https://api.typesafe.ai/v1/systemone",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        "@/dev/fd/3",
+        "--data-binary",
+        "@-"
+      ],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-_8rox9ks/live-equal-rules/pi",
+      "start": 1793981017.328935,
+      "request": {
+        "model": "jev-latest",
+        "state": {
+          "task": {
+            "project": "synthetic-dispatch-check",
+            "brief": "## Captain's intent\nFix the spelling of documentation in README. Both matching rules have exactly the same condition.\n\n## Firstmate spec\nKeep the change limited to the stated task.\n"
+          }
+        },
+        "questions": {
+          "rule": {
+            "type": "choice",
+            "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+            "criteria": {
+              "rule_1": "A mechanical typo fix in documentation.",
+              "rule_2": "A mechanical typo fix in documentation.",
+              "default": "No listed rule applies to this task."
+            }
+          }
+        }
+      },
+      "temp_permissions": [],
+      "response": {
+        "model": "jev-1.14.0",
+        "answers": {
+          "rule": {
+            "type": "choice",
+            "choice": "rule_1",
+            "confidence": 0.55,
+            "probabilities": {
+              "rule_1": 0.7,
+              "rule_2": 0.27,
+              "default": 0.03
+            }
+          }
+        },
+        "usage": {
+          "input_tokens": 454,
+          "output_tokens": 44
+        }
+      },
+      "exit_code": 0,
+      "end": 1793981017.6215
+    }
+  ],
+  "remaining_temps": []
+}

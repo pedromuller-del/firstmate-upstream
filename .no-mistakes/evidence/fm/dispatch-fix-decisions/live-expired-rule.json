@@ -1,67 +1,102 @@
 {
-  "name": "expired-rule",
-  "command": [
-    "bash",
-    "bin/fm-dispatch-resolve.sh",
-    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
-    "--project",
-    "dispatch-validation"
-  ],
+  "name": "live-expired-rule",
   "exit_code": 0,
-  "elapsed_seconds": 0.441,
-  "passed": true,
-  "output": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 309   tokens: 552/62\n  rule: rule_3 (A trivial mechanical edit such as a rename, typo, version bu)   confidence: 0.32\n  probabilities: rule_1=0.0 rule_2=0.41 rule_3=0.46 rule_4=0.0 default=0.13\n  note: rule matched (low confidence: answer confidence 0.32 below floor 0.6)\n  candidate: claude:sonnet  provider=claude  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'claude' --model 'sonnet' --effort 'low'\n",
+  "elapsed_seconds": 0.619,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 498   tokens: 439/35\n  rule: rule_1 (Fix a pagination bug whose root cause is a wrong comparison.)   confidence: 1.0\n  probabilities: rule_1=1.0 default=0.0\n  note: rule matched\n  candidate: codex:gpt-6.1-sol  provider=codex  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'codex' --model 'gpt-6.1-sol' --effort 'low'\n",
+  "stderr": "",
   "rules": {
     "shared_quota": true,
     "rules": [
       {
-        "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+        "when": "Fix a pagination bug whose root cause is a wrong comparison.",
+        "until": "2000-01-01T00:00:00Z",
         "use": {
           "harness": "claude",
-          "model": "opus",
-          "effort": "xhigh"
-        },
-        "approval": "captain"
-      },
-      {
-        "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
-        "use": {
-          "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "high"
+          "model": "sonnet"
         }
       },
       {
-        "when": "A bug fix whose root cause the brief states.",
+        "when": "Fix a pagination bug whose root cause is a wrong comparison.",
+        "until": "2096-02-29T00:00:00Z",
         "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-medium"
-        },
-        "until": "2000-01-01T00:00:00Z"
-      },
-      {
-        "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
-        "use": {
-          "harness": "claude",
-          "model": "sonnet",
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
           "effort": "low"
-        }
-      },
-      {
-        "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
-        "use": {
-          "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh"
         }
       }
     ],
     "default": {
       "harness": "codex",
-      "model": "gpt-5.6-sol",
+      "model": "gpt-6.1-sol",
       "effort": "low"
     }
   },
-  "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
-  "remaining_temporary_files": []
+  "brief": "Fix the pagination bug. Root cause: a wrong comparison uses <= instead of <.",
+  "events": [
+    {
+      "tool": "curl",
+      "args": [
+        "--globoff",
+        "-sS",
+        "--max-time",
+        "5",
+        "-o",
+        "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.cnPD3RQxM4",
+        "-w",
+        "%{http_code}",
+        "-X",
+        "POST",
+        "https://api.typesafe.ai/v1/systemone",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        "@/dev/fd/3",
+        "--data-binary",
+        "@-"
+      ],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-7t_ezzno/live-expired-rule/pi",
+      "start": 1793980868.596339,
+      "request": {
+        "model": "jev-latest",
+        "state": {
+          "task": {
+            "project": "synthetic-dispatch-check",
+            "brief": "## Captain's intent\nFix the pagination bug. Root cause: a wrong comparison uses <= instead of <.\n\n## Firstmate spec\nKeep the change limited to the stated task.\n"
+          }
+        },
+        "questions": {
+          "rule": {
+            "type": "choice",
+            "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+            "criteria": {
+              "rule_1": "Fix a pagination bug whose root cause is a wrong comparison.",
+              "default": "No listed rule applies to this task."
+            }
+          }
+        }
+      },
+      "temp_permissions": [],
+      "response": {
+        "model": "jev-1.14.0",
+        "answers": {
+          "rule": {
+            "type": "choice",
+            "choice": "rule_1",
+            "confidence": 1.0,
+            "probabilities": {
+              "rule_1": 1.0,
+              "default": 0.0
+            }
+          }
+        },
+        "usage": {
+          "input_tokens": 439,
+          "output_tokens": 35
+        }
+      },
+      "exit_code": 0,
+      "end": 1793980868.899777
+    }
+  ],
+  "remaining_temps": []
 }

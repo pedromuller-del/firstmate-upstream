@@ -3,6 +3,7 @@ ok - fm_backend_tmux_agent_state: rejects malformed targets before probing tmux
 ok - fm_backend_herdr_agent_state: preserves missing/no-agent/live/unknown husk behavior
 ok - fm_backend_agent_state: routes tmux/Herdr and keeps Zellij unverified
 ok - sweep: a confirmed-dead secondmate endpoint is killed and respawned
+ok - sweep: a dead secondmate respawns on its recorded backend, not a changed default
 ok - sweep: secondmate recovery resolves its durable account despite a different ambient login
 ok - sweep: distinct secondmate relaunches serialize across the task-set lock
 ok - sweep: a tmux secondmate whose close fails keeps the existing best-effort kill and guarded spawn
@@ -21,4 +22,8 @@ ok - relaunch: the spawn timeout bounds the lock wait before touching the endpoi
 ok - sweep: an unreadable or unwritable relaunch ledger refuses to kill or spawn
 ok - poll probe: remote states map to the same contract as local, one call each
 ok - poll probe: unreachable or inconclusive remote reads preserve the route
+ok - full probe: a live rex route stays alive through the rex readiness gate
+ok - full probe: remote backend drift is reported, never migrated
+ok - full probe: rex readiness gaps and unreachable hosts stay explicit
+ok - full probe: a record without remote_backend stays a herdr route
 # all fm-secondmate-liveness tests passed

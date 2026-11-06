@@ -1,56 +1,65 @@
 [
   {
-    "command": "bash tests/fm-dispatch-resolve.test.sh",
-    "exit_code": 0,
-    "passed": 36,
-    "failed": 0
-  },
-  {
-    "command": "bash tests/fm-quota-choose.test.sh",
-    "exit_code": 0,
-    "passed": 58,
-    "failed": 0
-  },
-  {
-    "command": "bash tests/fm-bootstrap.test.sh",
-    "exit_code": 0,
-    "passed": 30,
-    "failed": 0
-  },
-  {
     "command": "bash tests/fm-procevent-quota.test.sh",
     "exit_code": 0,
     "passed": 33,
-    "failed": 0
+    "failed": 0,
+    "seconds": 25.14
   },
   {
     "command": "bash tests/fm-startup-memory-budget.test.sh",
     "exit_code": 0,
     "passed": 4,
-    "failed": 0
+    "failed": 0,
+    "seconds": 12.85
   },
   {
     "command": "bash tests/fm-secondmate-sync.test.sh",
     "exit_code": 0,
     "passed": 33,
-    "failed": 0
+    "failed": 0,
+    "seconds": 85.41
   },
   {
     "command": "bash tests/fm-secondmate-harness.test.sh",
-    "exit_code": 1,
-    "passed": 9,
-    "failed": 1
+    "exit_code": "timeout",
+    "passed": 49,
+    "failed": 0,
+    "seconds": 240.53
   },
   {
     "command": "bash tests/fm-secondmate-liveness.test.sh",
-    "exit_code": 1,
-    "passed": 4,
-    "failed": 1
+    "exit_code": 0,
+    "passed": 28,
+    "failed": 0,
+    "seconds": 68.13
   },
   {
     "command": "bash tests/fm-shared-captain-inheritance.test.sh",
     "exit_code": 0,
     "passed": 13,
-    "failed": 0
+    "failed": 0,
+    "seconds": 15.51
+  },
+  {
+    "command": "bash tests/fm-quota-choose.test.sh",
+    "exit_code": 0,
+    "passed": 58,
+    "failed": 0,
+    "seconds": 4.26
+  },
+  {
+    "command": "bash tests/fm-bootstrap.test.sh",
+    "exit_code": "timeout",
+    "passed": 30,
+    "failed": 0,
+    "seconds": 242.34
+  },
+  {
+    "command": "bash tests/fm-spawn-dispatch-profile.test.sh",
+    "exit_code": "timeout",
+    "passed": 40,
+    "failed": 0,
+    "seconds": 241.47
   }
 ]

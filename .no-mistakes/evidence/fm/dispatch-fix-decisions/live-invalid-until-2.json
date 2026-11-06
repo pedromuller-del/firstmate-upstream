@@ -1,67 +1,37 @@
 {
-  "name": "invalid-until-2",
-  "command": [
-    "bash",
-    "bin/fm-dispatch-resolve.sh",
-    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
-    "--project",
-    "dispatch-validation"
-  ],
+  "name": "live-invalid-until-2",
   "exit_code": 2,
-  "elapsed_seconds": 0.042,
-  "passed": true,
-  "output": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
+  "elapsed_seconds": 0.043,
+  "stdout": "",
+  "stderr": "error: malformed rules file: /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-7t_ezzno/live-invalid-until-2/config/crew-dispatch.json - until must be a valid ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ)\n",
   "rules": {
     "shared_quota": true,
     "rules": [
       {
-        "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+        "when": "Fix a pagination bug whose root cause is a wrong comparison.",
+        "until": "2000-01-01T00:00:00Z",
         "use": {
           "harness": "claude",
-          "model": "opus",
-          "effort": "xhigh"
-        },
-        "approval": "captain",
-        "until": "2999-13-40T25:61:61Z"
+          "model": "sonnet"
+        }
       },
       {
-        "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+        "when": "Fix a pagination bug whose root cause is a wrong comparison.",
+        "until": "2027-02-29T12:00:00Z",
         "use": {
           "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "high"
-        }
-      },
-      {
-        "when": "A bug fix whose root cause the brief states.",
-        "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-medium"
-        }
-      },
-      {
-        "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
-        "use": {
-          "harness": "claude",
-          "model": "sonnet",
+          "model": "gpt-6.1-sol",
           "effort": "low"
-        }
-      },
-      {
-        "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
-        "use": {
-          "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh"
         }
       }
     ],
     "default": {
       "harness": "codex",
-      "model": "gpt-5.6-sol",
+      "model": "gpt-6.1-sol",
       "effort": "low"
     }
   },
-  "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
-  "remaining_temporary_files": []
+  "brief": "Fix the pagination bug caused by a wrong comparison.",
+  "events": [],
+  "remaining_temps": []
 }

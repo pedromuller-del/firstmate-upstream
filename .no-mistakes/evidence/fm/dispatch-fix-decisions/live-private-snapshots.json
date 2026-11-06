@@ -1,0 +1,214 @@
+{
+  "name": "live-private-snapshots",
+  "exit_code": 0,
+  "elapsed_seconds": 1.081,
+  "stdout": "dispatch-resolve:\n  status: clear\n  model: jev-1.14.0   latency_ms: 587   tokens: 581/71\n  rule: rule_3 (A bug fix whose root cause the brief states.)   confidence: 1.0\n  probabilities: rule_1=0.0 rule_2=0.0 rule_3=1.0 rule_4=0.0 rule_5=0.0 default=0.0\n  note: rule matched\n  candidate: codex:gpt-6.1-sol  provider=codex  -> eligible (quota ranking off: home declares a single shared quota)\n  profile: --harness 'codex' --model 'gpt-6.1-sol' --effort 'medium'\n",
+  "stderr": "",
+  "rules": {
+    "shared_quota": true,
+    "rules": [
+      {
+        "when": "Unusually difficult or high-risk security redesign or costly migration. Routine builds, ports, and installers do not qualify.",
+        "use": {
+          "harness": "claude",
+          "model": "opus"
+        },
+        "approval": "captain"
+      },
+      {
+        "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "low"
+        }
+      },
+      {
+        "when": "A bug fix whose root cause the brief states.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
+        }
+      },
+      {
+        "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+        "use": {
+          "harness": "claude",
+          "model": "sonnet"
+        }
+      },
+      {
+        "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+        "use": {
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      }
+    ],
+    "default": {
+      "harness": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "low"
+    }
+  },
+  "brief": "Fix the pagination bug. Root cause: the offset uses <= instead of < in orders_query.go. Change that comparison.",
+  "events": [
+    {
+      "tool": "mktemp",
+      "args": [],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.07448,
+      "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.4iSpaOP71X",
+      "mode": "0o600",
+      "exit_code": 0,
+      "end": 1793981150.077595
+    },
+    {
+      "tool": "mktemp",
+      "args": [],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.126566,
+      "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.Z4Hne0CDY9",
+      "mode": "0o600",
+      "exit_code": 0,
+      "end": 1793981150.1298392
+    },
+    {
+      "tool": "mktemp",
+      "args": [],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.192381,
+      "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.Ro5u7gqlQQ",
+      "mode": "0o600",
+      "exit_code": 0,
+      "end": 1793981150.195693
+    },
+    {
+      "tool": "mktemp",
+      "args": [],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.227808,
+      "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.EaKTnIzXEC",
+      "mode": "0o600",
+      "exit_code": 0,
+      "end": 1793981150.231065
+    },
+    {
+      "tool": "mktemp",
+      "args": [],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.262869,
+      "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.aF765DmQrb",
+      "mode": "0o600",
+      "exit_code": 0,
+      "end": 1793981150.266021
+    },
+    {
+      "tool": "mktemp",
+      "args": [],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.297395,
+      "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.zVFc6qarmc",
+      "mode": "0o600",
+      "exit_code": 0,
+      "end": 1793981150.300807
+    },
+    {
+      "tool": "curl",
+      "args": [
+        "--globoff",
+        "-sS",
+        "--max-time",
+        "5",
+        "-o",
+        "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.Ro5u7gqlQQ",
+        "-w",
+        "%{http_code}",
+        "-X",
+        "POST",
+        "https://api.typesafe.ai/v1/systemone",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        "@/dev/fd/3",
+        "--data-binary",
+        "@-"
+      ],
+      "root": "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-kkzadljm/live-private-snapshots/pi",
+      "start": 1793981150.499601,
+      "request": {
+        "model": "jev-latest",
+        "state": {
+          "task": {
+            "project": "synthetic-dispatch-check",
+            "brief": "## Captain's intent\nFix the pagination bug. Root cause: the offset uses <= instead of < in orders_query.go. Change that comparison.\n\n## Firstmate spec\nKeep the change limited to the stated task.\n"
+          }
+        },
+        "questions": {
+          "rule": {
+            "type": "choice",
+            "instructions": "Which ONE dispatch rule best fits `task` (read `task.brief` and `task.project`)? Each option is the rule's own matching condition; pick `default` when no rule's condition is met, including when a rule's own exemption text excludes this task.",
+            "criteria": {
+              "rule_1": "Unusually difficult or high-risk security redesign or costly migration. Routine builds, ports, and installers do not qualify.",
+              "rule_2": "Routine feature work, a port, or an installer build inside an existing codebase.",
+              "rule_3": "A bug fix whose root cause the brief states.",
+              "rule_4": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
+              "rule_5": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
+              "default": "No listed rule applies to this task."
+            }
+          }
+        }
+      },
+      "temp_permissions": [
+        {
+          "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.4iSpaOP71X",
+          "mode": "0o400"
+        },
+        {
+          "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.Ro5u7gqlQQ",
+          "mode": "0o600"
+        },
+        {
+          "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.EaKTnIzXEC",
+          "mode": "0o600"
+        },
+        {
+          "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.aF765DmQrb",
+          "mode": "0o600"
+        },
+        {
+          "path": "/var/folders/h9/7tyc857x2xd836wmcb8sdwtc0000gn/T/tmp.zVFc6qarmc",
+          "mode": "0o600"
+        }
+      ],
+      "response": {
+        "model": "jev-1.14.0",
+        "answers": {
+          "rule": {
+            "type": "choice",
+            "choice": "rule_3",
+            "confidence": 1.0,
+            "probabilities": {
+              "rule_1": 0.0,
+              "rule_2": 0.0,
+              "rule_3": 1.0,
+              "rule_4": 0.0,
+              "rule_5": 0.0,
+              "default": 0.0
+            }
+          }
+        },
+        "usage": {
+          "input_tokens": 581,
+          "output_tokens": 71
+        }
+      },
+      "exit_code": 0,
+      "end": 1793981150.900161
+    }
+  ],
+  "remaining_temps": [],
+  "remaining_recorded_temps": []
+}

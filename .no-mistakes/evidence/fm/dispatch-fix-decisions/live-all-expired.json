@@ -1,71 +1,37 @@
 {
-  "name": "all-expired",
-  "command": [
-    "bash",
-    "bin/fm-dispatch-resolve.sh",
-    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
-    "--project",
-    "dispatch-validation"
-  ],
+  "name": "live-all-expired",
   "exit_code": 0,
-  "elapsed_seconds": 0.073,
-  "passed": true,
-  "output": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
+  "elapsed_seconds": 0.07,
+  "stdout": "dispatch-resolve:\n  status: escalate\n  reason: no rules to match\n",
+  "stderr": "",
   "rules": {
     "shared_quota": true,
     "rules": [
       {
-        "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+        "when": "Fix a pagination bug whose root cause is a wrong comparison.",
+        "until": "2000-01-01T00:00:00Z",
         "use": {
           "harness": "claude",
-          "model": "opus",
-          "effort": "xhigh"
-        },
-        "approval": "captain",
-        "until": "2000-01-01T00:00:00Z"
+          "model": "sonnet"
+        }
       },
       {
-        "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
+        "when": "Fix a pagination bug whose root cause is a wrong comparison.",
+        "until": "2000-01-01T00:00:00Z",
         "use": {
           "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "high"
-        },
-        "until": "2000-01-01T00:00:00Z"
-      },
-      {
-        "when": "A bug fix whose root cause the brief states.",
-        "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-medium"
-        },
-        "until": "2000-01-01T00:00:00Z"
-      },
-      {
-        "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
-        "use": {
-          "harness": "claude",
-          "model": "sonnet",
+          "model": "gpt-6.1-sol",
           "effort": "low"
-        },
-        "until": "2000-01-01T00:00:00Z"
-      },
-      {
-        "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
-        "use": {
-          "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh"
-        },
-        "until": "2000-01-01T00:00:00Z"
+        }
       }
     ],
     "default": {
       "harness": "codex",
-      "model": "gpt-5.6-sol",
+      "model": "gpt-6.1-sol",
       "effort": "low"
     }
   },
-  "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
-  "remaining_temporary_files": []
+  "brief": "Fix the pagination bug caused by a wrong comparison.",
+  "events": [],
+  "remaining_temps": []
 }

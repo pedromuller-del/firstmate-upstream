@@ -1,25 +1,17 @@
 {
-  "name": "openrouter-availability",
-  "command": [
-    "bash",
-    "bin/fm-dispatch-resolve.sh",
-    "/Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/brief.md",
-    "--project",
-    "dispatch-validation"
-  ],
+  "name": "live-openrouter-availability",
   "exit_code": 0,
-  "elapsed_seconds": 0.018,
-  "passed": false,
-  "output": "dispatch-resolve: off (OPENROUTER_API_KEY absent from the environment and /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RJ610785WAMNF7KN4N4CWH/.dispatch-live-lab/home/.env)\n",
+  "elapsed_seconds": 0.02,
+  "stdout": "",
+  "stderr": "dispatch-resolve: off (OPENROUTER_API_KEY absent from the environment and /Users/pedromuller/.no-mistakes/worktrees/9cdf64f8f989/01M6RS0XKP6V2CRD7BTHY8Z0NH/.dispatch-check-7t_ezzno/live-openrouter-availability/.env)\n",
   "rules": {
     "shared_quota": true,
     "rules": [
       {
-        "when": "Work the brief itself calls unusually difficult or high-risk, such as a security-sensitive redesign or a migration where a mistake is costly; routine builds, ports, and installers do not qualify.",
+        "when": "Unusually difficult or high-risk security redesign or costly migration. Routine builds, ports, and installers do not qualify.",
         "use": {
           "harness": "claude",
-          "model": "opus",
-          "effort": "xhigh"
+          "model": "opus"
         },
         "approval": "captain"
       },
@@ -27,40 +19,41 @@
         "when": "Routine feature work, a port, or an installer build inside an existing codebase.",
         "use": {
           "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "high"
+          "model": "gpt-6.1-sol",
+          "effort": "low"
         }
       },
       {
         "when": "A bug fix whose root cause the brief states.",
         "use": {
-          "harness": "cursor",
-          "model": "cursor-grok-4.6-medium"
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "medium"
         }
       },
       {
         "when": "A trivial mechanical edit such as a rename, typo, version bump, or wording fix.",
         "use": {
           "harness": "claude",
-          "model": "sonnet",
-          "effort": "low"
+          "model": "sonnet"
         }
       },
       {
         "when": "A read-only investigation, diagnosis, or audit whose deliverable is a written report, not a code change.",
         "use": {
           "harness": "codex",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh"
+          "model": "gpt-6.1-sol",
+          "effort": "high"
         }
       }
     ],
     "default": {
       "harness": "codex",
-      "model": "gpt-5.6-sol",
+      "model": "gpt-6.1-sol",
       "effort": "low"
     }
   },
-  "brief": "Fix the pagination bug: the last page repeats an item because orders_query.go uses <= instead of <. Change that comparison only.",
-  "remaining_temporary_files": []
+  "brief": "Fix the pagination bug caused by a wrong comparison.",
+  "events": [],
+  "remaining_temps": []
 }
