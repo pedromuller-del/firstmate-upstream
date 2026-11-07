@@ -607,6 +607,7 @@ const r1 = await handlers.get("session_stop")({ type: "session_stop", stop_hook_
 if (r1?.continue !== true) throw new Error(`guard exit 2 did not compel a continuation: ${JSON.stringify(r1)}`);
 if (!r1.additionalContext.startsWith("⁣FIRSTMATE_OP: v1 turn-end-guard: ")) throw new Error(`continuation context is not typed operational input: ${r1.additionalContext}`);
 if (!r1.additionalContext.includes("TURN WOULD END BLIND") || !r1.additionalContext.includes("repair with fm_watch_arm_omp")) throw new Error("continuation dropped the guard text");
+if (!r1.additionalContext.includes("supervision needs attention.") || r1.additionalContext.includes("supervision is off.")) throw new Error("omp preamble overrides the shared owner diagnosis");
 const r2 = await handlers.get("session_stop")({ type: "session_stop", stop_hook_active: true }, {});
 if (r2 !== undefined) throw new Error(`the flagged second stop must stand down, got ${JSON.stringify(r2)}`);
 const payloads = readFileSync(process.env.FM_GUARD_LOG, "utf8").trim().split("\n");

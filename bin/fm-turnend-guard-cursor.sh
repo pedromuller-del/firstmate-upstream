@@ -206,7 +206,7 @@ emit_repair_followup() {  # <reason> <arm-tail> <attempt>
   prior=$BUDGET_COUNT
   count=$((prior + 1))
 
-  body="TURN WOULD END BLIND - supervision is off. The hook-owned watcher park could not establish a live cycle after $attempt_count bounded attempts (nag $count of $BLOCK_BUDGET).
+  body="TURN WOULD END BLIND - supervision needs attention. The hook-owned watcher park could not establish a live cycle after $attempt_count bounded attempts (nag $count of $BLOCK_BUDGET).
 $arm_tail
 
 $reason"
