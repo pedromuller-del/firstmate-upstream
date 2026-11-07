@@ -4955,7 +4955,7 @@ test_required_producer_identity() {
   local case_dir head kind variant expected app
   head=a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1
   for kind in classic ruleset; do
-    for variant in wrong correct unreadable malformed stale waived; do
+    for variant in wrong correct large unreadable malformed stale waived; do
       case_dir=$(make_case "required-producer-$kind-$variant")
       add_gh_mocks "$case_dir" "$head"
       write_github_required "$case_dir" "$kind:ci"
@@ -4969,10 +4969,14 @@ test_required_producer_identity() {
         mv "$case_dir/updated.json" "$case_dir/github-required-rules.json"
       fi
       app=42
-      [ "$variant" != correct ] || app=15368
+      case "$variant" in correct|large) app=15368 ;; esac
       printf '{"check_runs":[{"name":"ci","app":{"id":%s},"head_sha":"%s"}]}\n' \
         "$app" "$head" > "$case_dir/github-runs.json"
       case "$variant" in
+        large)
+          jq '.check_runs[0].output.text = ("x" * 3145728)' \
+            "$case_dir/github-runs.json" > "$case_dir/updated.json"
+          mv "$case_dir/updated.json" "$case_dir/github-runs.json" ;;
         unreadable) rm "$case_dir/github-runs.json" ;;
         malformed) printf '{}' > "$case_dir/github-runs.json" ;;
         stale) printf '{"check_runs":[{"name":"ci","app":{"id":15368},"head_sha":"bbbb"}]}' > "$case_dir/github-runs.json" ;;
@@ -4983,7 +4987,7 @@ test_required_producer_identity() {
         expected=0
       else
         run_required_case "$case_dir" 110 --attended-override -- --admin
-        [ "$variant" != correct ] || expected=0
+        case "$variant" in correct|large) expected=0 ;; esac
       fi
       expect_code "$expected" "$RC" "producer-$kind-$variant: $(cat "$case_dir/stderr")"
       if [ "$expected" = 1 ]; then
