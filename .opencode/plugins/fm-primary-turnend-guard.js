@@ -78,7 +78,7 @@ export const FmPrimaryTurnendGuard = async ({ client, directory, worktree }) => 
         const text = await encodeFirstmateOperationalInput(
           root,
           "turn-end-guard",
-          "TURN WOULD END BLIND - supervision is off. " +
+          "TURN WOULD END BLIND - supervision needs attention. " +
             "The watcher cycle is missing, failed, or unhealthy. Follow the harness recovery instruction below before ending the turn.\n\n" +
             result.stderr,
         );
@@ -118,7 +118,7 @@ function installTurnendGuard(ctx) {
       const text = await encodeFirstmateOperationalInput(
         root,
         "turn-end-guard",
-        "TURN WOULD END BLIND - supervision is off. " +
+        "TURN WOULD END BLIND - supervision needs attention. " +
           "The watcher cycle is missing, failed, or unhealthy. Follow the harness recovery instruction below before ending the turn.\n\n" +
           result.stderr,
       );

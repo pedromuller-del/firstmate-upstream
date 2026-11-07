@@ -45,7 +45,9 @@
 # window under load (a slow registered check, a busy supervisor pane) with the
 # daemon perfectly healthy throughout. The strict watcher predicate and $GRACE
 # are unchanged everywhere else, including for a dead daemon pid or a beacon
-# older than AFK_GRACE, which still block.
+# older than AFK_GRACE, which still block. A blocking banner distinguishes a
+# live owner with an overdue beacon from absent ownership; away/quiet mode
+# intentionally excludes Stop-owned auto-arm recovery.
 #
 # Loop-guard, codex/Grok (default) mode: never block twice in the same turn.
 # Codex uses stop_hook_active and Grok uses stopHookActive; typed camel-case
@@ -265,7 +267,8 @@ if [ "$(fm_path_age "$STATE/.last-watcher-beat")" -lt "$AFK_GRACE" ] \
 fi
 
 block_stop() {
-  local afk x_mode reason rule msg max_blocks cur_blocks
+  local afk x_mode reason rule msg max_blocks cur_blocks watcher_pid
+  local heading='SUPERVISION IS OFF' owner='no live watcher holds this home lock'
   afk=0
   [ -e "$STATE/.afk" ] && afk=1
   x_mode=0
@@ -288,21 +291,36 @@ block_stop() {
     reason=$("$SCRIPT_DIR/fm-supervision-instructions.sh" --afk "$afk" --x-mode "$x_mode" --repair-line 2>/dev/null \
       || printf '%s\n' 'tasks in flight, no live watcher - repair missing watcher supervision according to the session-start operating block before ending the turn')
   fi
+  if fm_afk_daemon_owns_supervision "$STATE"; then
+    heading='SUPERVISION BEACON IS OVERDUE'
+    owner='a live away-mode daemon owns supervision with an overdue watcher beacon'
+  else
+    watcher_pid=$(cat "$STATE/.watch.lock/pid" 2>/dev/null || true)
+    if fm_pid_alive "$watcher_pid" \
+      && fm_watcher_lock_matches_pid "$STATE" "$WATCH" "$watcher_pid" "$FM_HOME"; then
+      heading='SUPERVISION BEACON IS OVERDUE'
+      owner='a live watcher holds this home lock with an overdue beacon'
+    fi
+  fi
   rule='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
   msg=$(
     printf '●%s\n' "$rule"
-    printf '●  TURN WOULD END BLIND - SUPERVISION IS OFF\n'
+    printf '●  TURN WOULD END BLIND - %s\n' "$heading"
     if [ "$FM_SUP_IN_FLIGHT" -gt 0 ]; then
-      printf '●  %s task(s) in flight, but no live watcher holds this home lock (last beat: %s).\n' "$FM_SUP_IN_FLIGHT" "$FM_SUP_BEACON_DESC"
+      printf '●  %s task(s) in flight, but %s (last beat: %s).\n' "$FM_SUP_IN_FLIGHT" "$owner" "$FM_SUP_BEACON_DESC"
     elif [ "$FM_SUP_SOURCES" -gt 0 ]; then
-      printf '●  %s process-event source(s) registered, but no live watcher holds this home lock (last beat: %s).\n' "$FM_SUP_SOURCES" "$FM_SUP_BEACON_DESC"
+      printf '●  %s process-event source(s) registered, but %s (last beat: %s).\n' "$FM_SUP_SOURCES" "$owner" "$FM_SUP_BEACON_DESC"
     elif [ "$FM_SUP_CHECKS" -gt 0 ]; then
-      printf '●  %s registered custom check(s), but no live watcher holds this home lock (last beat: %s).\n' "$FM_SUP_CHECKS" "$FM_SUP_BEACON_DESC"
+      printf '●  %s registered custom check(s), but %s (last beat: %s).\n' "$FM_SUP_CHECKS" "$owner" "$FM_SUP_BEACON_DESC"
     else
-      printf '●  X-mode relay polling needs supervision, but no live watcher holds this home lock (last beat: %s).\n' "$FM_SUP_BEACON_DESC"
+      printf '●  X-mode relay polling needs supervision, but %s (last beat: %s).\n' "$owner" "$FM_SUP_BEACON_DESC"
     fi
     if [ "$CLAUDE_MODE" -eq 1 ]; then
-      printf '●  The Stop-owned auto-arm did not claim this home either, so recovery is NOT already under way.\n'
+      if [ "$afk" -eq 1 ]; then
+        printf '●  The Stop-owned auto-arm intentionally steps aside while away or quiet mode is set.\n'
+      else
+        printf '●  The Stop-owned auto-arm did not claim this home either, so recovery is NOT already under way.\n'
+      fi
     fi
     printf '●  %s\n' "$reason"
     printf '●%s\n' "$rule"

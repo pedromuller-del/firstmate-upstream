@@ -434,7 +434,42 @@ test_hook_blocks_with_live_lock_and_stale_beacon() {
   wait "$pid" 2>/dev/null || true
   expect_code 2 "$status" "hook must block when a live watcher lock has an ancient beacon"
   assert_contains "$out" "$REQUIRED_REASON" "block reason must contain the exact required instruction"
-  pass "fm-turnend-guard: blocks on a live watcher lock with an ancient beacon"
+  assert_contains "$out" 'SUPERVISION BEACON IS OVERDUE' "a live owner must be reported as overdue"
+  assert_contains "$out" 'a live watcher holds this home lock with an overdue beacon' "the banner must preserve verified watcher ownership"
+  assert_not_contains "$out" 'SUPERVISION IS OFF' "an overdue owner must not be reported as absent supervision"
+  assert_not_contains "$out" 'no live watcher' "the banner must not deny a live watcher owner"
+  pass "fm-turnend-guard: blocks on an overdue beacon without denying live watcher ownership"
+}
+
+test_hook_stale_banner_rejects_unmatched_watcher_lock() {
+  local dir pid identity field out i=0
+  local -a outputs statuses
+  dir=$(make_primary_dir "$TMP_ROOT/hook-stale-unmatched-lock")
+  : > "$dir/state/task1.meta"
+  touch -t 202001010000 "$dir/state/.last-watcher-beat"
+  sleep 60 &
+  pid=$!
+  identity=$(watcher_identity "$dir" "$pid") || {
+    kill "$pid" 2>/dev/null || true
+    wait "$pid" 2>/dev/null || true
+    fail "could not identify watcher fixture"
+  }
+  for field in pid-identity fm-home watcher-path; do
+    record_watcher_lock "$dir" "$pid" "$identity"
+    printf 'mismatched\n' > "$dir/state/.watch.lock/$field"
+    outputs[i]=$(run_hook "$dir" false); statuses[i]=$?
+    i=$((i + 1))
+  done
+  kill "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+  for i in 0 1 2; do
+    out=${outputs[i]}
+    expect_code 2 "${statuses[i]}" "an unmatched watcher lock must still block"
+    assert_contains "$out" 'SUPERVISION IS OFF' "a live unrelated process must not count as an owner"
+    assert_contains "$out" 'no live watcher holds this home lock' "unmatched ownership must retain the missing-watcher diagnosis"
+    assert_not_contains "$out" 'SUPERVISION BEACON IS OVERDUE' "a stale beacon alone must not prove ownership"
+  done
+  pass "fm-turnend-guard: overdue-owner wording requires matching identity, home, and watcher path"
 }
 
 test_hook_blocks_when_unhealthy_in_primary() {
@@ -759,6 +794,7 @@ EOF
   assert_not_contains "$(cat "$log")" '<--permission-mode>' "grok adapter must not add a stronger permission mode"
   assert_not_contains "$(cat "$log")" '<bypassPermissions>' "grok adapter must not bypass permissions on forced resume"
   assert_contains "$(cat "$log")" 'FIRSTMATE_OP: v1 turn-end-guard: TURN WOULD END BLIND' "grok adapter must retain the typed guard kind"
+  assert_contains "$(cat "$log")" 'TURN WOULD END BLIND - supervision needs attention.' "legacy Grok must not override the shared guard's owner diagnosis"
   pass "fm-turnend-guard-grok: forces one explicitly marked same-session resume when the shared predicate blocks"
 }
 
@@ -1149,6 +1185,9 @@ if (!promptBody.includes("guard-fired")) {
   console.error(`missing prompt body: ${promptBody}`);
   process.exit(1);
 }
+if (!promptBody.includes("supervision needs attention.") || promptBody.includes("supervision is off.")) {
+  throw new Error(`OpenCode preamble overrides the shared owner diagnosis: ${promptBody}`);
+}
 if (!promptBody.includes("watcher cycle is missing, failed, or unhealthy")) {
   console.error(`missing recovery-only preamble: ${promptBody}`);
   process.exit(1);
@@ -1193,12 +1232,14 @@ import { pathToFileURL } from "node:url";
 
 const handlers = new Map();
 let prompts = 0;
+let lastPrompt = "";
 const pi = {
   on(event, handler) {
     handlers.set(event, handler);
   },
   async sendUserMessage(message, options) {
     prompts += 1;
+    lastPrompt = message;
     if (!message.startsWith("\u2063FIRSTMATE_OP: v1 turn-end-guard: ")) throw new Error(`untyped operational prompt: ${message}`);
     if (!message.includes("TURN WOULD END BLIND")) throw new Error(`unexpected prompt: ${message}`);
     if (!message.includes("watcher cycle is missing, failed, or unhealthy")) throw new Error(`guard prompt omitted recovery-only state: ${message}`);
@@ -1215,6 +1256,9 @@ if (!settled) throw new Error("agent_settled handler was not registered");
 
 await settled({ type: "agent_settled" }, {});
 if (prompts !== 1) throw new Error(`no-tool run injected ${prompts} follow-ups`);
+if (!lastPrompt.includes("supervision needs attention.") || lastPrompt.includes("supervision is off.")) {
+  throw new Error(`Pi preamble overrides the shared owner diagnosis: ${lastPrompt}`);
+}
 
 for (let i = 0; i < 3; i += 1) {
   await handlers.get("turn_end")?.({ type: "turn_end", turnIndex: i }, {});
@@ -2347,6 +2391,8 @@ test_hook_claude_mode_away_mode_never_uses_stop_autoarm_fail_open() {
   out=$(FM_CLAUDE_AUTOARM_SYNC_WAIT_MS=100 run_hook_claude "$dir" true); status=$?
   expect_code 2 "$status" "away mode must not use a stale Stop-autoarm failure to fail open"
   assert_contains "$out" 'Away mode owns watcher supervision' "away-mode block lost its daemon ownership guidance"
+  assert_contains "$out" 'auto-arm intentionally steps aside while away or quiet mode is set' "away mode must explain intentional auto-arm exclusion even without a live daemon"
+  assert_not_contains "$out" 'recovery is NOT already under way' "away mode must not claim an attempted auto-arm failed"
   assert_absent "$dir/state/.claude-autoarm-failure-alarmed" "away mode consumed the Stop-autoarm attended alarm"
   pass "fm-turnend-guard --claude: away ownership excludes the Stop-autoarm fail-open"
 }
@@ -2514,6 +2560,7 @@ test_hook_away_mode_blocks_on_dead_daemon() {
   out=$(run_hook "$dir" false); status=$?
   expect_code 2 "$status" "a daemon lock left by a dead daemon must not satisfy supervision"
   assert_contains "$out" "$AWAY_REQUIRED_REASON" "away-mode block must point at the daemon, not normal supervision"
+  assert_contains "$out" 'SUPERVISION IS OFF' "a dead daemon must not be described as an overdue owner"
   pass "fm-turnend-guard: away mode blocks on a dead away-mode daemon"
 }
 
@@ -2530,11 +2577,13 @@ test_hook_away_mode_blocks_on_pid_reused_daemon() {
   wait "$pid" 2>/dev/null || true
   expect_code 2 "$status" "a live pid whose recorded identity does not match must not satisfy supervision"
   assert_contains "$out" "$AWAY_REQUIRED_REASON" "away-mode block must point at the daemon, not normal supervision"
+  assert_contains "$out" 'SUPERVISION IS OFF' "a reused daemon pid must not be described as an overdue owner"
   pass "fm-turnend-guard: away mode blocks on a pid-reused away-mode daemon lock"
 }
 
 test_hook_away_mode_blocks_on_stale_beacon() {
-  local dir pid out status
+  local dir pid out status mode i=0
+  local -a outputs statuses
   dir=$(make_away_home_between_cycles "$TMP_ROOT/hook-afk-stale-beacon")
   touch -t 202001010000 "$dir/state/.last-watcher-beat"
   sleep 60 &
@@ -2544,12 +2593,29 @@ test_hook_away_mode_blocks_on_stale_beacon() {
     wait "$pid" 2>/dev/null || true
     fail "could not identify live away-mode daemon holder"
   }
-  out=$(run_hook "$dir" false); status=$?
+  for mode in away quiet; do
+    printf '%s\n' "$mode" > "$dir/state/.afk"
+    if [ "$mode" = quiet ]; then
+      record_watcher_lock "$dir" "$pid" "$(watcher_identity "$dir" "$pid")"
+    fi
+    outputs[i]=$(FM_CLAUDE_AUTOARM_SYNC_WAIT_MS=0 run_hook_claude "$dir" false); statuses[i]=$?
+    i=$((i + 1))
+  done
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
-  expect_code 2 "$status" "a live daemon that stopped restarting its watcher must block once the beacon goes stale"
-  assert_contains "$out" "$AWAY_REQUIRED_REASON" "away-mode block must point at the daemon, not normal supervision"
-  pass "fm-turnend-guard: away-mode daemon ownership never substitutes for a fresh beacon"
+  for i in 0 1; do
+    out=${outputs[i]}
+    status=${statuses[i]}
+    expect_code 2 "$status" "a live away or quiet daemon must still block once its beacon goes stale"
+    assert_contains "$out" "$AWAY_REQUIRED_REASON" "the block must retain daemon repair guidance"
+    assert_contains "$out" 'SUPERVISION BEACON IS OVERDUE' "a live daemon must be reported as overdue"
+    assert_contains "$out" 'a live away-mode daemon owns supervision with an overdue watcher beacon' "the banner must identify the actual owner between watcher cycles"
+    assert_contains "$out" 'auto-arm intentionally steps aside while away or quiet mode is set' "the banner must explain intentional auto-arm exclusion"
+    assert_not_contains "$out" 'SUPERVISION IS OFF' "an overdue daemon must not be reported as absent supervision"
+    assert_not_contains "$out" 'no live watcher' "an away owner must not receive the missing-watcher banner"
+    assert_not_contains "$out" 'recovery is NOT already under way' "the banner must not claim an attempted auto-arm failed"
+  done
+  pass "fm-turnend-guard: away and quiet owners remain overdue, never healthy without a fresh beacon"
 }
 
 test_hook_daemon_lock_is_ignored_without_away_mode() {
@@ -2679,6 +2745,7 @@ test_hook_blocks_when_dead_lock_has_fresh_beacon
 test_hook_silent_with_live_lock_and_fresh_beacon
 test_hook_non_claude_health_ignores_claude_budget_contention
 test_hook_blocks_with_live_lock_and_stale_beacon
+test_hook_stale_banner_rejects_unmatched_watcher_lock
 test_hook_blocks_when_unhealthy_in_primary
 test_hook_blocks_from_fm_home_state
 test_hook_x_mode_reason_sources_cadence
