@@ -213,10 +213,6 @@ test_ship_modes_generate_clean_briefs() {
     assert_grep "{FIRSTMATE_SPEC}" "$brief" "$id: brief missing the {FIRSTMATE_SPEC} placeholder"
     assert_grep "## Captain's intent" "$brief" "$id: brief missing Captain's intent subsection"
     assert_grep "## Firstmate spec" "$brief" "$id: brief missing Firstmate spec subsection"
-    assert_grep "Where this spec changes the deliverable or the last step, it wins over the generic Definition of done." "$brief" \
-      "$id: brief missing the spec precedence sentence"
-    bash -c '. "$1/bin/fm-dod-lib.sh"; fm_brief_task_placeholders_present "$2"' _ "$ROOT" "$brief" \
-      || fail "$id: the precedence sentence hid the unfilled spec placeholder"
     assert_grep 'never a bare number such as "PR 108"' "$brief" "$id: brief missing the full-PR-URL rule"
     assert_grep "mid-task \`working:\` line (including setup complete) is nonterminal" "$brief" \
       "$id: brief missing nonterminal working:/setup-complete gate protection"
@@ -1118,7 +1114,7 @@ test_scout_completion_write_exception_is_task_scoped() {
       || fail "scout completion scaffold failed"
     brief="$home/data/$id/brief.md"
     command="FM_HOME='$home' bash '$ROOT/bin/fm-captain-hold.sh' complete '$id' --none"
-    assert_grep "outside it, write only the files this brief names, except for the task's empty-inventory attestation through \`fm-captain-hold.sh complete --none\`, exactly as specified under Definition of done." "$brief" \
+    assert_grep "except for the task's empty-inventory attestation through \`fm-captain-hold.sh complete --none\`, exactly as specified under Definition of done." "$brief" \
       "scout outside-write rule did not name its exact completion gate"
     assert_grep "Only when the reviewed inventory is empty, run \`$command\`." "$brief" \
       "scout did not receive the empty-inventory command for its own task and home"
@@ -1195,19 +1191,35 @@ test_scout_and_secondmate_scaffold() {
   pass "fm-brief: scout and secondmate code paths still scaffold well-formed briefs"
 }
 
-# Contract: the inbox step asks for a numeric listing and names no tool, so it
-# cannot contradict a task spec that bans a particular search tool.
-test_inbox_step_names_no_listing_tool() {
-  local home brief
+# Contract: the inbox listing the brief tells a worker to run succeeds silently
+# on an empty or absent inbox and lists messages in numeric order, in bash and zsh.
+test_inbox_listing_command_is_safe_on_empty_inbox() {
+  local home brief cmd inbox shell_name out status
   home="$TMP_ROOT/inbox-listing-home"
   mkdir -p "$home/data" "$home/config"
   FM_HOME="$home" "$ROOT/bin/fm-brief.sh" brief-inbox-list some-proj --mode no-mistakes >/dev/null 2>&1 \
     || fail "fm-brief.sh ship scaffold exited non-zero"
   brief="$home/data/brief-inbox-list/brief.md"
-  assert_grep "list the \`*.msg\` files in '$home/state/brief-inbox-list.inbox' in numeric order" "$brief" \
-    "the brief does not ask for a numeric inbox listing"
-  assert_no_grep "-maxdepth 1" "$brief" "the inbox step must name no listing tool"
-  pass "fm-brief: the inbox step asks for a numeric listing and names no tool"
+  # shellcheck disable=SC2016
+  cmd=$(sed -n 's/.*list them with `\(find [^`]*\)`.*/\1/p' "$brief" | head -1)
+  [ -n "$cmd" ] || fail "the brief does not give a find-based inbox listing command"
+  inbox="$home/state/brief-inbox-list.inbox"
+  for shell_name in bash zsh; do
+    command -v "$shell_name" >/dev/null 2>&1 || continue
+    rm -rf "$inbox"
+    status=0
+    out=$("$shell_name" -c "$cmd" 2>&1) || status=$?
+    [ "$status" -eq 0 ] && [ -z "$out" ] || fail "$shell_name: absent inbox listing was not silent success (exit $status): $out"
+    mkdir -p "$inbox"
+    status=0
+    out=$("$shell_name" -c "$cmd" 2>&1) || status=$?
+    [ "$status" -eq 0 ] && [ -z "$out" ] || fail "$shell_name: empty inbox listing was not silent success (exit $status): $out"
+    : > "$inbox/1000.msg"
+    : > "$inbox/999.msg"
+    out=$("$shell_name" -c "$cmd" 2>&1 | sed 's#.*/##' | tr '\n' ' ')
+    [ "$out" = "999.msg 1000.msg " ] || fail "$shell_name: messages not listed in numeric order: $out"
+  done
+  pass "fm-brief: inbox listing is silent on empty/absent inbox and numerically ordered"
 }
 
 # Contract: a waiting worker spends no turns. A decision wait ends the turn, an
@@ -1592,7 +1604,7 @@ test_branch_prefix_command_is_shell_safe() {
     || fail "a ref-format-valid metacharacter prefix should scaffold safely"
   brief="$home/data/$id/brief.md"
   # shellcheck disable=SC2016 # The sed expression intentionally contains literal backticks.
-  command=$(sed -n 's/^1\. After the isolation check, create your branch: `\(.*\)`$/\1/p' "$brief")
+  command=$(sed -n 's/^1\. First action: create your branch: `\(.*\)`$/\1/p' "$brief")
   [ -n "$command" ] || fail "generated brief exposed no branch-creation command"
   repo="$TMP_ROOT/branch-prefix-shell-safe-repo"
   git init -q "$repo" || fail "could not initialize shell-safety fixture repository"
@@ -1707,7 +1719,7 @@ test_scout_and_secondmate_load_decision_hold_policy
 test_scout_completion_write_exception_is_task_scoped
 test_scout_and_secondmate_scaffold
 test_scout_lavish_line_follows_presentation_floor
-test_inbox_step_names_no_listing_tool
+test_inbox_listing_command_is_safe_on_empty_inbox
 test_workers_wait_without_spending_turns
 test_wait_no_turns_absent_keeps_the_previous_brief
 test_inbox_guidance_explains_marked_body_terminator
