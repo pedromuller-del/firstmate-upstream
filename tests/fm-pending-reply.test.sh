@@ -1515,6 +1515,58 @@ test_tick_leaves_settled_records_alone() {
   pass "the tick leaves settled records alone and still does the selected records' work"
 }
 
+# Keep long-lived-home reconciliation within a small fraction of beacon grace.
+# The timeout has ample headroom for the fixed reader, but catches per-line forks.
+test_large_store_status_scan_budget() {
+  local home state before after rc=0 i corr rec
+  home=$(setup_parent large-status-store)
+  state="$home/state"
+  mkdir -p "$state/pending-replies"
+  awk -v state="$state" -v home="$home" 'BEGIN {
+    for (i = 1; i <= 3324; i++) {
+      corr = (i <= 3300 ? sprintf("ffff%012x", i) : sprintf("%016x", i))
+      path = state "/pending-replies/" corr
+      phase = (i <= 3300 ? "resolved" : (i <= 3312 ? "awaiting_report" : "escalated"))
+      print "schema=fm-pending-reply.v1\ncorr_id=" corr "\ntask_id=large\nparent_home=" home > path
+      print "parent_status=" state "/large.status\ndelivered_epoch=1000\nphase=" phase >> path
+      close(path)
+    }
+    status = state "/large.status"
+    for (i = 1; i <= 20000; i++) print "working [at=1000]: unrelated retained history " i > status
+    for (i = 3301; i <= 3324; i++) {
+      corr = sprintf("%016x", i)
+      print "working: xcorr=" corr " corr=" corr "ff" > status
+      print "blocked: pending-reply-missed corr=" corr > status
+      if (i < 3312) print "done [corr=" corr "]: report.md " i > status
+    }
+    # An unterminated line must still acknowledge the last waiting request.
+    printf "done [corr=0000000000000cf0]: report.md final" > status
+  }' || fail "large-store fixture generation failed"
+  before=$(cd "$state/pending-replies" && cksum ffff*)
+  # shellcheck source=bin/fm-timeout-lib.sh
+  . "$ROOT/bin/fm-timeout-lib.sh"
+  # Positional arguments expand in the bounded child, not this shell.
+  # shellcheck disable=SC2016
+  fm_run_timed 45 bash -c '. "$1"; fm_pending_reply_tick "$2"' _ \
+    "$ROOT/bin/fm-pending-reply-lib.sh" "$state" || rc=$?
+  [ "$rc" = 0 ] || fail "large-store reconciliation exceeded 45 seconds or failed (exit $rc)"
+  after=$(cd "$state/pending-replies" && cksum ffff*)
+  [ "$before" = "$after" ] || fail "large-store reconciliation rewrote settled records"
+  for ((i = 3301; i <= 3324; i++)); do
+    printf -v corr '%016x' "$i"
+    rec="$state/pending-replies/$corr"
+    if [ "$i" -le 3312 ]; then
+      [ "$(fm_pending_reply_get "$rec" phase)" = resolved ] || fail "large-store reply $corr was not acknowledged"
+      [ "$(fm_pending_reply_get "$rec" resolved_via)" = document ] || fail "large-store reply lost document classification"
+    else
+      [ "$(fm_pending_reply_get "$rec" phase)" = escalated ] || fail "a token echo incorrectly acknowledged $corr"
+    fi
+  done
+  [ "$(wc -l < "$state/large.status" | tr -d ' ')" = 20059 ] \
+    || fail "large-store reconciliation appended an unexpected status event"
+  pass "large-store reconciliation preserves replies and finishes within 45 seconds"
+}
+
 test_correlations_reuse_only_for_matching_open_task() {
   local dir fb log home state got corr1 corr2 corr3 rec
   dir="$TMP_ROOT/corr-reuse"; mkdir -p "$dir"
@@ -2160,6 +2212,7 @@ test_unknown_backend_state_uses_capture_fallback
 test_kimi_capture_fallback_uses_recorded_harness
 test_tick_skips_terminal_and_reuses_target_observation
 test_tick_leaves_settled_records_alone
+test_large_store_status_scan_budget
 test_correlations_reuse_only_for_matching_open_task
 test_tick_end_to_end_missed_then_escalate
 test_failed_send_discards_undelivered_expectation

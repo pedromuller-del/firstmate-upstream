@@ -199,7 +199,7 @@ fm_pending_reply_extract_corr() {  # <text>
 # word: xcorr=<id> or corr=<id>ff is a different token, not this one.
 fm_pending_reply_text_has_corr() {  # <text> <corr_id>
   local text=$1 corr=$2 re
-  re="(^|[^[:alnum:]_])$(fm_pending_reply_corr_token "$corr")([^[:alnum:]_]|\$)"
+  re="(^|[^[:alnum:]_])corr=${corr}([^[:alnum:]_]|\$)"
   [[ $text =~ $re ]]
 }
 
@@ -605,6 +605,8 @@ fm_pending_reply_line_resolves() {  # <line> <corr_id>
   [ -n "$line" ] && [ -n "$corr" ] || return 1
   case "$line" in
     *pending-reply-missed*) return 1 ;;
+    *corr=*) ;;
+    *) return 1 ;;
   esac
   fm_pending_reply_text_has_corr "$line" "$corr"
 }
@@ -614,7 +616,7 @@ fm_pending_reply_find_resolve_line() {  # <status-file> <corr_id>
   local status_file=$1 corr=$2 line
   [ -f "$status_file" ] || return 0
   while IFS= read -r line || [ -n "$line" ]; do
-    [ -n "$line" ] || continue
+    [[ $line == *corr=* ]] || continue
     if fm_pending_reply_line_resolves "$line" "$corr"; then
       printf '%s' "$line"
       return 0
