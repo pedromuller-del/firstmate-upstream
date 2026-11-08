@@ -656,33 +656,17 @@ test_relaunch_appends_the_progress_note_to_the_instructions() {
   pass "fm-control relaunch: progress and the Firstmate-worktree worker identity reach the replacement"
 }
 
-test_relaunch_note_inbox_listing_is_safe_on_empty_inbox() {
-  local dir out rc brief cmd inbox shell_name status
+test_relaunch_note_inbox_step_names_no_listing_tool() {
+  local dir out rc brief
   dir=$(new_case notelist rl2b)
   add_ship_task "$dir" rl2b claude
   out=$(run_control "$dir" rl2b relaunch --note "resume"); rc=$?
   expect_code 0 "$rc" "relaunch should succeed"$'\n'"$out"
   brief="$dir/home/data/rl2b/brief.md"
-  # shellcheck disable=SC2016
-  cmd=$(sed -n 's/^`\(find [^`]*\)`.*/\1/p' "$brief" | head -1)
-  [ -n "$cmd" ] || fail "the progress note does not give a find-based inbox listing command"
-  inbox="$dir/home/state/rl2b.inbox"
-  for shell_name in bash zsh; do
-    command -v "$shell_name" >/dev/null 2>&1 || continue
-    rm -rf "$inbox"
-    status=0
-    out=$("$shell_name" -c "$cmd" 2>&1) || status=$?
-    [ "$status" -eq 0 ] && [ -z "$out" ] || fail "$shell_name: absent inbox listing was not silent success (exit $status): $out"
-    mkdir -p "$inbox"
-    status=0
-    out=$("$shell_name" -c "$cmd" 2>&1) || status=$?
-    [ "$status" -eq 0 ] && [ -z "$out" ] || fail "$shell_name: empty inbox listing was not silent success (exit $status): $out"
-    : > "$inbox/1000.msg"
-    : > "$inbox/999.msg"
-    out=$("$shell_name" -c "$cmd" 2>&1 | sed 's#.*/##' | tr '\n' ' ')
-    [ "$out" = "999.msg 1000.msg " ] || fail "$shell_name: messages not listed in numeric order: $out"
-  done
-  pass "fm-control relaunch: the progress note's inbox listing is silent on an empty inbox"
+  assert_grep "'$dir/home/state/rl2b.inbox' in numeric order, act on" "$brief" \
+    "the progress note does not ask for a numeric inbox listing"
+  assert_no_grep "-maxdepth 1" "$brief" "the progress note must name no listing tool"
+  pass "fm-control relaunch: the progress note asks for a numeric listing and names no tool"
 }
 
 test_relaunch_requires_a_note_for_a_ship_task() {
@@ -3153,7 +3137,7 @@ test_traced_relaunch_keeps_an_armed_pr_poll_authenticated
 test_relaunch_serializes_concurrent_durable_metadata_publication
 test_disabled_relaunch_clears_prior_trace_context
 test_relaunch_appends_the_progress_note_to_the_instructions
-test_relaunch_note_inbox_listing_is_safe_on_empty_inbox
+test_relaunch_note_inbox_step_names_no_listing_tool
 test_relaunch_requires_a_note_for_a_ship_task
 test_harness_switch_moves_the_record_and_clears_prior_wiring
 test_refused_relaunch_onto_polytoken_keeps_the_project_hook_layer
