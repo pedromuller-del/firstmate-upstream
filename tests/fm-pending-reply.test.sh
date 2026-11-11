@@ -382,21 +382,29 @@ test_wait_guard_refuses_on_an_unreadable_history() {
 # Concurrent guard reads and appends share one cursor safely: every reader
 # succeeds, and the settled cursor agrees with the whole-file fold.
 test_wait_guard_cursor_is_safe_under_concurrency() {
-  local dir f pids='' pid i full inc rc=0
+  local dir f probe pids='' pid i full inc rc=0
   dir="$TMP_ROOT/decision-concurrency"; mkdir -p "$dir"
   f="$dir/hibit.status"
-  : > "$f"
+  probe="$dir/probe"
+  : > "$f"; : > "$probe"
+  # Readers keep reading until the writer is finished, so reads overlap appends.
   for i in 1 2 3 4 5 6; do
-    bash -c '. "$1"; for n in $(seq 1 15); do status_own_open_decisions "$2" incremental >/dev/null || exit 1; done' \
-      _ "$ROOT/bin/fm-classify-lib.sh" "$f" &
+    FM_OPEN_DECISIONS_READ_PROBE=$probe bash -c '. "$1"; until [ -e "$3" ]; do status_own_open_decisions "$2" incremental >/dev/null || exit 1; done' \
+      _ "$ROOT/bin/fm-classify-lib.sh" "$f" "$dir/writer-done" &
     pids="$pids $!"
   done
+  i=0
+  until [ -e "$dir/.hibit.open-decisions-cursor" ] || [ "$i" -ge 300 ]; do sleep 0.1; i=$((i + 1)); done
   for i in $(seq 1 30); do
     printf 'needs-decision [key=k%s]: question %s\n' "$i" "$i" >> "$f"
     [ $((i % 3)) -eq 0 ] || printf 'resolved [key=k%s]: answered\n' "$i" >> "$f"
+    sleep 0.05
   done
+  : > "$dir/writer-done"
   for pid in $pids; do wait "$pid" || rc=1; done
   [ "$rc" = 0 ] || fail "a concurrent guard read failed"
+  [ "$(cut -f2 "$probe" | sort -u | wc -l | tr -d ' ')" -gt 2 ] \
+    || fail "reads must overlap appends for this case to mean anything:"$'\n'"$(cat "$probe")"
   full=$(bash -c '. "$1"; status_own_open_decisions "$2"' _ "$ROOT/bin/fm-classify-lib.sh" "$f")
   inc=$(bash -c '. "$1"; status_own_open_decisions "$2" incremental' _ "$ROOT/bin/fm-classify-lib.sh" "$f")
   [ -n "$full" ] || fail "fixture must leave decisions open"
