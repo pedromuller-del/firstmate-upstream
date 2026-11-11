@@ -967,7 +967,7 @@ fm_pending_reply_recovery_message() {  # <record-path>
 fm_pending_reply_send_recovery() {  # <state-dir> <corr_id>
   local state=$1 corr=$2
   local rec phase completed delivered attempted grace now age task_id msg parent_home send_status=0
-  local sender_pid sender_identity status_file lock
+  local sender_pid sender_identity status_file lock own
   local STATE FM_WAKE_QUEUE FM_WAKE_QUEUE_LOCK
   rec=$(fm_pending_reply_path "$state" "$corr")
   [ -f "$rec" ] || return 1
@@ -995,8 +995,11 @@ fm_pending_reply_send_recovery() {  # <state-dir> <corr_id>
   fm_pending_reply_missing_report_is_evidence "$state" "$task_id" "$completed" || return 1
   # config/wait-no-turns: a mate waiting on its own open decision or blocker
   # is never poked. The recovery stays unattempted until the answer lands.
+  # The cursor-backed read keeps one tick from refolding a shared history once
+  # per overdue request; a read it cannot trust also leaves the recovery unsent.
   if [ -e "${FM_CONFIG_OVERRIDE:-${FM_HOME:-}/config}/wait-no-turns" ]; then
-    [ -z "$(status_own_open_decisions "$state/$task_id.status")" ] || return 1
+    own=$(status_own_open_decisions "$state/$task_id.status" incremental) || return 1
+    [ -z "$own" ] || return 1
   fi
   status_file=$(fm_pending_reply_get "$rec" parent_status)
   parent_home=$(fm_pending_reply_get "$rec" parent_home)

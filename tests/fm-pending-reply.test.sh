@@ -276,6 +276,135 @@ test_recovery_sends_during_an_open_decision_without_the_flag() {
   pass "recovery sends during an open decision when config/wait-no-turns is absent"
 }
 
+# Several overdue requests to one mate share its status history: the wait guard
+# folds that history once per tick, not once per request, and still holds every
+# recovery while an own decision is open.
+test_wait_guard_folds_a_shared_history_once() {
+  local home state hook_log probe i corr corrs='' size closing
+  home=$(setup_parent decision-fold-once)
+  state="$home/state"
+  hook_log="$TMP_ROOT/decision-fold-once-hook.log"
+  probe="$TMP_ROOT/decision-fold-once-probe.log"
+  : > "$hook_log"; : > "$probe"
+  export FM_PENDING_REPLY_NOW=2500
+  mkdir -p "$home/config"
+  : > "$home/config/wait-no-turns"
+  FM_CONFIG_OVERRIDE="$home/config"
+  # shellcheck disable=SC2329
+  fold_once_hook() { printf '%s\n' "$1" >> "$hook_log"; }
+  export -f fold_once_hook
+  export FM_PENDING_REPLY_SEND_HOOK=fold_once_hook
+  for i in 1 2 3 4; do
+    corr=$(fm_pending_reply_create "$home" "$state" "hibit" "request $i")
+    fm_pending_reply_mark_delivered "$state" "$corr"
+    fm_pending_reply_observe_busy "$state" "$corr" busy
+    fm_pending_reply_observe_busy "$state" "$corr" idle
+    corrs="$corrs $corr"
+  done
+  for i in $(seq 1 50); do printf 'working: step %s\n' "$i" >> "$state/hibit.status"; done
+  printf 'blocked [key=captain-hold-x]: relayed child decision\n' >> "$state/hibit.status"
+  printf 'needs-decision [key=scope]: narrow or wide?\n' >> "$state/hibit.status"
+  size=$(wc -c < "$state/hibit.status" | tr -d ' ')
+
+  export FM_OPEN_DECISIONS_READ_PROBE=$probe
+  for corr in $corrs; do
+    if fm_pending_reply_send_recovery "$state" "$corr" 2>/dev/null; then
+      fail "recovery must wait while the mate waits on its own decision"
+    fi
+    [ "$(phase_of "$state" "$corr")" = awaiting_report ] || fail "a held recovery must stay unattempted"
+  done
+  [ ! -s "$hook_log" ] || fail "recovery poked a mate waiting on its decision"
+  [ "$(wc -l < "$probe" | tr -d ' ')" = 1 ] \
+    || fail "four requests must fold the shared history once, got:"$'\n'"$(cat "$probe")"
+  [ "$(cut -f2 "$probe")" = "$size" ] || fail "the one fold must read the whole history once"
+
+  closing='resolved [key=scope]: answered: narrow'
+  printf '%s\n' "$closing" >> "$state/hibit.status"
+  for corr in $corrs; do
+    fm_pending_reply_send_recovery "$state" "$corr" || fail "recovery should send once the decision closes"
+  done
+  [ "$(wc -l < "$hook_log" | tr -d ' ')" = 4 ] || fail "expected one recovery per request once the decision closed"
+  [ "$(wc -l < "$probe" | tr -d ' ')" = 2 ] || fail "the closing line must be folded once"
+  [ "$(sed -n 2p "$probe" | cut -f2)" = "$(( ${#closing} + 1 ))" ] || fail "the second fold must read only the appended line"
+  unset FM_OPEN_DECISIONS_READ_PROBE FM_PENDING_REPLY_SEND_HOOK FM_CONFIG_OVERRIDE
+  pass "wait guard folds a shared history once per change, not once per overdue request"
+}
+
+# A status read the guard cannot trust never counts as "no open decision".
+test_wait_guard_refuses_on_an_unreadable_history() {
+  local home state hook_log corr
+  home=$(setup_parent decision-io-fail)
+  state="$home/state"
+  hook_log="$TMP_ROOT/decision-io-fail-hook.log"
+  : > "$hook_log"
+  export FM_PENDING_REPLY_NOW=2500
+  mkdir -p "$home/config"
+  : > "$home/config/wait-no-turns"
+  FM_CONFIG_OVERRIDE="$home/config"
+  # shellcheck disable=SC2329
+  io_fail_hook() { printf '%s\n' "$1" >> "$hook_log"; }
+  # shellcheck disable=SC2329
+  failing_span_reader() { return 1; }
+  # shellcheck disable=SC2329
+  failing_size_reader() { return 1; }
+  export -f io_fail_hook
+  export FM_PENDING_REPLY_SEND_HOOK=io_fail_hook
+  corr=$(fm_pending_reply_create "$home" "$state" "hibit" "status of phase 9")
+  fm_pending_reply_mark_delivered "$state" "$corr"
+  fm_pending_reply_observe_busy "$state" "$corr" busy
+  fm_pending_reply_observe_busy "$state" "$corr" idle
+  printf 'working: started\n' >> "$state/hibit.status"
+
+  # Cold cursor and a failing read: nothing proves the mate is not waiting.
+  if FM_STATUS_SPAN_READER=failing_span_reader fm_pending_reply_send_recovery "$state" "$corr" 2>/dev/null; then
+    fail "a failed status read must not send the recovery"
+  fi
+  # A size read failure behaves the same way.
+  if FM_STATUS_SIZE_READER=failing_size_reader fm_pending_reply_send_recovery "$state" "$corr" 2>/dev/null; then
+    fail "a failed status size read must not send the recovery"
+  fi
+  # An unreadable log is a failure too, not an empty history.
+  chmod 000 "$state/hibit.status"
+  if [ ! -r "$state/hibit.status" ]; then
+    if fm_pending_reply_send_recovery "$state" "$corr" 2>/dev/null; then
+      fail "an unreadable status log must not send the recovery"
+    fi
+  fi
+  chmod 644 "$state/hibit.status"
+  [ ! -s "$hook_log" ] || fail "an untrusted read sent the recovery"
+  [ "$(phase_of "$state" "$corr")" = awaiting_report ] || fail "a refused recovery must stay unattempted"
+  fm_pending_reply_send_recovery "$state" "$corr" || fail "recovery should send once the read succeeds"
+  [ "$(wc -l < "$hook_log" | tr -d ' ')" = 1 ] || fail "expected exactly one recovery send"
+  unset FM_PENDING_REPLY_SEND_HOOK FM_CONFIG_OVERRIDE
+  pass "wait guard refuses a recovery when it cannot read the status history"
+}
+
+# Concurrent guard reads and appends share one cursor safely: every reader
+# succeeds, and the settled cursor agrees with the whole-file fold.
+test_wait_guard_cursor_is_safe_under_concurrency() {
+  local dir f pids='' pid i full inc rc=0
+  dir="$TMP_ROOT/decision-concurrency"; mkdir -p "$dir"
+  f="$dir/hibit.status"
+  : > "$f"
+  for i in 1 2 3 4 5 6; do
+    bash -c '. "$1"; for n in $(seq 1 15); do status_own_open_decisions "$2" incremental >/dev/null || exit 1; done' \
+      _ "$ROOT/bin/fm-classify-lib.sh" "$f" &
+    pids="$pids $!"
+  done
+  for i in $(seq 1 30); do
+    printf 'needs-decision [key=k%s]: question %s\n' "$i" "$i" >> "$f"
+    [ $((i % 3)) -eq 0 ] || printf 'resolved [key=k%s]: answered\n' "$i" >> "$f"
+  done
+  for pid in $pids; do wait "$pid" || rc=1; done
+  [ "$rc" = 0 ] || fail "a concurrent guard read failed"
+  full=$(bash -c '. "$1"; status_own_open_decisions "$2"' _ "$ROOT/bin/fm-classify-lib.sh" "$f")
+  inc=$(bash -c '. "$1"; status_own_open_decisions "$2" incremental' _ "$ROOT/bin/fm-classify-lib.sh" "$f")
+  [ -n "$full" ] || fail "fixture must leave decisions open"
+  [ "$inc" = "$full" ] || fail "settled cursor disagrees with the whole-file fold"$'\n'"inc=$inc"$'\n'"full=$full"
+  [ "$(sed -n '/^offset=/p' "$dir/.hibit.open-decisions-cursor" | wc -l | tr -d ' ')" = 1 ] || fail "cursor must be one whole record"
+  pass "wait guard cursor stays consistent under concurrent reads and appends"
+}
+
 test_recovery_grace_measures_from_turn_completion() {
   local home state corr hook_log lines
   home=$(setup_parent grace-from-completion)
@@ -2181,6 +2310,9 @@ test_normal_correlated_reply_resolves_once
 test_completed_turn_no_report_triggers_one_recovery
 test_recovery_waits_while_the_mate_has_an_open_decision
 test_recovery_sends_during_an_open_decision_without_the_flag
+test_wait_guard_folds_a_shared_history_once
+test_wait_guard_refuses_on_an_unreadable_history
+test_wait_guard_cursor_is_safe_under_concurrency
 test_recovery_grace_measures_from_turn_completion
 test_recovery_fresh_status_read_resolves_before_firing
 test_partial_resolve_write_blocks_firing
