@@ -3631,6 +3631,27 @@ if "$ROOT/bin/fm-procevent-lavish.sh" reconciles "$ANS" >/dev/null 2>&1; then
 fi
 pass "answers reads list-form choices and refuses a block it cannot account for"
 
+# A note with accents must leave `answers` as UTF-8, not Latin-1, with no
+# "Wide character" warning: the runner records this text as the answer.
+cat > "$ANS" <<'EOF'
+session:
+  file: /review.html
+  status: feedback
+prompts[1]:
+  - uid: "1"
+    prompt: "Nota\n\nContext data:\n{\n  \"schema\": \"fm-bearings-answer.v1\",\n  \"question\": \"sample-accent-note\",\n  \"selection\": \"\",\n  \"note\": \"não, ação\"\n}"
+    selector: "div#qgrid > form:nth-of-type(1)"
+    tag: choice
+    text: "Nota"
+EOF
+out=$("$ROOT/bin/fm-procevent-lavish.sh" answers "$ANS" 2>"$TMP_ROOT/answers-stderr") \
+  || fail "answers failed on an accented note"
+[ "$out" = "$(printf 'sample-accent-note\tn\303\243o, a\303\247\303\243o\tNota')" ] \
+  || fail "answers did not print the accented note as UTF-8: $(printf '%s' "$out" | od -An -c)"
+[ ! -s "$TMP_ROOT/answers-stderr" ] \
+  || fail "answers warned on an accented note: $(cat "$TMP_ROOT/answers-stderr")"
+pass "answers prints an accented note as UTF-8 with no warning"
+
 # The runner's silence seam is generic and closed by default: an adapter with no
 # `silent` command must keep announcing, so adding the seam changed nothing for
 # every adapter that has no notion of a no-op.
