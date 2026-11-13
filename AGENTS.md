@@ -109,6 +109,7 @@ Break genuine evidence ties without array-order or harness bias.
 Load `quota-array-dispatch` before choosing among a matched profile array or a Claude spawn's declared accounts; that skill is the single owner of the TOON-first spendPriority selection procedure.
 Run `bin/fm-dispatch-resolve.sh` directly on the written brief in the same turn, with no preflight.
 On `clear`, pass its `profile:` line to `fm-spawn` unchanged; change it only for a current captain instruction or a hard blocker such as a failed spawn or a login refusal, and record that reason in the task's dispatch note.
+Pass any such change as `--dispatch-override <reason>`, because `fm-spawn` refuses other flags without it.
 `ambiguous`, `escalate`, `error`, and off all mean the intake above, unchanged (contract: `docs/configuration.md` "Typed dispatch resolution").
 The generic effort fallback and its precedence are owned by `harness-adapters`: explicit captain and standing configured effort win; otherwise use low for well-understood explicit work, xhigh for ambiguous investigation or design, intermediate levels proportionally, and never max without explicit captain preference.
 Do not add model-specific versions of that policy.
