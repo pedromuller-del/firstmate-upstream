@@ -1398,8 +1398,8 @@ assert_equals '{"task":"pager-fix","status":"clear","profile":{"harness":"cursor
 reset_log
 write_response "$RESPONSE" rule_4 0.41
 TYPESAFE_API_KEY=$KEY run code out err "$TASK_BRIEF" --project pager
-assert_equals 'ambiguous null' "$(jq -r '"\(.status) \(.profile)"' "$TASK_RECORD")" \
-  "a later non-clear run replaces the clear selection, so the manual intake is not bound to it"
+assert_equals 'clear {"harness":"cursor","model":"cursor-grok-4.6-medium","effort":null}' "$(jq -r '"\(.status) \(.profile)"' "$TASK_RECORD")" \
+  "a later low-confidence clear run records the carry's selected profile"
 reset_log
 run code out err "$TASK_BRIEF" --project pager
 assert_contains "$err" 'dispatch-resolve: off (' "the keyless run is off"
