@@ -12,6 +12,10 @@ An owner is an ordinary long-running task in a secondmate home, not a new proces
 Create one for a project or a large delivery when sustained ownership is needed.
 Route the request to the secondmate whose scope fits, and have that secondmate provision and supervise the owner in its own home.
 Do not create a duplicate owner for the same responsibility.
+An owner delivers safely and correctly as fast as possible.
+When work is blocked or stuck, the owner first tries to resolve it with an advisor from a different model family.
+If the owner cannot resolve it, the owner escalates to its parent and names what it tried.
+Merges, posts, and asks to people still require the captain's word.
 
 ## Create
 
