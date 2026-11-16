@@ -621,8 +621,85 @@ inbox_steer_busy() {  # <window> <backend> <task> <tail40>
 # Normal retries keep the watcher blocking rather than waking firstmate.
 # Runs for secondmates too: their pane-staleness exemption is about quiet panes
 # being healthy, while an unacknowledged instruction can still be a stuck steer.
+launch_mcp_prompt_check() {  # <window> <task> <capture>
+  local w=$1 task=$2 capture=$3 reason
+  local marker="$STATE/.mcp-prompt-$2"
+  case "$(window_harness "$w")" in pi|pi-signed|omp) ;; *) return 0 ;; esac
+  if [ "$(fm_busy_classify_meta "$STATE/$task.meta" "$task" "$STATE" "$capture")" = 'unknown launch-prompt' ] \
+    && printf '%s' "$capture" | fm_busy_pi_mcp_prompt_tail; then
+    [ ! -e "$marker" ] || return 0
+    reason="stale: $w (Pi project MCP server consent needs a decision; inspect the prompt without sending input automatically)"
+    fm_wake_append stale "$w" "$reason" || exit 1
+    printf 'reported\n' > "$marker" || exit 1
+    wake "$reason"
+  else
+    rm -f "$marker"
+  fi
+}
+
+remote_inbox_steer_check() {  # <window> <task>
+  local w=$1 task=$2 out kind base count age extra previous attempts last now grace max reason
+  local ladder="$STATE/.remote-inbox-ladder-$2" marker="$STATE/.remote-inbox-escalated-$2"
+  local unknown="$STATE/.remote-inbox-unknown-$2"
+  if watcher_waited run_check_process "$SCRIPT_DIR/fm-on.sh" "$task" fm-remote-secondmate-control.sh inbox-probe "$task" 2>/dev/null; then
+    out=$WATCHER_CAPTURE
+  else
+    out=unknown
+  fi
+  read -r kind base count age extra <<EOF
+$out
+EOF
+  case "$kind" in
+    empty)
+      [ -z "${base:-}" ] || kind=unknown
+      ;;
+    pending)
+      fm_task_inbox_seq_of "${base:-}" >/dev/null 2>&1 || kind=unknown
+      case "${count:-}:${age:-}" in *[!0-9:]*|:*|*:) kind=unknown ;; esac
+      [ -z "${extra:-}" ] || kind=unknown
+      ;;
+    *) kind=unknown ;;
+  esac
+  if [ "$kind" = unknown ]; then
+    [ ! -e "$unknown" ] || return 0
+    reason="stale: $w (remote secondmate $task inbox state unknown; remote probe failed or returned invalid data)"
+    fm_wake_append stale "$w" "$reason" || exit 1
+    printf 'unknown\n' > "$unknown" || exit 1
+    wake "$reason"
+    return 0
+  fi
+  rm -f "$unknown"
+  if [ "$kind" = empty ]; then
+    rm -f "$ladder" "$marker"
+    return 0
+  fi
+  grace=$(fm_task_inbox_grace_secs)
+  [ "$age" -ge "$grace" ] || return 0
+  [ "$(cat "$marker" 2>/dev/null || true)" != "$base" ] || return 0
+  previous='' attempts=0 last=0
+  if [ -f "$ladder" ]; then read -r previous attempts last < "$ladder" || true; fi
+  [ "$previous" = "$base" ] || { attempts=0; last=0; }
+  case "$attempts:$last" in *[!0-9:]*|:*|*:) attempts=0; last=0 ;; esac
+  max=$(fm_task_inbox_ring_max)
+  if [ "$attempts" -ge "$max" ]; then
+    reason="stale: $w (remote secondmate $task has $count unhandled instructions; oldest $base age ${age}s after $attempts checks; inspect delivery)"
+    fm_wake_append stale "$w" "$reason" || exit 1
+    printf '%s\n' "$base" > "$marker" || exit 1
+    wake "$reason"
+    return 0
+  fi
+  now=$(date +%s)
+  [ "$((now - last))" -ge "$grace" ] || return 0
+  printf '%s %s %s\n' "$base" "$((attempts + 1))" "$now" > "$ladder" || exit 1
+}
+
 inbox_steer_check() {  # <window> <task>
   local w=$1 task=$2 action verb rec count tail40 reason='' ring_rc backend agent_state
+  if [ "$(fm_meta_get "$STATE/$task.meta" kind)" = secondmate ] \
+    && [ -n "$(fm_meta_get "$STATE/$task.meta" remote_host)" ]; then
+    remote_inbox_steer_check "$w" "$task"
+    return 0
+  fi
   action=$(fm_task_inbox_due_action "$STATE" "$task") || return 0
   verb=${action%% *}
   [ "$verb" != quiet ] || return 0
@@ -4594,6 +4671,7 @@ EOF
     fi
     watcher_capture "$(window_backend "$w")" "$w" 40 "$(window_label "$w")" || continue
     tail40=$WATCHER_CAPTURE
+    [ -z "$task" ] || launch_mcp_prompt_check "$w" "$task" "$tail40"
     # The matcher is already defined in this shell. It reads the capture this
     # poll already takes, and a miss drops a name the away daemon saved.
     dialog=$(fm_composer_blocking_dialog "$tail40") || dialog=

@@ -1062,11 +1062,24 @@ fm_busy_claude_launch_prompt_tail() {
 # name. Matching BOTH the heading and "Do not trust" keeps this from firing on
 # a worker's own prose that happens to use the common word "trust" alone.
 # Covers omp too: it shares Pi's engine and the same project-trust gate.
+fm_busy_pi_mcp_prompt_tail() {
+  local buf
+  buf=$(cat)
+  printf '%s\n' "$buf" | grep -qiE '^ *Allow project MCP server .+\? *$' \
+    && printf '%s\n' "$buf" | tr '\n' ' ' | tr -s '[:space:]' | grep -qiF 'This server can run local commands or make network requests with your user permissions.' \
+    && printf '%s\n' "$buf" | grep -qiE "^[[:space:]→>]*Don't allow[[:space:]]*$" \
+    && printf '%s\n' "$buf" | grep -qiE '^[[:space:]→>]*Allow[[:space:]]*$' \
+    && printf '%s\n' "$buf" | grep -qiF 'navigate  enter select  escape/ctrl+c cancel'
+}
+
 fm_busy_pi_launch_prompt_tail() {
   local buf
   buf=$(cat)
-  printf '%s' "$buf" | grep -qiE "${FM_BUSY_PI_LAUNCH_PROMPT_REGEX:-Trust project folder\\?}" \
-    && printf '%s' "$buf" | grep -qiE 'Do not trust'
+  if printf '%s' "$buf" | grep -qiE "${FM_BUSY_PI_LAUNCH_PROMPT_REGEX:-Trust project folder\\?}" \
+    && printf '%s' "$buf" | grep -qiE 'Do not trust'; then
+    return 0
+  fi
+  printf '%s' "$buf" | fm_busy_pi_mcp_prompt_tail
 }
 
 # fm_busy_gemini_launch_prompt_tail: Gemini's workspace-trust dialog ("Do you

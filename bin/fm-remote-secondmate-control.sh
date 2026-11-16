@@ -11,6 +11,7 @@
 #   fm-remote-secondmate-control.sh key <id> <key>
 #   fm-remote-secondmate-control.sh capture <id> [lines]
 #   fm-remote-secondmate-control.sh observe <id>
+#   fm-remote-secondmate-control.sh inbox-probe <id>
 #   fm-remote-secondmate-control.sh sync <id> [<parent-commit>]
 #   fm-remote-secondmate-control.sh update <id>
 #   fm-remote-secondmate-control.sh retire <id> [--force]
@@ -556,7 +557,32 @@ cmd_retire() {
   fi
 }
 
+cmd_inbox_probe() {
+  local id=$1 dir f oldest='' count=0 n best=0 mtime now age
+  validate_id "$id"
+  validate_home "$id"
+  [ -d "$CONTROL_STATE" ] && [ -r "$CONTROL_STATE" ] && [ -x "$CONTROL_STATE" ] || return 1
+  dir="$CONTROL_STATE/$id.inbox"
+  [ -e "$dir" ] || { printf 'empty\n'; return 0; }
+  [ -d "$dir" ] && [ -r "$dir" ] && [ -x "$dir" ] || return 1
+  for f in "$dir"/*.msg; do
+    [ -e "$f" ] || continue
+    [ -f "$f" ] && [ -r "$f" ] || return 1
+    n=$(fm_task_inbox_seq_of "${f##*/}") || continue
+    fm_task_inbox_is_fire_and_forget "$f" && continue
+    count=$((count + 1))
+    if [ -z "$oldest" ] || [ "$n" -lt "$best" ]; then oldest=$f; best=$n; fi
+  done
+  [ -n "$oldest" ] || { printf 'empty\n'; return 0; }
+  mtime=$(fm_path_mtime "$oldest") || return 1
+  now=$(date +%s)
+  age=$((now - mtime))
+  [ "$age" -ge 0 ] || age=0
+  printf 'pending %s %s %s\n' "${oldest##*/}" "$count" "$age"
+}
+
 case "${1:-}" in
+  inbox-probe) shift; [ "$#" -eq 1 ] || usage; cmd_inbox_probe "$1" ;;
   launch) shift; [ "$#" -ge 5 ] && [ "$#" -le 6 ] || usage; cmd_launch "$@" ;;
   relaunch) shift; [ "$#" -eq 4 ] || usage; cmd_relaunch "$@" ;;
   state) shift; [ "$#" -eq 1 ] || usage; validate_id "$1"; validate_home "$1"; state_value "$1" ;;

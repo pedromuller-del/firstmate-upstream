@@ -442,6 +442,34 @@ test_launch_prompt_pi_trust_dialog() {
   pass "a Pi-family launch (pi, pi-signed, omp) parked on the project-trust dialog classifies unknown launch-prompt"
 }
 
+test_launch_prompt_pi_mcp_dialog() {
+  local state out
+  state=$(new_state_dir launch-prompt-pi-mcp)
+  "$EV" arm "$state" t1 >/dev/null
+  out=$(fm_busy_classify tmux w1 pi t1 "$state" ' Allow project MCP server “postgres”?
+ Project config: /tmp/project/.pi/mcp.json
+ Endpoint: "uvx" "postgres-mcp"
+ This server can run local commands or make network requests with your user permissions.
+ → Don'"'"'t allow
+   Allow
+ ↑↓ navigate  enter select  escape/ctrl+c cancel')
+  [ "$out" = "unknown launch-prompt" ] || fail "Pi MCP consent must classify unknown launch-prompt, got '$out'"
+  out=$(fm_busy_classify tmux w1 pi t1 "$state" ' Allow project MCP server “postgres”?
+ Project config: /tmp/project/.pi/mcp.json
+ This server can run local commands or make network requests with your user
+ permissions.
+ → Don'"'"'t allow
+   Allow
+ ↑↓ navigate  enter select  escape/ctrl+c cancel')
+  [ "$out" = "unknown launch-prompt" ] || fail "wrapped Pi MCP consent must classify unknown launch-prompt, got '$out'"
+  out=$(fm_busy_classify tmux w1 pi t1 "$state" 'The question "Allow project MCP server postgres?" appears in documentation.')
+  [ "$out" = "busy fm-spawn" ] || fail "quoted prompt prose must not classify as a dialog, got '$out'"
+  out=$(fm_busy_classify tmux w1 pi t1 "$state" '❯ I will inspect the project MCP server
+ ↑↓ navigate  enter select')
+  [ "$out" = "busy fm-spawn" ] || fail "normal composer must not classify as a dialog, got '$out'"
+  pass "Pi MCP consent is recognized without matching ordinary prose or composer"
+}
+
 test_launch_prompt_pi_requires_both_markers() {
   local state out
   state=$(new_state_dir launch-prompt-pi-partial)
@@ -841,6 +869,7 @@ test_source_mismatch_cross_adapter
 test_converted_adapters_ignore_footer_text
 test_launch_prompt_claude_trust_dialog
 test_launch_prompt_pi_trust_dialog
+test_launch_prompt_pi_mcp_dialog
 test_launch_prompt_pi_requires_both_markers
 test_launch_prompt_gemini_dialogs
 test_launch_prompt_never_shortens_a_working_launch

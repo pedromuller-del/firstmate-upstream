@@ -587,6 +587,11 @@ Each signature below was live-verified against the real installed binary through
 An initial Pi signature sourced only from the installed binary's own UI strings ("Project trust", the internal panel-title component, never the dialog's own rendered heading) was wrong and never matched the real screen.
 This guard's first live run caught that before it shipped, which is the evidence for why this class of check must be driven end to end rather than read off strings or a component name.
 
+On 2026-11-16 the same command exited 0 with Pi 1.5.0 and pi-mcp-adapter 7.0.1.
+It printed `ok - pi MCP: real adapter consent surfaces without answering the prompt` from an isolated Pi session with a project MCP server fixture.
+The run also passed Claude Code 2.1.321 and Pi project-trust checks; Gemini was not installed.
+The MCP check observes the dialog and closes the isolated session without approving or declining the server.
+
 Verified 2026-09-22 on Claude Code 2.1.278, pi 0.86.1, and gemini 0.60.0.
 
 ```sh
