@@ -541,7 +541,11 @@ if [ "${FM_TEST_PROVISION_ONLY:-0}" = 1 ]; then
   exit 0
 fi
 
-mkdir -p "$TMP_ROOT/seed-parent/data" "$TMP_ROOT/seed-parent/state"
+mkdir -p "$TMP_ROOT/seed-parent/data" "$TMP_ROOT/seed-parent/state" "$TMP_ROOT/seed-parent/config"
+# Pinned, because macOS cmux process ancestry survives any environment scrub.
+printf 'tmux\n' > "$TMP_ROOT/seed-parent/config/backend"
+[ "$(FM_HOME="$TMP_ROOT/seed-parent" bash -c '. "$1/bin/fm-backend.sh"; fm_backend_name' _ "$ROOT" 2>/dev/null)" = tmux ] \
+  || fail "the seed parent's backend followed the runner's terminal"
 FM_SECONDMATE_CHARTER='Failing seed charter.' FM_SECONDMATE_SCOPE='failed seed' \
   FM_FAKE_SSH_MODE=provision-block-fail seed_env "$ROOT/bin/fm-remote-home-seed.sh" \
   seed-fail remote-mac "$REMOTE_ROOT" "$TMP_ROOT/seed-fail-home" --no-projects \
