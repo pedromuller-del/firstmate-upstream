@@ -1487,7 +1487,7 @@ spawn_remote_secondmate() {
     herdr | hc)
       if out=$("$SCRIPT_DIR/fm-on.sh" "$id" fm-remote-secondmate-control.sh validate-backend \
         "$id" "$backend" </dev/null 2>&1); then
-        :
+        case $'\n'"$out"$'\n' in *$'\n''fleet_pin=new'$'\n'*) SPAWN_REMOTE_CHILD_PIN="$id $backend" ;; esac
       else
         rc=$?
         fm_lock_release "$registry_lock" || true
@@ -1496,7 +1496,7 @@ spawn_remote_secondmate() {
         [ -z "$out" ] || printf '%s\n' "$out" >&2
         return "$rc"
       fi
-      if ! fm_fleet_backend_bind "$STATE" "$CONFIG" "$backend" >/dev/null; then
+      if ! spawn_fleet_bind "$STATE" "$CONFIG" "$backend"; then
         fm_lock_release "$registry_lock" || true
         fm_lock_release "$SPAWN_TASK_LOCK" || true
         echo "error: remote secondmate $id must use fleet runtime $fleet; refusing creation" >&2
@@ -1582,6 +1582,7 @@ spawn_remote_secondmate() {
   fi
   launch_args=("$id" "$harness" "$model" "$effort" "$backend")
   [ -z "$remote_traceparent" ] || launch_args+=("$remote_traceparent")
+  SPAWN_ENDPOINT_CREATE_STARTED=1
   if out=$("$SCRIPT_DIR/fm-on.sh" "$id" fm-remote-secondmate-control.sh launch \
     "${launch_args[@]}" </dev/null 2>&1); then
     rc=0
@@ -1784,6 +1785,9 @@ GIT_HOOKS_DIR=
 SPAWN_LAUNCH_SENT=0
 SPAWN_ENDPOINT_CLOSED=0
 SPAWN_STAGED_LAUNCH_FILE=
+SPAWN_ENDPOINT_CREATE_STARTED=0
+SPAWN_NEW_FLEET_PINS=()
+SPAWN_REMOTE_CHILD_PIN=
 
 spawn_fresh_commit_rollback() {
   if fm_backlog_atomic_transition rollback "$STATE/$ID.meta" \
@@ -1825,8 +1829,44 @@ spawn_orca_reclaim_launch_file() {
   return 1
 }
 
+# Binds <state> and remembers a pin this spawn created, so an abort before any
+# endpoint exists releases it (spawn_release_new_fleet_pins).
+spawn_fleet_bind() { # <state> <config> <backend>
+  local existed=0
+  if [ -e "$1/fleet-backend" ] || [ -L "$1/fleet-backend" ]; then existed=1; fi
+  fm_fleet_backend_bind "$1" "$2" "$3" >/dev/null || return 1
+  if [ "$existed" = 0 ] && [ -e "$1/fleet-backend" ]; then SPAWN_NEW_FLEET_PINS+=("$1"); fi
+}
+
+# A first secondmate creation that fails before its endpoint exists leaves both
+# homes as they were. A failure after endpoint creation starts keeps the pins,
+# because the endpoint may exist and reconciliation needs its runtime.
+spawn_release_new_fleet_pins() {
+  local pin_state lock
+  for pin_state in ${SPAWN_NEW_FLEET_PINS[@]+"${SPAWN_NEW_FLEET_PINS[@]}"}; do
+    lock="$pin_state/.fleet-backend.lock"
+    if fm_lock_acquire_wait_max "$lock" 10; then
+      rm -f -- "$pin_state/fleet-backend" && pin_state=
+      fm_lock_release "$lock" || true
+    fi
+    [ -z "$pin_state" ] \
+      || echo "warning: could not release the fleet runtime this aborted spawn bound in $pin_state; remove $pin_state/fleet-backend once no task there uses it" >&2
+  done
+  SPAWN_NEW_FLEET_PINS=()
+  if [ -n "$SPAWN_REMOTE_CHILD_PIN" ]; then
+    # shellcheck disable=SC2086 # "<id> <backend>", both validated tokens.
+    "$SCRIPT_DIR/fm-on.sh" ${SPAWN_REMOTE_CHILD_PIN%% *} fm-remote-secondmate-control.sh release-backend \
+      $SPAWN_REMOTE_CHILD_PIN </dev/null >/dev/null 2>&1 \
+      || echo "warning: could not release the fleet runtime this aborted spawn bound in remote secondmate ${SPAWN_REMOTE_CHILD_PIN%% *}'s home; remove its state/fleet-backend on that host once no endpoint exists" >&2
+    SPAWN_REMOTE_CHILD_PIN=
+  fi
+}
+
 spawn_abort_cleanup() {
   local status=$?
+  if [ "$status" -ne 0 ] && [ "$SPAWN_ENDPOINT_CREATE_STARTED" = 0 ]; then
+    spawn_release_new_fleet_pins
+  fi
   if [ "$RELAUNCH_REPLACEMENT_PENDING" = 1 ] &&
     [ "$SPAWN_META_PUBLISH_STARTED" = 1 ] &&
     [ -n "$SPAWN_META_TMP" ] &&
@@ -4257,17 +4297,17 @@ if [ "$KIND" = secondmate ]; then
     exit 1
   }
   PROJ_ABS=$(validate_firstmate_home_for_spawn "$ID" "$FIRSTMATE_HOME")
-  if [ -n "$FLEET_BACKEND" ]; then
-    fm_fleet_backend_validate "$PROJ_ABS/state" "$PROJ_ABS/config" "$BACKEND" >/dev/null || exit 1
-    fm_fleet_backend_bind "$STATE" "$CONFIG" "$BACKEND" >/dev/null || exit 1
-    fm_fleet_backend_bind "$PROJ_ABS/state" "$PROJ_ABS/config" "$BACKEND" >/dev/null || exit 1
-  fi
   if [ -e "$DATA/secondmates.md" ] || [ -L "$DATA/secondmates.md" ]; then
     if ! secondmate_registry_validate_bindings "$DATA/secondmates.md" resolve_path "$ID" "$FIRSTMATE_HOME"; then
       echo "error: $SECONDMATE_REGISTRY_ERROR" >&2
       exit 1
     fi
     SECONDMATE_PROJECTS=$SECONDMATE_REGISTRY_MATCH_PROJECTS
+  fi
+  if [ -n "$FLEET_BACKEND" ]; then
+    fm_fleet_backend_validate "$PROJ_ABS/state" "$PROJ_ABS/config" "$BACKEND" >/dev/null || exit 1
+    spawn_fleet_bind "$STATE" "$CONFIG" "$BACKEND" || exit 1
+    spawn_fleet_bind "$PROJ_ABS/state" "$PROJ_ABS/config" "$BACKEND" || exit 1
   fi
   WT="$PROJ_ABS"
   # Local-HEAD sync: before launch, fast-forward this secondmate's worktree to the
@@ -5060,6 +5100,7 @@ if [ -e "$STATE/$ID.backlog-close" ] || [ -L "$STATE/$ID.backlog-close" ]; then
   exit 1
 fi
 
+SPAWN_ENDPOINT_CREATE_STARTED=1
 W="fm-$ID"
 if [ "$RELAUNCH" -eq 1 ]; then
   # A secondmate's home already resolved WT above through the same validation a

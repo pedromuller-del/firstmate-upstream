@@ -20,12 +20,14 @@ case "$1" in
   --version) echo 'hc 0.1.14' ;;
   get)
     case "$(cat "$HC_TEST_STATE")" in missing) exit 3 ;; unreadable) exit 1 ;; esac
-    tag=$HC_TEST_HOME_TAG
+    tag=$HC_TEST_HOME_TAG st=live
     [ "$(cat "$HC_TEST_STATE")" != foreign ] || tag=foreign
-    jq -n --arg home "$tag" '{state:"live",labels:{"firstmate.task":"fm-mate","firstmate.home":$home},foreground:{name:"codex",argv0:"codex",args:"codex",pid:99999999},status:{state:"idle"}}'
+    [ "$(cat "$HC_TEST_STATE")" != finished ] || st=finished
+    jq -n --arg home "$tag" --arg st "$st" '{state:$st,labels:{"firstmate.task":"fm-mate","firstmate.home":$home},foreground:{name:"codex",argv0:"codex",args:"codex",pid:99999999},status:{state:"idle"}}'
     ;;
   read) echo 'fixture capture' ;;
   send|keys) echo '{}' ;;
+  rm) printf 'missing\n' > "$HC_TEST_STATE"; echo '{}' ;;
   *) exit 88 ;;
 esac
 SH
@@ -82,6 +84,17 @@ assert_grep 'hc' "$CHILD/state/fleet-backend" 'preflight must bind child runtime
 assert_absent "$HC_TEST_LOG" 'binding must not contact hc'
 if run_control validate-backend mate herdr >/dev/null 2>&1; then fail 'child binding must refuse migration'; fi
 pass 'pre-inheritance validation binds the child without contacting a runtime'
+
+[ -z "$(run_control validate-backend mate hc)" ] || fail 'an existing child pin must not be reported as new'
+run_control release-backend mate hc
+assert_absent "$CHILD/state/fleet-backend" 'release must remove the pin of an aborted creation'
+[ "$(run_control validate-backend mate hc)" = fleet_pin=new ] || fail 'a new child pin must be reported to the creating parent'
+write_meta
+if run_control release-backend mate hc > "$TMP/release" 2>&1; then fail 'release must refuse while an endpoint record exists'; fi
+assert_grep 'keeping its fleet runtime' "$TMP/release" 'refused release must say why'
+assert_grep 'hc' "$CHILD/state/fleet-backend" 'refused release removed the pin'
+rm "$CHILD/state/parent-route/mate.meta"
+pass 'validate-backend reports a new child pin, and release-backend removes it only before any endpoint record'
 
 write_meta
 OUT=$(run_control route mate)
@@ -160,6 +173,11 @@ printf 'missing\n' > "$HC_TEST_STATE"
 assert_contains "$(run_control launch mate codex - - hc)" 'hc_terminal=t8' 'missing endpoint must return replacement identity'
 if HC_TEST_BIN=/nonexistent run_control launch mate codex - - hc > "$TMP/no-hc" 2>&1; then fail 'missing hc must refuse launch'; fi
 assert_grep 'selected remote backend hc is unavailable' "$TMP/no-hc" 'missing selected hc must not fall back'
+write_meta
+printf 'finished\n' > "$HC_TEST_STATE"
+[ "$(run_control state mate)" = dead ] || fail 'a finished hc terminal must read dead, not missing'
+assert_contains "$(run_control launch mate codex - - hc)" 'hc_terminal=t8' 'finished endpoint must return replacement identity'
+assert_grep 'rm --json t7' "$HC_TEST_LOG" 'launch must remove the finished terminal before replacing it'
 pass 'launch and relaunch pin hc routing and return current endpoint identity'
 
 rm "$CHILD/state/fleet-backend"
@@ -215,3 +233,61 @@ assert_contains "$OUT" 'check hc=ok:' 'doctor must validate hc version'
 assert_contains "$OUT" 'check hc-server=fixable:' 'absent core must require explicit repair'
 assert_no_grep 'server status' "$HC_TEST_LOG" 'read-only doctor must not autostart absent core'
 pass 'doctor supports hc tools and does not autostart a missing core in check mode'
+
+# A first remote creation that fails its host readiness check leaves the
+# parent and the child unbound. The SSH boundary is faked; the child-side
+# control script runs for real against a scratch child home.
+PARENT2="$TMP/parent2"
+CHILD2="$TMP/child2"
+mkdir -p "$PARENT2/data" "$PARENT2/state" "$PARENT2/config" "$CHILD2/state" "$CHILD2/config" "$CHILD2/bin"
+printf 'codex\n' > "$PARENT2/config/crew-harness"
+printf 'rmate\n' > "$CHILD2/.fm-secondmate-home"
+touch "$CHILD2/AGENTS.md"
+printf -- '- rmate - remote hc mate (host: remote-hc; root: %s; home: %s; scope: remote hc; projects: ; added 2026-11-17)\n' \
+  "$ROOT" "$CHILD2" > "$PARENT2/data/secondmates.md"
+cat > "$TMP/fake-ssh" <<'SH'
+#!/usr/bin/env bash
+while [ "$#" -gt 0 ]; do
+  case "$1" in -o) shift 2 ;; --) shift; break ;; *) exit 90 ;; esac
+done
+[ "$1" = remote-hc ] && [ "$2" = fm-remote-entrypoint.sh ] || exit 91
+shift 2
+mapfile -d '' args < <(printf '%s' "$4" | base64 -d)
+printf '%s\n' "${args[*]}" >> "$FAKE_SSH_LOG"
+case "${args[0]}:${args[1]:-}" in
+  fm-remote-doctor.sh:*)
+    [ -n "${FAKE_HOST_READY:-}" ] && exit 0
+    echo 'check hc-server=broken: fixture host is not ready'; exit 1 ;;
+  fm-remote-secondmate-control.sh:launch) echo 'error: fixture launch failed after creating nothing provable' >&2; exit 1 ;;
+  *) exec env FM_HOME="$FAKE_CHILD" FM_ROOT_OVERRIDE="$FAKE_ROOT" "$FAKE_ROOT/bin/${args[0]}" "${args[@]:1}" ;;
+esac
+SH
+chmod +x "$TMP/fake-ssh"
+: > "$TMP/ssh.log"
+if env HOME="$TMP/account" FM_HOME="$PARENT2" FM_BACKEND=hc FM_SSH_BIN="$TMP/fake-ssh" \
+  FAKE_SSH_LOG="$TMP/ssh.log" FAKE_CHILD="$CHILD2" FAKE_ROOT="$ROOT" \
+  "$ROOT/bin/fm-spawn.sh" rmate --secondmate > "$TMP/remote-abort.out" 2>&1; then
+  fail 'remote creation succeeded on a host that is not ready'
+fi
+assert_grep 'is not ready for a remote second mate' "$TMP/remote-abort.out" 'remote creation must stop at readiness'
+grep -qx 'fm-remote-secondmate-control.sh validate-backend rmate hc' "$TMP/ssh.log" || fail 'creation must validate the child before readiness'
+grep -qx 'fm-remote-secondmate-control.sh release-backend rmate hc' "$TMP/ssh.log" || fail 'abort must release the new child pin'
+assert_no_grep 'control.sh launch ' "$TMP/ssh.log" 'an unready host must never receive a launch'
+assert_absent "$PARENT2/state/fleet-backend" 'aborted remote creation left the parent bound'
+assert_absent "$CHILD2/state/fleet-backend" 'aborted remote creation left the child bound'
+pass 'a remote creation that fails readiness releases the new parent and child pins'
+
+# Once the launch request leaves the parent, the endpoint may exist, so a
+# failed launch keeps both pins for reconciliation.
+rm -f "$CHILD2/state/fleet-backend"
+: > "$TMP/ssh.log"
+if env HOME="$TMP/account" FM_HOME="$PARENT2" FM_BACKEND=hc FM_SSH_BIN="$TMP/fake-ssh" \
+  FAKE_SSH_LOG="$TMP/ssh.log" FAKE_CHILD="$CHILD2" FAKE_ROOT="$ROOT" FAKE_HOST_READY=1 \
+  "$ROOT/bin/fm-spawn.sh" rmate --secondmate > "$TMP/remote-launch-failed.out" 2>&1; then
+  fail 'remote creation succeeded although the launch failed'
+fi
+grep -q 'control.sh launch rmate' "$TMP/ssh.log" || fail "the fixture never reached the launch: $(cat "$TMP/remote-launch-failed.out")"
+assert_no_grep 'release-backend' "$TMP/ssh.log" 'a failed launch released the child pin'
+assert_grep 'hc' "$PARENT2/state/fleet-backend" 'a failed launch released the parent pin'
+assert_grep 'hc' "$CHILD2/state/fleet-backend" 'a failed launch released the child pin'
+pass 'a remote creation whose launch request failed keeps both pins for reconciliation'

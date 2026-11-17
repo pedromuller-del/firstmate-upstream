@@ -34,6 +34,8 @@ elif cmd == 'connect':
 elif cmd == 'ls':
     print('{"terminals":[]}')
 elif cmd == 'run':
+    if os.environ.get('FM_FAKE_HC_RUN_FAIL'):
+        sys.exit(1)
     labels = dict(args[i + 1].split('=', 1) for i, arg in enumerate(args) if arg == '--label')
     cwd = args[args.index('--cwd') + 1]
     terminal = dict(address='t1', state='live', labels=labels, cwd=cwd,
@@ -195,3 +197,30 @@ for selection in config detected; do
   assert_absent "$FM_FAKE_HC_DIR/terminal.json" "$selection primary selection conflict created terminal"
 done
 pass 'hc secondmate: configured and detected primary selections win over a conflicting secondmate flag'
+
+# A first creation that fails before its endpoint exists leaves both homes as
+# they were; a failure after creation starts keeps the pins for reconciliation.
+setup_world abort-after-bind
+printf 'hc\n' > "$CHILD/state/fleet-backend"
+touch "$PRIMARY/state/design.backlog-close"
+if spawn > "$TMP_ROOT/abort-after-bind.out" 2>&1; then
+  fail 'spawn ignored a pending backlog close'
+fi
+assert_grep 'pending authoritative backlog close' "$TMP_ROOT/abort-after-bind.out" 'missing backlog close diagnosis'
+assert_absent "$PRIMARY/state/fleet-backend" 'aborted creation left the primary bound'
+assert_line 'hc' "$CHILD/state/fleet-backend" 'aborted creation removed a pin it did not create'
+assert_absent "$FM_FAKE_HC_DIR/terminal.json" 'aborted creation created a terminal'
+setup_world registry-error
+printf -- '- design - design fleet (home: %s; scope: design; projects: ; added 2026-11-15)\n' "$TMP_ROOT/elsewhere" > "$PRIMARY/data/secondmates.md"
+if spawn > "$TMP_ROOT/registry-error.out" 2>&1; then
+  fail 'spawn accepted a registry row naming another home'
+fi
+assert_absent "$PRIMARY/state/fleet-backend" 'registry refusal left the primary bound'
+assert_absent "$CHILD/state/fleet-backend" 'registry refusal left the child bound'
+setup_world create-failed
+if FM_FAKE_HC_RUN_FAIL=1 spawn > "$TMP_ROOT/create-failed.out" 2>&1; then
+  fail 'spawn reported success after hc run failed'
+fi
+assert_line 'hc' "$PRIMARY/state/fleet-backend" 'a failure after endpoint creation started released the primary pin'
+assert_line 'hc' "$CHILD/state/fleet-backend" 'a failure after endpoint creation started released the child pin'
+pass 'hc secondmate: a failed first creation releases only the pins it made, and only before endpoint creation'

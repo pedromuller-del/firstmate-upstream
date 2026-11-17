@@ -5,6 +5,7 @@
 #   fm-remote-secondmate-control.sh launch <id> <harness> <model|-> <effort|-> {herdr|rex|hc} [traceparent]
 #   fm-remote-secondmate-control.sh validate-backend <id> <backend>
 #   fm-remote-secondmate-control.sh validate-inheritance <id>
+#   fm-remote-secondmate-control.sh release-backend <id> <backend>
 #   fm-remote-secondmate-control.sh relaunch <id> <harness> <model|default|-> <effort|default|->
 #   fm-remote-secondmate-control.sh state <id>
 #   fm-remote-secondmate-control.sh route <id>
@@ -202,7 +203,9 @@ remote_agent_state() { # <backend> <target> <meta>
     verdict=$(fm_backend_hc_endpoint_state "$target" "fm-$(fm_meta_get "$meta" endpoint_task_id)")
     case "$verdict" in
       ready) ;;
-      absent|finished) printf 'missing\n'; return 0 ;;
+      absent) printf 'missing\n'; return 0 ;;
+      # A finished terminal still exists, so launch must remove it before replacing it.
+      finished) printf 'dead\n'; return 0 ;;
       foreign) printf 'unverified\n'; return 0 ;;
       *) printf 'unreadable\n'; return 0 ;;
     esac
@@ -305,7 +308,23 @@ cmd_validate_backend() { # <id> <selected-backend>
     rex:hc|rex:herdr)
       die "FM_BACKEND '$FM_BACKEND' conflicts with selected fleet backend 'rex'; refusing runtime change" ;;
   esac
-  fm_fleet_backend_bind "$TARGET_HOME/state" "$TARGET_HOME/config" "$2" >/dev/null
+  local existed=0
+  if [ -e "$TARGET_HOME/state/fleet-backend" ] || [ -L "$TARGET_HOME/state/fleet-backend" ]; then existed=1; fi
+  fm_fleet_backend_bind "$TARGET_HOME/state" "$TARGET_HOME/config" "$2" >/dev/null || exit 1
+  # The creating parent releases a pin it saw reported here if it aborts before launch.
+  if [ "$existed" = 0 ] && [ -e "$TARGET_HOME/state/fleet-backend" ]; then printf 'fleet_pin=new\n'; fi
+}
+
+# Undoes validate-backend's new pin for a creation that aborted before launch.
+# The parent holds this mate's registry and spawn locks, so no launch can race.
+cmd_release_backend() { # <id> <backend>
+  validate_id "$1"
+  validate_home "$1"
+  if [ -e "$(meta_path "$1")" ] || [ -L "$(meta_path "$1")" ]; then
+    die "remote secondmate $1 has an endpoint record; keeping its fleet runtime"
+  fi
+  [ "$(fm_fleet_backend_read "$TARGET_HOME/state")" = "$2" ] || return 0
+  rm -f -- "$TARGET_HOME/state/fleet-backend"
 }
 
 cmd_launch() {
@@ -659,6 +678,7 @@ case "${1:-}" in
   inbox-probe) shift; [ "$#" -eq 1 ] || usage; cmd_inbox_probe "$1" ;;
   validate-backend) shift; [ "$#" -eq 2 ] || usage; cmd_validate_backend "$@" ;;
   validate-inheritance) shift; [ "$#" -eq 1 ] || usage; cmd_validate_inheritance "$@" ;;
+  release-backend) shift; [ "$#" -eq 2 ] || usage; cmd_release_backend "$@" ;;
   launch) shift; [ "$#" -ge 5 ] && [ "$#" -le 6 ] || usage; cmd_launch "$@" ;;
   relaunch) shift; [ "$#" -eq 4 ] || usage; cmd_relaunch "$@" ;;
   state) shift; [ "$#" -eq 1 ] || usage; validate_id "$1"; validate_home "$1"; state_value "$1" ;;
