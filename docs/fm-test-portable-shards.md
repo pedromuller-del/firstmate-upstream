@@ -43,6 +43,7 @@ The 2026-10-28 Antigravity primary tests carry provisional serial hints - 45000 
 The 2026-11-16 hc fleet suites carry single-run Ubuntu samples from the passing scripts of fork CI run [43803578909](https://github.com/tiago-peixoto/firstmate/actions/runs/43803578909), taking the slower sample where a script ran twice: 402 ms for `tests/fm-bootstrap-fleet-backend.test.sh`, 2080 ms for `tests/fm-fleet-backend.test.sh`, 4547 ms for `tests/fm-fleet-inheritance.test.sh`, 21433 ms for `tests/fm-hc-recovery.test.sh`, 468 ms for `tests/fm-remote-hc-doctor.test.sh`, 16135 ms for `tests/fm-remote-hc-smoke.test.sh`, 5573 ms for `tests/fm-remote-hc.test.sh`, 98 ms for `tests/fm-remote-home-seed-backend.test.sh`, 15127 ms for `tests/fm-secondmate-hc-smoke.test.sh`, and 20142 ms for `tests/fm-secondmate-hc.test.sh`.
 That run failed in other scripts, so these are completed-script samples, not a green-run maximum.
 Replace them with timing-artifact maxima at the next CI refresh.
+With those hints the largest of eleven serial shards packed 1203541 ms, past the 1200000 ms budget, so a twelfth shard keeps every shard within it under the unchanged timeout policy.
 The wedge-cap suite carries the Ubuntu measurements from CI run [39597689178](https://github.com/kunchenguid/firstmate/actions/runs/39597689178) - 374225 ms for `tests/fm-watch-wedge-cap.test.sh` and the 74 ms live-guard skip for `tests/fm-watch-wedge-cap-live.test.sh` - in place of the provisional local measurements the suite first carried (1003000 ms and the 155 ms skip), which overstated the CI cost of both.
 They are not a formality: without a hint the suite is packed on the 45000 ms default, which puts it beside a shard already holding about 17 minutes of measured work, so that shard would really have run for about 23 minutes - past the 20-minute target the guard reserves - while the coverage guard still passed.
 The same run measured the wedge-cap parity suite at 27763 ms, which `bin/fm-test-run.sh` packs in place of the provisional 209000 ms local measurement.
@@ -144,7 +145,7 @@ No fast mode, path skips, or paid runner provisioning is part of this layout.
 
 The longer-term performance objective remains a complete green run under fifteen minutes including start delay, but the three watch-triage members still sum to about 26 minutes of CI test time.
 The immediate packing target is the runner's modeled script budget, not a claim that more shards alone can make an indivisible script faster.
-The layout uses sixteen long-lived Linux jobs (eleven serial, two parallel, Herdr, two lint), plus short checks and macOS; insufficient shared account capacity can erase the packing gain.
+The layout uses seventeen long-lived Linux jobs (twelve serial, two parallel, Herdr, two lint), plus short checks and macOS; insufficient shared account capacity can erase the packing gain.
 Compare complete before/after runs, preserve cancelled and partial-run evidence, and measure a representative normal-run sample before claiming a P95 improvement.
 The workflow retains per-PR supersession and keeps only the newest of close main pushes' runs, without changing the compliance workflow's event semantics.
 
