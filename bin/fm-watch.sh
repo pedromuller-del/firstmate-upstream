@@ -640,7 +640,6 @@ launch_mcp_prompt_check() {  # <window> <task> <capture>
 remote_inbox_steer_check() {  # <window> <task>
   local w=$1 task=$2 out kind base count age extra previous attempts last now grace max reason
   local ladder="$STATE/.remote-inbox-ladder-$2" marker="$STATE/.remote-inbox-escalated-$2"
-  local unknown="$STATE/.remote-inbox-unknown-$2"
   if watcher_waited run_check_process "$SCRIPT_DIR/fm-on.sh" "$task" fm-remote-secondmate-control.sh inbox-probe "$task" 2>/dev/null; then
     out=$WATCHER_CAPTURE
   else
@@ -660,15 +659,8 @@ EOF
       ;;
     *) kind=unknown ;;
   esac
-  if [ "$kind" = unknown ]; then
-    [ ! -e "$unknown" ] || return 0
-    reason="stale: $w (remote secondmate $task inbox state unknown; remote probe failed or returned invalid data)"
-    fm_wake_append stale "$w" "$reason" || exit 1
-    printf 'unknown\n' > "$unknown" || exit 1
-    wake "$reason"
-    return 0
-  fi
-  rm -f "$unknown"
+  # An unreachable or unreadable remote is never evidence of a stuck inbox; the liveness probe owns host loss.
+  [ "$kind" != unknown ] || return 0
   if [ "$kind" = empty ]; then
     rm -f "$ladder" "$marker"
     return 0

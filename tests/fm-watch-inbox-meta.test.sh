@@ -45,6 +45,7 @@ printf 'schema=fm-task-inbox.v1\nat=2026-01-01T00:00:00Z\n--\nanother\n' > "$REM
 cat > "$TMP_ROOT/fakebin/ssh" <<'SH'
 #!/usr/bin/env bash
 [ "${FM_TEST_REMOTE_DOWN:-0}" != 1 ] || exit 255
+[ "${FM_TEST_REMOTE_GARBAGE:-0}" != 1 ] || { echo "garbled probe"; exit 0; }
 while [ "$#" -gt 0 ]; do
   case "$1" in -o) shift 2 ;; --) shift; break ;; *) exit 90 ;; esac
 done
@@ -68,13 +69,16 @@ FM_HOME="$TMP_ROOT" FM_ROOT_OVERRIDE="$ROOT" FM_STATE_OVERRIDE="$TMP_ROOT/state"
   for i in 1 2 3 4 5; do inbox_steer_check remote:mate mate; done
   [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 1 ] || { echo "acknowledged or fire-and-forget record produced wake" >&2; exit 1; }
   rm "$2/state/parent-route/mate.inbox/003.msg"
-  export FM_TEST_REMOTE_DOWN=1
-  inbox_steer_check remote:mate mate
-  inbox_steer_check remote:mate mate
-  [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 2 ] || { echo "unreachable remote must produce one deduplicated unknown wake" >&2; exit 1; }
-  rg -q "(unknown|unreachable)" "$FM_WAKE_QUEUE" || { echo "remote failure was not reported as unknown" >&2; exit 1; }
+  printf "schema=fm-task-inbox.v1\n--\nwhile down\n" > "$2/state/parent-route/mate.inbox/003.msg"
+  FM_TEST_REMOTE_DOWN=1 inbox_steer_check remote:mate mate
+  FM_TEST_REMOTE_GARBAGE=1 inbox_steer_check remote:mate mate
+  [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 1 ] || { echo "unreachable or garbled remote probe produced a wake" >&2; exit 1; }
+  for i in 1 2 3 4 5; do inbox_steer_check remote:mate mate; done
+  [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 2 ] || { echo "stuck record after an unknown probe did not wake once" >&2; exit 1; }
+  rg -q "mate has 1 unhandled.*003.msg" "$FM_WAKE_QUEUE" || { echo "second wake must name the stuck record" >&2; exit 1; }
+  mv "$2/state/parent-route/mate.inbox/003.msg" "$2/state/parent-route/mate.inbox/handled/"
 ' _ "$ROOT" "$REMOTE"
-pass "remote inbox alerts once for unhandled records and unknown probes"
+pass "remote inbox alerts once for unhandled records and stays quiet on unknown probes"
 
 FM_HOME="$TMP_ROOT" FM_ROOT_OVERRIDE="$ROOT" FM_STATE_OVERRIDE="$TMP_ROOT/state" \
   bash -eu -c '
@@ -113,6 +117,23 @@ wait_for_exit "$pid" 200 || { reap "$pid"; fail "watcher did not surface the rem
 rg -q 'remote secondmate mate has 1 unhandled' "$case_dir/state/.wake-queue" \
   || fail "watcher did not enqueue the remote inbox wake"
 pass "watcher loop surfaces a remote mate's unhandled inbox"
+
+case_dir=$(make_case remote-inbox-unreachable)
+mkdir -p "$case_dir/data" "$case_dir/config"
+printf 'window=remote:mate\nkind=secondmate\nremote_host=lab\n' > "$case_dir/state/mate.meta"
+printf -- '- mate - fixture (host: lab; root: /remote/root; home: %s; scope: fixture; projects: sample; added 2026-08-26)\n' "$REMOTE" > "$case_dir/data/secondmates.md"
+watch_bg "$case_dir/state" "$case_dir/fakebin" "$case_dir/out" env \
+  FM_HOME="$case_dir" FM_ROOT_OVERRIDE="$ROOT" FM_SSH_BIN="$TMP_ROOT/fakebin/ssh" \
+  FM_TEST_ROOT="$ROOT" FM_TEST_REMOTE_DOWN=1 FM_TASK_INBOX_GRACE_SECS=0 FM_TASK_INBOX_RING_MAX=0
+pid=$!
+if ! wait_poll_cycle "$case_dir/state" "$pid" || ! wait_poll_cycle "$case_dir/state" "$pid"; then
+  reap "$pid"
+  fail "watcher exited against an unreachable remote mate: $(cat "$case_dir/out")"
+fi
+# The watcher's TERM exit status is nonzero; this file runs under set -e.
+reap "$pid" || true
+[ ! -s "$case_dir/state/.wake-queue" ] || fail "unreachable remote mate queued a wake: $(cat "$case_dir/state/.wake-queue")"
+pass "watcher loop stays quiet and running against an unreachable remote mate"
 
 case_dir=$(make_case pi-mcp-loop)
 mkdir -p "$case_dir/config"
