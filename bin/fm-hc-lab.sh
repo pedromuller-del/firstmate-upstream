@@ -14,7 +14,9 @@
 # owned directory holding scratch XDG_STATE_HOME / XDG_CONFIG_HOME /
 # XDG_DATA_HOME plus an explicitly pinned HC_SESSION and HC_SOCKET - every hc
 # call this helper makes carries all five, and ambient HC_TERMINAL_* markers
-# are stripped, exactly like bin/backends/hc.sh.
+# are stripped, exactly like bin/backends/hc.sh. The operator's HERDR_*, TMUX,
+# and TMUX_PANE markers are stripped as well, because lab terminals inherit
+# the lab server's environment.
 #
 # Session names must begin with "fm-hclab-" and can never be "default".
 # The name command sanitizes the label, caps it at 16 characters, and appends
@@ -117,14 +119,20 @@ fm_hclab_bin() {
 
 # fm_hclab_cli: every hc call this helper makes, pinned to the lab session's
 # env and socket. Ambient HC_* are stripped in a subshell (env -u is not
-# portable), stdin detached.
+# portable), stdin detached. The operator's Herdr and tmux markers are
+# stripped too: every lab terminal gets the environment the lab server
+# started with, and a harness hook there that still saw them would report to
+# the operator's own pane.
 fm_hclab_cli() { # <session> <hc arguments...>
-  local name=$1 dir bin
+  local name=$1 dir bin var
   shift
   dir=$(fm_hclab_session_dir "$name")
   bin=$(fm_hclab_bin) || return 1
   (
-    unset HC_TERMINAL_ID HC_TERMINAL_SOCKET HC_SCOPE HC_SESSION HC_SOCKET
+    unset HC_TERMINAL_ID HC_TERMINAL_SOCKET HC_SCOPE HC_SESSION HC_SOCKET TMUX TMUX_PANE
+    for var in $(compgen -e); do
+      case "$var" in HERDR_*) unset "$var" ;; esac
+    done
     XDG_STATE_HOME="$dir/env/xdg-state" \
     XDG_CONFIG_HOME="$dir/env/xdg-config" \
     XDG_DATA_HOME="$dir/env/xdg-data" \

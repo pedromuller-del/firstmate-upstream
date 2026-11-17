@@ -17,6 +17,7 @@ REAL_FIND=$(command -v find)
 REAL_CAT=$(command -v cat)
 cat > "$TMP_ROOT/fakebin/hc" <<'SH'
 #!/usr/bin/env bash
+[ -z "${FAKE_HC_ENV_LOG:-}" ] || env >> "$FAKE_HC_ENV_LOG"
 printf '{"pid":123}\n'
 SH
 cat > "$TMP_ROOT/fakebin/find" <<'SH'
@@ -87,3 +88,15 @@ refuse 'could not record the fleet-state tripwire' env FAIL_READ=find bash "$LAB
 bash "$LAB" teardown fm-hclab-good
 [ ! -e "$FM_HC_LAB_DIR/fm-hclab-good" ] || fail 'successful teardown retained session'
 printf 'ok - private roots, exclusive sessions, and fail-closed tripwire\n'
+
+# Every lab terminal gets the lab server's environment, so the operator's own
+# terminal markers must not reach the hc call that starts the server: a harness
+# hook in the lab would report to the operator's pane.
+HERDR_ENV=1 HERDR_SOCKET_PATH=/operator/herdr.sock HERDR_PANE_ID=operator-pane \
+  TMUX=/operator/tmux,1,0 TMUX_PANE=%1 FAKE_HC_ENV_LOG="$TMP_ROOT/hc-env" \
+  bash "$LAB" provision fm-hclab-markers
+grep -qx 'HC_SESSION=fm-hclab-markers' "$TMP_ROOT/hc-env" || fail 'provision made no hc call to check'
+! grep -E '^(HERDR_[A-Z_]*|TMUX|TMUX_PANE)=' "$TMP_ROOT/hc-env" \
+  || fail 'the lab server inherited the operator terminal markers'
+bash "$LAB" teardown fm-hclab-markers
+printf 'ok - the lab server never inherits the operator Herdr or tmux markers\n'

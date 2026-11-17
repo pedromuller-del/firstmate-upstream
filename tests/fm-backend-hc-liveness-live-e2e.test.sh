@@ -24,9 +24,10 @@
 # typed text, and `hc read` carries no styling, so bin/backends/hc.sh takes
 # the styled screen from a watch-only attach paint. A fresh idle Claude must
 # read `empty` through that paint. Claude is started in the repo root, which
-# the operator has normally trusted; a trust dialog fails the check. Its
-# Herdr and tmux markers are dropped, so its own hooks never report to the
-# operator's live terminal.
+# the operator has normally trusted; a trust dialog fails the check. Every lab
+# terminal gets the lab server's environment, which bin/fm-hc-lab.sh starts
+# without the operator's Herdr and tmux markers, so no harness hook here
+# reports to the operator's live terminal.
 set -u
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -144,7 +145,7 @@ for harness in claude codex opencode pi grok kimi; do
   [ "$harness" = claude ] || continue
   address=$(fm_backend_hc_cli "$HC_SESSION" run --bg --json --no-parent --outlive-parent --no-notify \
     --cwd "$ROOT" --label "firstmate.task=fm-composer-$harness" --label "firstmate.home=$(fm_backend_hometag)" \
-    env -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u TMUX -u TMUX_PANE "$bin_path" \
+    "$bin_path" \
     | jq -r '.address // empty')
   fm_backend_hc_address_valid "$address" || fail "$harness ($version): hc did not start a composer terminal"
   target="$HC_SESSION:$address"
