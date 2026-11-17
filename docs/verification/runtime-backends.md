@@ -3708,6 +3708,23 @@ FM_TEST_COMPLETE
 A real Claude Code launch through the user's `claude` wrapper, typed into a task terminal with `fm_backend_hc_send_text_line` and never given a prompt, read `alive` from `fm_backend_agent_state` within three polls, and `fm_backend_kill` returned 0 with no surviving member of its process group.
 Before reading the process group, the same launch read `ambiguous`.
 
+### Away-mode supervisor
+
+On 2026-11-17 with hc 0.1.14, an untracked lab script ran the real `bin/fm-afk-start.sh` with `FM_DAEMON_PRIMARY_HARNESS=claude` against a fake Claude composer (an idle `❯`+NBSP row between two rules) in an owned `bin/fm-hc-lab.sh` core:
+
+| Scenario | Result |
+| --- | --- |
+| Idle composer, explicit `FM_SUPERVISOR_TARGET` | One record-backed doorbell was delivered and confirmed, and the away-mode return check read it as internal. |
+| Claude's rendered working footer, with no native status reported for the fake | Deferred as busy, then delivered once after the footer cleared. |
+| Half-typed text, and a dim prompt suggestion | Both deferred as an unproven composer (`state=unknown`) with nothing typed, then each was delivered once after the composer cleared. |
+| Bare shell prompt | Deferred as `unknown`, with nothing typed. |
+| Daemon started as the fake's child with no override | Resolved `<session>:<address>` with `target_source=HC_TERMINAL_ID` and delivered there. |
+| Missing hc terminal | The daemon refused and removed `state/.afk`. |
+| The same script on the code before hc support | The daemon refused `hc` at startup and left `state/.afk` standing. |
+
+hc's screen read is plain text, so a Claude prompt suggestion reads like typed input and delivery waits until the composer is visibly empty.
+A real Claude Code composer in a Herdr app terminal, and whether hc reports native status for it, are not verified.
+
 ### Spawn, steer, peek, and teardown
 
 A scout ran end to end in a scratch home with `HOME` and `TREEHOUSE_ROOT` in the scratch root, a private core (`HC_SESSION=fme1`), a local bare-origin project, and a compiled stand-in agent at `<root>/agents/claude/claude` that logs its argv, its `HC_*` and `FM_*` environment, and every input line:

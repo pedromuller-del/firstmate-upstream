@@ -77,7 +77,9 @@
 #
 # Usage: fm-supervise-daemon.sh
 #          Long-lived background loop. Normally started by the /afk skill, which
-#          sets state/.afk first. Env knobs:
+#          sets state/.afk first; a daemon that then refuses at startup (an
+#          unsupported backend or a missing target) removes state/.afk again,
+#          so the watcher is never left one-shot without a daemon. Env knobs:
 #          FM_SUPERVISOR_TARGET     supervisor endpoint target (override; otherwise
 #                                   auto-discovered per backend - $TMUX_PANE
 #                                   under tmux, "<session>:<pane-id>" from
@@ -2100,6 +2102,21 @@ fm_super_main() {
     exit 1
   fi
   echo "$$" > "$PIDFILE"
+  # A daemon that refuses to start must not leave state/.afk behind: with the
+  # flag present and no daemon, the watcher stays one-shot and nothing
+  # supervises the fleet. Armed only after this process owns the lock, so a
+  # second daemon that found a live owner never clears that owner's flag; the
+  # away-posture record stays, as on a home that runs no daemon.
+  startup_rollback() {
+    afk_active "$STATE" || return 0
+    if afk_exit "$STATE" && ! afk_active "$STATE"; then
+      echo "afk: the away-mode daemon could not start, so state/.afk was removed and normal supervision continues" >&2
+      log "startup failed; removed state/.afk so no one-shot watcher is left without a daemon"
+    else
+      echo "afk: the away-mode daemon could not start and state/.afk could not be removed" >&2
+    fi
+  }
+  trap startup_rollback EXIT
   # The recorded identity is what proves this daemon still owns supervision after
   # its watcher child exits (fm_afk_daemon_owns_supervision, read by the turn-end
   # guard). Startup continues without it - a supervising daemon must not refuse to
@@ -2196,6 +2213,7 @@ fm_super_main() {
     rm -f "$PIDFILE" 2>/dev/null || true
     exit 1
   fi
+  trap - EXIT
 
   local afk_status="off"
   afk_active "$STATE" && afk_status="on"

@@ -1044,6 +1044,57 @@ unit_native_lifecycle() {
   rm -rf "$st"
 }
 
+# A harness-native entry (enter, start-native, then the prepared daemon entry
+# the harness runs as its tracked background job) whose daemon refuses at
+# startup must not leave state/.afk behind, or the watcher stays one-shot with
+# no daemon. Both refusal sites are covered: an unsupported backend and a
+# missing hc terminal. The away-posture record stays. A daemon refused by a
+# live owner's lock must leave that owner's flag alone.
+unit_native_daemon_refusal_clears_flag() {
+  local st out rc case holder
+  for case in tern hc; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-refusal.XXXXXX")
+    mkdir -p "$st/state"
+    # shellcheck disable=SC2016 # The fake core reads its own argument.
+    printf '#!/bin/sh\ncase "$1" in --version) echo "hc 0.1.14" ;; get) exit 3 ;; *) exit 88 ;; esac\n' > "$st/hc"
+    chmod +x "$st/hc"
+    enter_posture "$st" || fail "daemon refusal ($case): could not enter fixture posture"
+    FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" "$LAUNCH" start-native >/dev/null 2>&1 \
+      && [ -e "$st/state/.afk" ] || fail "daemon refusal ($case): start-native did not prepare state/.afk"
+    out=$(FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" FM_AFK_STATE_PREPARED=1 \
+      FM_HC_BIN="$st/hc" FM_HC_SOCKET="$st/core.sock" \
+      FM_SUPERVISOR_BACKEND="$case" FM_SUPERVISOR_TARGET=lab:t9 "$START" 2>&1)
+    rc=$?
+    if [ "$rc" -ne 0 ] && [ ! -e "$st/state/.afk" ] && [ -e "$st/state/.afk-contract" ] \
+      && printf '%s' "$out" | grep -F 'state/.afk was removed' >/dev/null; then
+      pass "daemon refusal ($case): the refused daemon removed state/.afk, said why, and kept the posture record"
+    else
+      fail "daemon refusal ($case): rc=$rc afk=$([ -e "$st/state/.afk" ] && echo present || echo absent): $out"
+    fi
+    FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" "$LAUNCH" stop >/dev/null 2>&1
+    rm -rf "$st"
+  done
+
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-refusal-held.XXXXXX")
+  mkdir -p "$st/state/.supervise-daemon.lock"
+  "$SLEEPER" &
+  holder=$!
+  printf '%s\n' "$holder" > "$st/state/.supervise-daemon.lock/pid"
+  printf 'away\n%s\n' "$(date +%s)" > "$st/state/.afk"
+  out=$(FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" FM_SUPERVISOR_BACKEND=tern \
+    "$ROOT/bin/fm-supervise-daemon.sh" 2>&1)
+  rc=$?
+  kill "$holder" 2>/dev/null; wait "$holder" 2>/dev/null
+  if [ "$rc" -ne 0 ] && [ -e "$st/state/.afk" ] \
+    && printf '%s' "$out" | grep -F 'another fm-supervise-daemon is already running' >/dev/null \
+    && ! printf '%s' "$out" | grep -F 'state/.afk was removed' >/dev/null; then
+    pass "daemon refusal: a daemon refused by a live owner's lock leaves state/.afk to that owner"
+  else
+    fail "daemon refusal: a lock-refused daemon touched the owner's flag (rc=$rc): $out"
+  fi
+  rm -rf "$st"
+}
+
 # A Claude home runs the supervision host by default and it is the home's away
 # session, so away mode launches no daemon there with no file or any file but
 # off; quiet mode still does, a plain refresh of a running quiet daemon is
@@ -1928,6 +1979,7 @@ unit_readiness_failure_rolls_back_terminal
 unit_readiness_failure_preserves_unconfirmed_record
 unit_tmux_absence_distinguishes_probe_failure
 unit_native_lifecycle
+unit_native_daemon_refusal_clears_flag
 unit_supervision_host_claude_home_runs_no_away_daemon
 unit_supervision_host_other_harnesses_run_no_away_daemon
 unit_daemon_quiet_entry_holds_nothing_for_a_return
