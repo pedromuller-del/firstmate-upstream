@@ -772,6 +772,36 @@ fm_afk_launch_create_rex() {  # <captain-target> <captain-backend>
   fm_afk_launch_log "daemon launched in dedicated rex session $sid (block $target), supervising $captain_target"
 }
 
+# A failed hc create may still have started its terminal. It is found by its
+# unique label: one match is recorded and closed through the label-checked
+# close path, no match means nothing was created, and anything else is left
+# alone and named.
+fm_afk_launch_hc_reclaim_created() {  # <session> <label>
+  local session=$1 label=$2 listed addresses target
+  if ! listed=$(fm_backend_hc_cli "$session" ls --json --label "firstmate.task=$label" \
+    --label "firstmate.home=$(fm_backend_hometag)" 2>/dev/null) \
+    || ! addresses=$(printf '%s' "$listed" | jq -r '.terminals[]?.address' 2>/dev/null); then
+    fm_afk_launch_log "could not list hc terminals labeled '$label'; a hidden daemon terminal may remain in session '$session'"
+    return 1
+  fi
+  [ -n "$addresses" ] || return 0
+  if [ "$(printf '%s\n' "$addresses" | wc -l)" -ne 1 ] || ! fm_backend_hc_address_valid "$addresses"; then
+    fm_afk_launch_log "hc terminals labeled '$label' are not one exact address ($addresses); left in session '$session'"
+    return 1
+  fi
+  target="$session:$addresses"
+  fm_afk_launch_log "closing hc daemon terminal $target found by its label after the failed create"
+  if ! fm_afk_launch_record_write hc "$target" "$label"; then
+    fm_afk_launch_log "failed to persist hc daemon terminal record; closing $target"
+    fm_afk_launch_close_terminal hc "$target" "$label"
+    return 1
+  fi
+  FM_AFK_REC_BACKEND=hc
+  FM_AFK_REC_TARGET=$target
+  FM_AFK_REC_EXTRA=$label
+  fm_afk_launch_close_recorded
+}
+
 # Launch the daemon in a terminal of the captain's own hc core session, so the
 # daemon reaches the captain terminal by its recorded address. The terminal
 # carries this home's firstmate.home label and a unique firstmate.task label but
@@ -795,11 +825,13 @@ fm_afk_launch_create_hc() {  # <captain-target> <captain-backend>
   out=$(fm_backend_hc_cli "$session" run --bg --json --no-parent --outlive-parent --no-notify \
     --cwd "$FM_HOME" --label "firstmate.task=$label" --label "firstmate.home=$(fm_backend_hometag)" 2>&1) || {
     fm_afk_launch_log "hc could not create the daemon terminal in session '$session': $out"
+    fm_afk_launch_hc_reclaim_created "$session" "$label" || true
     return 1
   }
   address=$(printf '%s' "$out" | jq -r '.address // empty' 2>/dev/null)
   if ! fm_backend_hc_address_valid "$address"; then
     fm_afk_launch_log "hc create did not yield an exact terminal address for '$label'"
+    fm_afk_launch_hc_reclaim_created "$session" "$label" || true
     return 1
   fi
   target="$session:$address"

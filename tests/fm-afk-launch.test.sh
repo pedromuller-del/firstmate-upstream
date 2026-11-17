@@ -1821,8 +1821,28 @@ case "${1:-}" in
       esac
       shift
     done
+    [ "${FAKE_HC_RUN:-}" = fail-before ] && exit 1
     printf '%s\t%s\n' "$task" "$home" > "$d/terms/t5"
-    echo '{"address":"t5"}'
+    case "${FAKE_HC_RUN:-}" in
+      no-address) echo '{}' ;;
+      fail-after) exit 1 ;;
+      *) echo '{"address":"t5"}' ;;
+    esac
+    ;;
+  ls)
+    [ -z "${FAKE_HC_LS_FAIL:-}" ] || exit 1
+    want_task='' want_home=''
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --label) case "$2" in firstmate.task=*) want_task=${2#*=} ;; firstmate.home=*) want_home=${2#*=} ;; esac; shift ;;
+      esac
+      shift
+    done
+    for f in "$d"/terms/*; do
+      [ -f "$f" ] || continue
+      IFS=$'\t' read -r task home < "$f"
+      [ "$task" = "$want_task" ] && [ "$home" = "$want_home" ] && printf '%s\n' "${f##*/}"
+    done | jq -R . | jq -s '{terminals: map({address: .})}'
     ;;
   get)
     addr=${3:-}
@@ -1952,6 +1972,51 @@ unit_hc_unreadable_core_keeps_the_record() {
     fail "hc unreadable: rc=$rc output=$(cat "$st/out")"
   fi
   rm -rf "$st"
+}
+
+unit_hc_failed_create_reclaims_its_labeled_terminal() {
+  local mode st dir rc tag
+  for mode in no-address fail-after fail-before; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-create.XXXXXX")
+    dir="$st/fake"
+    hc_fake_install "$dir"
+    enter_posture "$st" || fail "hc create $mode: could not enter fixture posture"
+    # Another terminal of this home under another task label must survive.
+    tag=$(FM_HOME="$st" FM_ROOT="$ROOT" bash -c '. "$1/bin/fm-backend-hometag-lib.sh"; fm_backend_hometag' _ "$ROOT")
+    printf 'fm-other\t%s\n' "$tag" > "$dir/terms/t9"
+    FAKE_HC_RUN=$mode hc_launch "$st" "$dir" start > "$st/out" 2>&1
+    rc=$?
+    if [ "$rc" -ne 0 ] && [ ! -e "$dir/terms/t5" ] && [ -e "$dir/terms/t9" ] \
+      && [ ! -e "$st/state/.afk-daemon-terminal" ] && [ ! -s "$dir/typed" ] \
+      && ! grep -q ' t9$' "$dir/calls" \
+      && { [ "$mode" = fail-before ] || grep -q '^kill --json t5$' "$dir/calls"; }; then
+      pass "hc start ($mode): a failed create leaves no daemon terminal and no record, and closes nothing else"
+    else
+      fail "hc create $mode: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls")"
+    fi
+    rm -rf "$st"
+  done
+  # Two terminals under the daemon's label, or a core that cannot list, are
+  # never guessed at: nothing is closed and the launcher names what remains.
+  for mode in ambiguous ls-fail; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-create.XXXXXX")
+    dir="$st/fake"
+    hc_fake_install "$dir"
+    enter_posture "$st" || fail "hc create $mode: could not enter fixture posture"
+    tag=$(FM_HOME="$st" FM_ROOT="$ROOT" bash -c '. "$1/bin/fm-backend-hometag-lib.sh"; fm_backend_hometag' _ "$ROOT")
+    [ "$mode" = ambiguous ] && printf 'afk-fixed\t%s\n' "$tag" > "$dir/terms/t6"
+    FAKE_HC_RUN=no-address FM_AFK_LAUNCH_LABEL=afk-fixed FAKE_HC_LS_FAIL=$([ "$mode" = ls-fail ] && echo 1) \
+      hc_launch "$st" "$dir" start > "$st/out" 2>&1
+    rc=$?
+    if [ "$rc" -ne 0 ] && [ -e "$dir/terms/t5" ] && ! grep -q '^kill\|^rm' "$dir/calls" \
+      && [ ! -e "$st/state/.afk-daemon-terminal" ] \
+      && grep -q "labeled 'afk-fixed'" "$st/out"; then
+      pass "hc start ($mode): an uncertain failed create closes nothing and names the label left behind"
+    else
+      fail "hc create $mode: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls")"
+    fi
+    rm -rf "$st"
+  done
 }
 
 # ---------------------------------------------------------------------------
@@ -2252,6 +2317,7 @@ unit_hc_start_and_stop_use_a_hidden_labeled_terminal
 unit_hc_malformed_record_fails_closed
 unit_hc_close_refuses_a_foreign_terminal
 unit_hc_unreadable_core_keeps_the_record
+unit_hc_failed_create_reclaims_its_labeled_terminal
 e2e_herdr
 e2e_tmux
 e2e_rex
