@@ -410,14 +410,41 @@ fm_backend_hc_current_path() {  # <target> [expected-label]
 }
 
 fm_backend_hc_composer_caps() {
-  printf 'styled=0\ncursor=0\nidentity=0\nrows=%s\n' "$FM_COMPOSER_CAPTURE_LINES"
+  printf 'styled=0\ncursor=0\nidentity=1\nrows=%s\n' "$FM_COMPOSER_CAPTURE_LINES"
+}
+
+# fm_backend_hc_composer_identity: the identity behind Pi's separated composer
+# (blank or typed rows between two solid rules), which a screen alone cannot
+# tell from transcript rules. It answers "pi<TAB><state>" only while hc's
+# foreground process is a Pi binary, with hc's native status as the state; an
+# idle status still reads working when Pi's rendered busy footer shows, so a
+# busy Pi is never reported idle. Verified on hc 0.1.14 with pi 1.5.0.
+fm_backend_hc_composer_identity() {  # <target> [expected-label] -> "pi\t<state>"
+  local json fields name argv0 state visible
+  json=$(fm_backend_hc_get "$1") || return 1
+  fields=$(printf '%s' "$json" | jq -r '[.foreground.name // "", (.foreground.argv[0] // "" | split("/") | last // ""),
+    .status.state // ""] | @tsv' 2>/dev/null) || return 1
+  IFS=$'\t' read -r name argv0 state <<EOF
+$fields
+EOF
+  case "$name" in
+    pi|pi-signed|pi-launcher|Pi) ;;
+    *) case "$argv0" in pi|pi-signed|pi-launcher) ;; *) return 1 ;; esac ;;
+  esac
+  case "$state" in
+    idle|done)
+      visible=$(fm_backend_hc_capture "$1" 40 "${2:-}" | grep -v '^[[:space:]]*$' | tail -12)
+      if [ -z "$visible" ] || printf '%s' "$visible" | fm_busy_lines_match pi; then state=working; fi
+      ;;
+  esac
+  printf 'pi\t%s' "${state:-unknown}"
 }
 
 # fm_backend_hc_composer_state: the styled capture is preferred (styled=1 lets
 # the shared classifier strip ghost text, such as Claude's dim prompt
 # suggestion); without one, the plain screen degrades to the caps' styled=0.
 fm_backend_hc_composer_state() {  # <target> [expected-label] -> empty|pending|pending-unproven|unknown
-  local cap caps verdict
+  local cap caps verdict identity
   caps=$(fm_backend_hc_composer_caps)
   if cap=$(fm_backend_hc_visible_capture_ansi "$1" "${2:-}"); then
     caps=${caps/styled=0/styled=1}
@@ -425,7 +452,13 @@ fm_backend_hc_composer_state() {  # <target> [expected-label] -> empty|pending|p
     cap=$(fm_backend_hc_visible_capture "$1" "${2:-}") || { printf 'unknown'; return 0; }
   fi
   verdict=$(fm_composer_classify_screen "$caps" "$cap")
-  [ "$verdict" != need-identity ] || verdict=unknown
+  if [ "$verdict" = need-identity ]; then
+    if ! identity=$(fm_backend_hc_composer_identity "$1" "${2:-}") || [ -z "$identity" ]; then
+      identity=probe-absent
+    fi
+    verdict=$(fm_composer_classify_screen "$caps" "$cap" '' "$identity")
+    [ "$verdict" != need-identity ] || verdict=unknown
+  fi
   printf '%s' "$verdict"
 }
 

@@ -47,7 +47,7 @@ case "$cmd" in
     cat "$D/$last.json"
     ;;
   rm) [ -e "$D/rm-sticks" ] || rm -f "$D/$last.json"; printf '{}\n' ;;
-  read) if [ -f "$D/read.txt" ]; then cat "$D/read.txt"; else printf 'screen of %s\n' "$last"; fi ;;
+  read) if [ -f "$D/$last.screen" ]; then cat "$D/$last.screen"; elif [ -f "$D/read.txt" ]; then cat "$D/read.txt"; else printf 'screen of %s\n' "$last"; fi ;;
   attach)
     [ -f "$D/attach.paint" ] || { printf '{}\n'; exit 0; }
     printf '%s\n' "$$" > "$D/attach.pid"
@@ -419,6 +419,47 @@ test_composer_state_reads_ghost_text_from_the_attach_paint() {
   pass "hc: the composer read takes Claude's dim suggestion from the attach paint and falls back to the plain read"
 }
 
+# Pi's composer is blank or typed rows between two solid rules (hc 0.1.14, pi
+# 1.5.0, proof/pi-hc-composer-probe-18ee7a94.log); only a live idle Pi proves it empty.
+pi_screen() {  # <file> <composer-row> [busy-row]
+  local rule='────────────────────────────────────────'
+  { printf '\n\n'; [ -z "${3:-}" ] || printf '%s\n' "$3"; printf '%s\n%s\n%s\n' "$rule" "$2" "$rule"
+    printf 'pi  gpt-6-luna · high  ctx 0.0k/272k  quota ?\n'; } > "$1"
+}
+pi_status() {  # <dir> <address> <state|"">: add hc's native status to a terminal record
+  local f="$1/$2.json"
+  if [ -n "$3" ]; then jq --arg s "$3" '. + {status: {app: "pi", state: $s}}' "$f" > "$f.tmp"; else jq 'del(.status)' "$f" > "$f.tmp"; fi
+  mv "$f.tmp" "$f"
+}
+
+test_pi_composer_is_proven_by_its_foreground_and_status() {
+  local tag
+  setup_case pi-composer
+  tag=$(hometag_of)
+  write_terminal "$D" t1 live fm-a1 "$tag" pi pi
+  pi_status "$D" t1 idle
+  pi_screen "$D/t1.screen" ''
+  assert_equals empty "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "an idle Pi's blank composer must read empty"
+  pi_screen "$D/t1.screen" 'xyz'
+  assert_equals pending "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "typed text in Pi's composer must read pending"
+  pi_screen "$D/t1.screen" ''
+  pi_status "$D" t1 working
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a working Pi must not read empty"
+  pi_status "$D" t1 idle
+  pi_screen "$D/t1.screen" '' '⠋ Working...'
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a busy footer must win over an idle status"
+  pi_screen "$D/t1.screen" ''
+  pi_status "$D" t1 ''
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a Pi with no reported status must not read empty"
+  write_terminal "$D" t1 live fm-a1 "$tag" bash /bin/bash
+  pi_status "$D" t1 idle
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "two stale rules over a shell must not read empty"
+  write_terminal "$D" t1 live fm-a1 "$tag" node /home/agent/.local/bin/pi
+  pi_status "$D" t1 idle
+  assert_equals empty "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a Pi named by its argv path must be proven too"
+  pass "hc: Pi's separated composer reads empty only for a live idle Pi"
+}
+
 test_send_delimiters_and_binary_socket_pins() {
   local tag out
   setup_case pins
@@ -477,4 +518,5 @@ fm_test_run \
   test_container_ensure_gates_binary_version_and_generation \
   test_send_text_submit_confirms_through_send_wait \
   test_composer_state_reads_ghost_text_from_the_attach_paint \
+  test_pi_composer_is_proven_by_its_foreground_and_status \
   test_send_delimiters_and_binary_socket_pins

@@ -3689,6 +3689,7 @@ The default socket path under the scratchpad temp directory exceeded the 103-byt
 | `hc keys <t> -- <key>` (0.1.14, 2026-10-30) | Accepts the `--` delimiter before key names. |
 | `server stop` on a lab session (0.1.14, 2026-10-30) | Closes the API listener only; the session's `serve` and `hold` daemons stay by design and take ~30-60s to finish exiting after TERM/KILL. `bin/fm-hc-lab.sh` sweeps them by their exact `HC_SESSION=<name>` env token. |
 | `hc get` of a terminal running the user's `claude` wrapper | `foreground` was `{"name":"hats","argv":["/Users/fran/.cargo/bin/hats","run","--"]}`; the Claude process was another member of that process group. |
+| `hc get` and `hc read --lines 0` of an idle bare Pi (hc 0.1.14, pi 1.5.0, 2026-11-17) | `foreground` was `{"name":"pi","argv":["pi"]}` and `status` was `{"app":"pi","state":"idle"}`; the screen ended with a solid `─` rule, a blank row, a second rule and Pi's footer. With that identity `fm_backend_hc_composer_state` read `empty`, and `pending` after `hc keys <t> -- x y z` typed into the composer. `tests/fm-backend-hc-liveness-live-e2e.test.sh` now requires `empty` for an idle Pi. |
 
 ### Adapter lifecycle
 

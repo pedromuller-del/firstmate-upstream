@@ -123,9 +123,21 @@ for harness in claude codex opencode pi grok kimi; do
     sleep 0.2
   done
   foreground=$(fm_backend_hc_cli "$HC_SESSION" get --json "$address" | jq -c '.foreground')
+  # Pi's empty composer is provable only through the adapter's identity probe,
+  # which fm-control exit needs before it types /quit.
+  composer=
+  if [ "$harness" = pi ] && [ "$state" = alive ]; then
+    for _ in $(seq 1 50); do
+      composer=$(fm_backend_hc_composer_state "$target" "fm-$harness")
+      [ "$composer" = empty ] && break
+      sleep 0.2
+    done
+  fi
   fm_backend_kill hc "$target" || fail "$harness ($version): kill did not close $target"
   [ "$state" = alive ] || fail \
     "LIVENESS DRIFT: $harness $version in $HC_VERSION classifies '$state', not 'alive'. hc reported foreground $foreground. Teach bin/fm-agent-process-lib.sh or bin/backends/hc.sh the identity this release reports."
+  [ "$harness" != pi ] || [ "$composer" = empty ] || fail \
+    "COMPOSER DRIFT: an idle $harness $version in $HC_VERSION reads '$composer', not 'empty'. Teach fm_backend_hc_composer_identity in bin/backends/hc.sh the status or footer this release reports."
   note "$harness $version: foreground=$foreground"
   pass "hc liveness: $harness $version classifies alive in $HC_VERSION"
   CHECKED=$((CHECKED + 1))
