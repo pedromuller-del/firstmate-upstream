@@ -24,10 +24,15 @@
 # typed text, and `hc read` carries no styling, so bin/backends/hc.sh takes
 # the styled screen from a watch-only attach paint. A fresh idle Claude must
 # read `empty` through that paint. Claude is started in the repo root, which
-# the operator has normally trusted; a trust dialog fails the check. Every lab
-# terminal gets the lab server's environment, which bin/fm-hc-lab.sh starts
-# without the operator's Herdr and tmux markers, so no harness hook here
-# reports to the operator's live terminal.
+# the operator has normally trusted; a trust dialog fails the check. That root
+# can be a live Firstmate home, so every Claude here starts through
+# hc_test_start_claude (tests/hc-test-safety.sh) with its hooks, plugins, MCP
+# servers, and CLAUDE.md off, and the guard refuses to start one that cannot;
+# tests/fm-backend-hc-claude-hooks-live-e2e.test.sh proves that launch leaves a
+# primary-scope home's state/ unchanged. Every lab terminal gets the
+# lab server's environment, which bin/fm-hc-lab.sh starts without the
+# operator's Herdr and tmux markers, so no harness hook here reports to the
+# operator's live terminal.
 set -u
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -55,6 +60,9 @@ export FM_HC_BIN=${FM_HC_BIN:-$HC_BIN}
 TMP_ROOT=$(fm_test_tmproot fm-backend-hc-liveness)
 
 HC_TEST_SES=$("$ROOT/bin/fm-hc-lab.sh" name liveness)
+# Every lab terminal gets the lab server's environment, so no pointer at the
+# caller's own Firstmate home may reach the server this run provisions.
+unset FM_HOME FM_ROOT_OVERRIDE FM_STATE_OVERRIDE
 
 # The teardown's own result propagates: a fleet-tripwire failure or surviving
 # session processes keep this run nonzero even on an otherwise-clean pass.
@@ -112,9 +120,15 @@ for harness in claude codex opencode pi grok kimi; do
   fi
   version=$("$bin_path" --version 2>/dev/null | head -1 | tr -d '\r') || version=
   [ -n "$version" ] || version=unknown
-  address=$(fm_backend_hc_cli "$HC_SESSION" run --bg --json --no-parent --outlive-parent --no-notify \
-    --cwd "$HC_LAB_DIR/wt" --label "firstmate.task=fm-$harness" --label "firstmate.home=$(fm_backend_hometag)" \
-    "$bin_path" | jq -r '.address // empty')
+  if [ "$harness" = claude ]; then
+    address=$(hc_test_start_claude "$bin_path" "$HC_LAB_DIR/wt" \
+      --label "firstmate.task=fm-$harness" --label "firstmate.home=$(fm_backend_hometag)") \
+      || fail "$harness ($version): the hooks-off lab launch did not start it"
+  else
+    address=$(fm_backend_hc_cli "$HC_SESSION" run --bg --json --no-parent --outlive-parent --no-notify \
+      --cwd "$HC_LAB_DIR/wt" --label "firstmate.task=fm-$harness" --label "firstmate.home=$(fm_backend_hometag)" \
+      "$bin_path" | jq -r '.address // empty')
+  fi
   fm_backend_hc_address_valid "$address" || fail "$harness ($version): hc did not start a terminal"
   target="$HC_SESSION:$address"
   state=
@@ -143,10 +157,9 @@ for harness in claude codex opencode pi grok kimi; do
   pass "hc liveness: $harness $version classifies alive in $HC_VERSION"
   CHECKED=$((CHECKED + 1))
   [ "$harness" = claude ] || continue
-  address=$(fm_backend_hc_cli "$HC_SESSION" run --bg --json --no-parent --outlive-parent --no-notify \
-    --cwd "$ROOT" --label "firstmate.task=fm-composer-$harness" --label "firstmate.home=$(fm_backend_hometag)" \
-    "$bin_path" \
-    | jq -r '.address // empty')
+  address=$(hc_test_start_claude "$bin_path" "$ROOT" \
+    --label "firstmate.task=fm-composer-$harness" --label "firstmate.home=$(fm_backend_hometag)") \
+    || fail "$harness ($version): the hooks-off lab launch did not start a composer terminal"
   fm_backend_hc_address_valid "$address" || fail "$harness ($version): hc did not start a composer terminal"
   target="$HC_SESSION:$address"
   # A screen Claude has not drawn yet captures as blank, so only a styled

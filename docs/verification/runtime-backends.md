@@ -3748,6 +3748,12 @@ Reading only up to the first placement took the empty main screen, so the styled
 In owned Linux lab cores, a program that writes to the main screen and then draws a dim composer on the alternate screen reads `empty` (and `pending` without the dim) on hc 0.1.14 and 0.1.21; before the change, hc 0.1.21 read `unknown`.
 `tests/fm-backend-hc.test.sh` pins this with the real macOS paint in `tests/fixtures/claude-2.1.321-hc-0.1.21-macos/`, whose transcript rows are blanked.
 The changed read has been replayed against the recorded macOS paints on Linux but not yet run live on macOS.
+
+On 2026-11-17 on Linux with Claude Code 2.1.321 in owned lab cores of hc 0.1.14 and hc 0.1.21, a plain Claude started in a scratch home that passes the primary-scope gate ran that home's SessionStart hook within 5 seconds: it took the session lock, advanced the wake and status cursors, and recorded a completed session start under `state/`.
+Started with `--safe-mode`, which `claude --help` documents as starting with hooks, plugins, MCP servers, and CLAUDE.md disabled, the same Claude reached an `empty` composer and left `state/` unchanged through 20 more seconds, and the live guard run from that home started every Claude with the flag and left `state/` unchanged.
+`tests/fm-backend-hc-claude-hooks-live-e2e.test.sh` refreshes this record; it fails with the `state/` diff when the lab launch drops `--safe-mode`, and names the bare launch when the guard bypasses that launch.
+On this host neither a plain nor a safe-mode Claude drew on the alternate screen, so the guard's composer check here does not show whether `--safe-mode` changes the macOS alternate-screen paint recorded above.
+`claude --help` written to a pipe sometimes ended early (at 12286 or 16380 of 22335 bytes, once in 8 consecutive reads), while 6 of 6 reads into a file were complete, so the lab launch reads the help from a file.
 A Claude Code supervisor inside the Herdr app is not verified.
 
 ### Spawn, steer, peek, and teardown

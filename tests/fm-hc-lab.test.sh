@@ -100,3 +100,25 @@ grep -qx 'HC_SESSION=fm-hclab-markers' "$TMP_ROOT/hc-env" || fail 'provision mad
   || fail 'the lab server inherited the operator terminal markers'
 bash "$LAB" teardown fm-hclab-markers
 printf 'ok - the lab server never inherits the operator Herdr or tmux markers\n'
+
+# A lab Claude can start in the root of a live Firstmate home, so the shared
+# launch starts it with hooks off and refuses a Claude that cannot do that.
+(
+  # shellcheck source=tests/hc-test-safety.sh
+  . "$ROOT/tests/hc-test-safety.sh"
+  fm_backend_hc_cli() { printf '%s\n' "$@" > "$TMP_ROOT/claude-run"; printf '{"address":"lab-term"}\n'; }
+  printf '#!/usr/bin/env bash\necho "Usage: claude [options] [prompt]"\n' > "$TMP_ROOT/fakebin/claude-old"
+  printf '#!/usr/bin/env bash\necho "  --safe-mode   Start with all customizations disabled"\n' > "$TMP_ROOT/fakebin/claude-new"
+  chmod +x "$TMP_ROOT/fakebin/claude-old" "$TMP_ROOT/fakebin/claude-new"
+  HC_SESSION=fm-hclab-claude
+  status=0
+  hc_test_start_claude "$TMP_ROOT/fakebin/claude-old" "$TMP_ROOT" >/dev/null 2> "$TMP_ROOT/claude-refusal" || status=$?
+  [ "$status" = 1 ] || fail "a Claude without --safe-mode was not refused (status $status)"
+  grep -q 'does not document --safe-mode' "$TMP_ROOT/claude-refusal" || fail 'the refusal gave no reason'
+  [ ! -e "$TMP_ROOT/claude-run" ] || fail 'a Claude without --safe-mode was started'
+  address=$(hc_test_start_claude "$TMP_ROOT/fakebin/claude-new" "$TMP_ROOT" --label firstmate.task=t)
+  [ "$address" = lab-term ] || fail "the launch printed '$address', not the terminal address"
+  [ "$(tail -n 2 "$TMP_ROOT/claude-run" | tr '\n' ' ')" = "$TMP_ROOT/fakebin/claude-new --safe-mode " ] \
+    || fail "the lab Claude did not start with --safe-mode: $(tr '\n' ' ' < "$TMP_ROOT/claude-run")"
+)
+printf 'ok - a lab Claude starts with hooks off, and one that cannot is refused\n'
