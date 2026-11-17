@@ -45,7 +45,7 @@ printf 'schema=fm-task-inbox.v1\nat=2026-01-01T00:00:00Z\n--\nanother\n' > "$REM
 cat > "$TMP_ROOT/fakebin/ssh" <<'SH'
 #!/usr/bin/env bash
 [ "${FM_TEST_REMOTE_DOWN:-0}" != 1 ] || exit 255
-[ "${FM_TEST_REMOTE_GARBAGE:-0}" != 1 ] || { echo "garbled probe"; exit 0; }
+[ -z "${FM_TEST_REMOTE_GARBAGE:-}" ] || { printf "%s\n" "$FM_TEST_REMOTE_GARBAGE"; exit 0; }
 while [ "$#" -gt 0 ]; do
   case "$1" in -o) shift 2 ;; --) shift; break ;; *) exit 90 ;; esac
 done
@@ -71,7 +71,9 @@ FM_HOME="$TMP_ROOT" FM_ROOT_OVERRIDE="$ROOT" FM_STATE_OVERRIDE="$TMP_ROOT/state"
   rm "$2/state/parent-route/mate.inbox/003.msg"
   printf "schema=fm-task-inbox.v1\n--\nwhile down\n" > "$2/state/parent-route/mate.inbox/003.msg"
   FM_TEST_REMOTE_DOWN=1 inbox_steer_check remote:mate mate
-  FM_TEST_REMOTE_GARBAGE=1 inbox_steer_check remote:mate mate
+  FM_TEST_REMOTE_GARBAGE="garbled probe" inbox_steer_check remote:mate mate
+  # Pending-shaped but malformed (extra field), aged past grace and the ring limit.
+  for i in 1 2 3 4 5; do FM_TEST_REMOTE_GARBAGE="pending 003.msg 1 99 extra" inbox_steer_check remote:mate mate; done
   [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 1 ] || { echo "unreachable or garbled remote probe produced a wake" >&2; exit 1; }
   for i in 1 2 3 4 5; do inbox_steer_check remote:mate mate; done
   [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 2 ] || { echo "stuck record after an unknown probe did not wake once" >&2; exit 1; }
