@@ -5100,7 +5100,9 @@ if [ -e "$STATE/$ID.backlog-close" ] || [ -L "$STATE/$ID.backlog-close" ]; then
   exit 1
 fi
 
-SPAWN_ENDPOINT_CREATE_STARTED=1
+# An hc core that cannot start is still a pre-creation failure, so hc marks the
+# start at its terminal create below.
+[ "$BACKEND" = hc ] || SPAWN_ENDPOINT_CREATE_STARTED=1
 W="fm-$ID"
 if [ "$RELAUNCH" -eq 1 ]; then
   # A secondmate's home already resolved WT above through the same validation a
@@ -5529,6 +5531,7 @@ EOF
     ;;
   hc)
     HC_SES=$(fm_backend_hc_container_ensure) || exit 1
+    SPAWN_ENDPOINT_CREATE_STARTED=1
     HC_PRESENTATION_HOME=
     [ "$KIND" != secondmate ] || HC_PRESENTATION_HOME=$PROJ_ABS
     HC_TERMINAL=$(fm_backend_hc_create_task "$HC_SES" "$W" "$PROJ_ABS" "$HC_PRESENTATION_HOME") || exit 1

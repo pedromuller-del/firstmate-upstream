@@ -316,7 +316,7 @@ cmd_validate_backend() { # <id> <selected-backend>
 }
 
 # Undoes validate-backend's new pin for a creation that aborted before launch.
-# The parent holds this mate's registry and spawn locks, so no launch can race.
+# It refuses once this host records an endpoint, so it never unbinds a launched mate.
 cmd_release_backend() { # <id> <backend>
   validate_id "$1"
   validate_home "$1"

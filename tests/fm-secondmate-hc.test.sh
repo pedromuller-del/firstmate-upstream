@@ -28,6 +28,8 @@ cmd = args[0]
 if cmd == '--version':
     print('hc 0.1.14')
 elif cmd == 'server':
+    if os.environ.get('FM_FAKE_HC_SERVER_FAIL'):
+        sys.exit(1)
     print('{}')
 elif cmd == 'connect':
     print('{"result":{"generation":1}}')
@@ -210,6 +212,14 @@ assert_grep 'pending authoritative backlog close' "$TMP_ROOT/abort-after-bind.ou
 assert_absent "$PRIMARY/state/fleet-backend" 'aborted creation left the primary bound'
 assert_line 'hc' "$CHILD/state/fleet-backend" 'aborted creation removed a pin it did not create'
 assert_absent "$FM_FAKE_HC_DIR/terminal.json" 'aborted creation created a terminal'
+assert_absent "$CHILD/config/backend" 'aborted creation wrote a runtime into the child configuration'
+setup_world core-unavailable
+if FM_FAKE_HC_SERVER_FAIL=1 spawn > "$TMP_ROOT/core-unavailable.out" 2>&1; then
+  fail 'spawn reported success although the hc core could not start'
+fi
+assert_absent "$PRIMARY/state/fleet-backend" 'an hc core that could not start left the primary bound'
+assert_absent "$CHILD/state/fleet-backend" 'an hc core that could not start left the child bound'
+assert_absent "$FM_FAKE_HC_DIR/terminal.json" 'an unavailable core created a terminal'
 setup_world registry-error
 printf -- '- design - design fleet (home: %s; scope: design; projects: ; added 2026-11-15)\n' "$TMP_ROOT/elsewhere" > "$PRIMARY/data/secondmates.md"
 if spawn > "$TMP_ROOT/registry-error.out" 2>&1; then
