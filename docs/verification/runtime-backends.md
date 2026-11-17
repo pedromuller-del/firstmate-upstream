@@ -3747,6 +3747,7 @@ hc 0.1.21 paints a terminal on its alternate screen in two parts: the main scree
 Reading only up to the first placement took the empty main screen, so the styled read failed and the composer read `unknown`; the read now takes the rows after the switch.
 In owned Linux lab cores, a program that writes to the main screen and then draws a dim composer on the alternate screen reads `empty` (and `pending` without the dim) on hc 0.1.14 and 0.1.21; before the change, hc 0.1.21 read `unknown`.
 `tests/fm-backend-hc.test.sh` pins this with the real macOS paint in `tests/fixtures/claude-2.1.321-hc-0.1.21-macos/`, whose transcript rows are blanked.
+The changed read has been replayed against the recorded macOS paints on Linux but not yet run live on macOS.
 A Claude Code supervisor inside the Herdr app is not verified.
 
 ### Spawn, steer, peek, and teardown

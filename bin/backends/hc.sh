@@ -349,8 +349,8 @@ fm_backend_hc_visible_capture() {  # <target> [expected-label]
 # the screen just before the attach (or, when the screen moved, just after
 # it), so a cut-short, changed, or misparsed paint fails and the caller reads
 # the plain screen.
-# Verified with Claude Code 2.1.321 on hc 0.1.14 and 0.1.21, including its
-# alternate screen on 0.1.21.
+# Verified with Claude Code 2.1.321 on hc 0.1.14 and 0.1.21; its alternate
+# screen is checked against a recorded macOS hc 0.1.21 paint.
 fm_backend_hc_visible_capture_ansi() {  # <target> [expected-label]
   local raw body screen text plain home=$'\e[H' alt=$'\e[?1049h' placement_re=$'\e\\[[0-9]+(;[0-9]+)?H'
   fm_backend_hc_target_ready "$1" "${2:-}" || return 1
