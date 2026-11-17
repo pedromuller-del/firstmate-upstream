@@ -4177,7 +4177,7 @@ test_dialog_name_after_demand_deep_inspection_still_escalates
 # suggestion defers, a bare shell prompt defers, and an idle Claude composer
 # gets exactly one `hc send --wait` whose native turn start confirms delivery.
 test_inject_msg_hc_guards_and_submit_through_adapter() {
-  local dir state nbsp rule idle case status screen rc sent
+  local dir state nbsp rule idle case status screen rc sent fixture
   dir=$(make_supercase inject-hc-adapter)
   state="$dir/state"
   afk_enter "$state"
@@ -4189,21 +4189,30 @@ case "$1" in
   get) cat "$D/hc-get.json" ;;
   read) cat "$D/hc-screen.txt" ;;
   send) printf '%s\n' "$*" >> "$D/hc-sent.log"; echo '{"started":true,"wait":{"status":"working"}}' ;;
+  attach) [ -f "$D/hc-attach.paint" ] || { echo '{}'; exit 0; }; cat "$D/hc-attach.paint"; exec sleep 30 ;;
   *) echo '{}' ;;
 esac
 SH
   chmod +x "$dir/hc"
+  fixture="$ROOT/tests/fixtures/claude-2.1.321-hc-0.1.14/post-turn-suggestion"
   nbsp=$(printf '\302\240')
   rule='────────────────────────'
   idle="transcript"$'\n'"$rule"$'\n'"❯$nbsp"$'\n'"$rule"
-  for case in busy typed shell idle; do
+  for case in busy typed shell idle suggestion; do
     : > "$dir/hc-sent.log"
+    rm -f "$dir/hc-attach.paint"
     status=idle
     screen=$idle
     case "$case" in
       busy) status=working ;;
       typed) screen="transcript"$'\n'"$rule"$'\n'"❯ fix the login bug"$'\n'"$rule" ;;
       shell) screen='user@host:~$ ' ;;
+      suggestion)
+        # Real Claude 2.1.321 on hc 0.1.14: an idle composer showing its dim
+        # post-turn prompt suggestion, styled only in the attach paint.
+        screen=$(cat "$fixture.read")
+        cp "$fixture.paint" "$dir/hc-attach.paint"
+        ;;
     esac
     printf '{"state":"live","status":{"state":"%s"},"labels":{}}\n' "$status" > "$dir/hc-get.json"
     printf '%s\n' "$screen" > "$dir/hc-screen.txt"
@@ -4220,8 +4229,8 @@ SH
         [ "$rc" -ne 0 ] && [ "$sent" = 0 ] || fail "hc: a $case composer was typed into (rc=$rc sent=$sent)"
         assert_contains "$INJECT_LAST_FAILURE" "state=unknown" "hc: the $case composer was not deferred as unproven"
         ;;
-      idle)
-        [ "$rc" -eq 0 ] && [ "$sent" = 1 ] || fail "hc: an idle Claude composer did not get one confirmed send (rc=$rc sent=$sent)"
+      idle|suggestion)
+        [ "$rc" -eq 0 ] && [ "$sent" = 1 ] || fail "hc: an idle Claude composer ($case) did not get one confirmed send (rc=$rc sent=$sent $INJECT_LAST_FAILURE)"
         assert_contains "$(cat "$dir/hc-sent.log")" "--wait" "hc: delivery did not wait for the native turn start"
         sed 's/.* -- //' "$dir/hc-sent.log" > "$dir/hc-typed.log"
         delivered_digest "$dir/hc-typed.log" | grep -F 'hello hc' >/dev/null \
@@ -4229,7 +4238,7 @@ SH
         ;;
     esac
   done
-  pass "inject_msg on hc: busy, unproven text and a shell defer untyped; an idle composer gets one confirmed send"
+  pass "inject_msg on hc: busy, unproven text and a shell defer untyped; an idle composer, even one showing Claude's dim suggestion, gets one confirmed send"
 }
 
 test_inject_msg_hc_guards_and_submit_through_adapter

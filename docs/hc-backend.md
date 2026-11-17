@@ -95,6 +95,7 @@ An input, capture, or close that carries the task label refuses a terminal whose
 | Create task | `hc run --bg --no-parent --outlive-parent --no-notify --cwd <project> --label ...` |
 | Capture | `hc read --lines <n>` |
 | Visible capture | `hc read --lines 0` |
+| Composer state | The first paint of a watch-only `hc attach --observe`, bounded to one second and kept only when its text equals `hc read`; otherwise the plain screen |
 | Send a line and submit | `hc send` |
 | Submit with confirmation | `hc send --wait`; see submit safety under Limits |
 | Named key | `hc keys` |
@@ -110,6 +111,9 @@ An input, capture, or close that carries the task label refuses a terminal whose
 - Submitting a message uses one bounded `hc send --wait`.
   A started turn or a still-working wait confirms it natively; otherwise the adapter falls back to the composer screen, with Enter retries only for a proven pending composer.
   A blocked terminal (exit 9) returns `unknown` without typing or retrying and is never forced.
+- `hc read` carries no styling, so the composer read takes the styled screen from an attach paint.
+  Each composer read therefore takes about one second.
+  When no matching paint is available, the plain screen cannot tell dim ghost text, such as Claude's prompt suggestion, from typed text, and the composer reads `unknown`.
 - hc reports one foreground process per terminal.
   When that process is a launcher, the adapter also reads the rest of its process group from `ps`, which works only for terminals on the local machine.
 - Right after a terminal starts, `hc get` can report no foreground process yet, and agent state reads `unreadable` until the shell is up.

@@ -14,7 +14,9 @@ TMP_ROOT=$(fm_test_tmproot fm-backend-hc-tests)
 # The stub answers `get` from <dir>/<address>.json (exit from <address>.exit,
 # 3 = not_found when no file exists), `ls` from <dir>/ls.json, `run` with
 # <dir>/run.json, and removes <address>.json on `rm` unless <dir>/rm-sticks
-# exists. Every call is logged with its HC_SESSION and HC_SOCKET.
+# exists. `read` prints <dir>/read.txt when it exists; `attach` prints
+# <dir>/attach.paint and then never exits, like a real watch-only attach.
+# Every call is logged with its HC_SESSION and HC_SOCKET.
 make_hc_fakebin() {  # <dir> -> echoes fakebin dir
   local fb="$1/fakebin"
   mkdir -p "$fb"
@@ -45,7 +47,13 @@ case "$cmd" in
     cat "$D/$last.json"
     ;;
   rm) [ -e "$D/rm-sticks" ] || rm -f "$D/$last.json"; printf '{}\n' ;;
-  read) printf 'screen of %s\n' "$last" ;;
+  read) if [ -f "$D/read.txt" ]; then cat "$D/read.txt"; else printf 'screen of %s\n' "$last"; fi ;;
+  attach)
+    [ -f "$D/attach.paint" ] || { printf '{}\n'; exit 0; }
+    printf '%s\n' "$$" > "$D/attach.pid"
+    cat "$D/attach.paint"
+    exec sleep 31
+    ;;
   send)
     if [ -f "$D/send.exit" ]; then
       printf '{"error":{"kind":"%s"}}\n' "$(cat "$D/send.kind" 2>/dev/null || echo blocked)" >&2
@@ -321,6 +329,42 @@ test_send_text_submit_confirms_through_send_wait() {
   pass "hc: send_text_submit proves the turn through send --wait and never forces a blocked terminal"
 }
 
+# The styled composer read: Claude's dim prompt suggestion is ghost text only
+# in hc's attach paint, so a real recorded paint must read empty while the
+# same text without the dim reads pending; a paint that is cut short or does
+# not match the plain read falls back to the plain read, never to empty.
+test_composer_state_reads_ghost_text_from_the_attach_paint() {
+  local tag out fixture start log
+  setup_case composer-styled
+  tag=$(hometag_of)
+  write_terminal "$D" t1 live fm-a1 "$tag" claude /usr/bin/claude
+  fixture="$FM_TEST_ROOT/tests/fixtures/claude-2.1.321-hc-0.1.14/post-turn-suggestion"
+  cp "$fixture.read" "$D/read.txt"
+  cp "$fixture.paint" "$D/attach.paint"
+  start=$SECONDS
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" empty "a real Claude prompt suggestion (dim in the attach paint) must read empty"
+  [ $((SECONDS - start)) -lt 10 ] || fail "the never-ending attach was not bounded ($((SECONDS - start))s)"
+  if kill -0 "$(cat "$D/attach.pid")" 2>/dev/null; then fail "the bounded attach left its process running"; fi
+  log=$(grep $'\x1fattach\x1f' "$D/log")
+  assert_contains "$log" $'\x1fattach\x1f--observe\x1ft1' "the styled read must be a watch-only attach of the target"
+  LC_ALL=C sed $'s/\e\\[2m//g' "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" pending "the same suggestion text without the dim is typed text"
+  head -c 1500 "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "a paint cut short must fall back to the plain read"
+  cp "$fixture.paint" "$D/attach.paint"
+  LC_ALL=C sed 's/Write the naming spec/Delete the naming spec/' "$fixture.read" > "$D/read.txt"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "a paint that differs from the plain read must fall back to the plain read"
+  cp "$fixture.read" "$D/read.txt"
+  rm -f "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "without a paint, the plain read cannot prove the suggestion empty"
+  pass "hc: the composer read takes Claude's dim suggestion from the attach paint and falls back to the plain read"
+}
+
 test_send_delimiters_and_binary_socket_pins() {
   local tag out
   setup_case pins
@@ -376,4 +420,5 @@ fm_test_run \
   test_endpoint_validation_binds_hc_meta \
   test_container_ensure_gates_binary_version_and_generation \
   test_send_text_submit_confirms_through_send_wait \
+  test_composer_state_reads_ghost_text_from_the_attach_paint \
   test_send_delimiters_and_binary_socket_pins

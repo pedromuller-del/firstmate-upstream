@@ -3722,8 +3722,25 @@ On 2026-11-17 with hc 0.1.14, an untracked lab script ran the real `bin/fm-afk-s
 | Missing hc terminal | The daemon refused and removed `state/.afk`. |
 | The same script on the code before hc support | The daemon refused `hc` at startup and left `state/.afk` standing. |
 
-hc's screen read is plain text, so a Claude prompt suggestion reads like typed input and delivery waits until the composer is visibly empty.
-A real Claude Code composer in a Herdr app terminal, and whether hc reports native status for it, are not verified.
+With a plain-text screen read, the dim-suggestion row above deferred as `unknown`.
+The adapter now reads the composer from a styled attach paint, verified next with a real Claude.
+
+On 2026-11-17 with hc 0.1.14 and Claude Code 2.1.321 (Haiku 5.5, hooks, MCP servers and tools disabled), an untracked lab script ran the real `bin/fm-afk-start.sh` against a real Claude Code terminal in an owned `bin/fm-hc-lab.sh` core:
+
+| Scenario | Result |
+| --- | --- |
+| Idle Claude showing its dim post-turn prompt suggestion | Delivered as one doorbell turn. |
+| Idle Claude with an empty composer after a doorbell turn | Delivered as one doorbell turn. |
+| Typed text in the composer | Deferred as `state=pending` with nothing typed, then delivered once after the text was cleared. |
+| Claude mid-turn, native `status.state` `working` | Deferred as busy, then delivered once after the turn ended. |
+| The whole run | Four escalations, four doorbells, four records, no failed submit. |
+| The code before the styled read, with a real suggestion showing | Held for 25 seconds with 15 `state=unknown` deferrals and no delivery. |
+
+Claude Code reports native status through hc: `idle` at start, `working` mid-turn, and `done` after a turn.
+Claude draws both the fresh `Try "..."` placeholder and the post-turn suggestion with SGR 2 (dim), which only the attach paint carries.
+The paint arrived within 0.15 seconds; `hc attach --observe` left the terminal size unchanged, and the bounded read left no attach process under the `timeout`, perl, and bash timeout mechanisms.
+`tests/fm-backend-hc-liveness-live-e2e.test.sh` refreshes the idle-Claude part of this record: an idle Claude must read `empty` through the styled paint.
+A Claude Code supervisor inside the Herdr app is not verified.
 
 ### Spawn, steer, peek, and teardown
 

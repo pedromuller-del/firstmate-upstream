@@ -18,6 +18,15 @@
 # HC_SESSION env marker, so the captain's own core is never touched.
 # tests/hc-test-safety.sh owns the only sanctioned teardown path.
 # tests/fm-backend-hc.test.sh pins the classifier logic with a fake hc.
+#
+# For Claude it also proves the styled composer read: an idle Claude draws a
+# dim placeholder or prompt suggestion that only the styling tells apart from
+# typed text, and `hc read` carries no styling, so bin/backends/hc.sh takes
+# the styled screen from a watch-only attach paint. A fresh idle Claude must
+# read `empty` through that paint. Claude is started in the repo root, which
+# the operator has normally trusted; a trust dialog fails the check. Its
+# Herdr and tmux markers are dropped, so its own hooks never report to the
+# operator's live terminal.
 set -u
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -120,6 +129,32 @@ for harness in claude codex opencode pi grok kimi; do
   note "$harness $version: foreground=$foreground"
   pass "hc liveness: $harness $version classifies alive in $HC_VERSION"
   CHECKED=$((CHECKED + 1))
+  [ "$harness" = claude ] || continue
+  address=$(fm_backend_hc_cli "$HC_SESSION" run --bg --json --no-parent --outlive-parent --no-notify \
+    --cwd "$ROOT" --label "firstmate.task=fm-composer-$harness" --label "firstmate.home=$(fm_backend_hometag)" \
+    env -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u TMUX -u TMUX_PANE "$bin_path" \
+    | jq -r '.address // empty')
+  fm_backend_hc_address_valid "$address" || fail "$harness ($version): hc did not start a composer terminal"
+  target="$HC_SESSION:$address"
+  # A screen Claude has not drawn yet captures as blank, so only a styled
+  # capture that carries SGR styling counts.
+  verdict='' styled=''
+  for _ in $(seq 1 30); do
+    styled=$(fm_backend_hc_visible_capture_ansi "$target") || styled=
+    case "$styled" in *$'\e['*m*) ;; *) styled= ;; esac
+    if [ -n "$styled" ]; then
+      verdict=$(fm_backend_hc_composer_state "$target")
+      [ "$verdict" = empty ] && break
+    fi
+    sleep 1
+  done
+  screen=$(fm_backend_hc_visible_capture "$target" | grep -v '^[[:space:]]*$' | tail -6)
+  fm_backend_kill hc "$target" || fail "$harness ($version): kill did not close $target"
+  [ -n "$styled" ] || fail \
+    "STYLED READ DRIFT: no usable attach paint from $harness $version in $HC_VERSION; the composer read falls back to plain text, which holds every away-mode delivery while a suggestion shows. Screen: $screen"
+  [ "$verdict" = empty ] || fail \
+    "COMPOSER DRIFT: idle $harness $version in $HC_VERSION reads '$verdict', not 'empty', through the styled paint. Screen: $screen"
+  pass "hc composer: idle $harness $version reads empty through the styled attach paint in $HC_VERSION"
 done
 
 [ "$CHECKED" -gt 0 ] || fail "no verified harness is installed here, so this run proved nothing"

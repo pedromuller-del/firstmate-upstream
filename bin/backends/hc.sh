@@ -54,6 +54,14 @@
 . "$FM_BACKEND_LIB_DIR/fm-composer-lib.sh"
 # shellcheck source=bin/fm-agent-process-lib.sh
 . "$FM_BACKEND_LIB_DIR/fm-agent-process-lib.sh"
+# bin/fm-timeout-lib.sh owns bounded execution (fm_run_timed). It declares
+# set -u for its own hygiene, so the caller's nounset setting is restored.
+_fm_backend_hc_nounset=off
+case $- in *u*) _fm_backend_hc_nounset=on ;; esac
+# shellcheck source=bin/fm-timeout-lib.sh
+. "$FM_BACKEND_LIB_DIR/fm-timeout-lib.sh"
+[ "$_fm_backend_hc_nounset" = on ] || set +u
+unset _fm_backend_hc_nounset
 
 # The verified floor: the oldest herdr-core release every adapter surface
 # (including `send --wait` and the `hello` handshake) was exercised against.
@@ -128,19 +136,31 @@ EOF
 # pins. Ambient HC_TERMINAL_* routing markers are always stripped. An
 # inherited HC_SOCKET is stripped because hc lets it win over HC_SESSION;
 # FM_HC_SOCKET is the deliberate pin used by tests and the lab instead.
-fm_backend_hc_env_run() {  # <session> <args...>
-  local session=$1 bin
+# --bound <seconds> ends a call that never ends by itself (`attach`) through
+# fm_run_timed.
+fm_backend_hc_env_run() {  # [--bound <seconds>] <session> <args...>
+  local bound='' session bin
+  if [ "${1:-}" = --bound ]; then
+    bound=$2
+    shift 2
+  fi
+  session=$1
   shift
   bin=$(fm_backend_hc_bin) || {
     echo "error: backend=hc selected but no 'herdr-core' or 'hc' binary was found on PATH (install Herdr Core per docs/hc-backend.md or set FM_HC_BIN)" >&2
     return 1
   }
   if [ -n "${FM_HC_SOCKET:-}" ]; then
-    env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE \
+    set -- env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE \
       HC_SESSION="$session" HC_SOCKET="$FM_HC_SOCKET" "$bin" "$@"
   else
-    env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE -u HC_SOCKET \
+    set -- env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE -u HC_SOCKET \
       HC_SESSION="$session" "$bin" "$@"
+  fi
+  if [ -n "$bound" ]; then
+    fm_run_timed "$bound" "$@"
+  else
+    "$@"
   fi
 }
 
@@ -312,6 +332,43 @@ fm_backend_hc_visible_capture() {  # <target> [expected-label]
   fm_backend_hc_cli "$FM_BACKEND_HC_SESSION" read --lines 0 "$FM_BACKEND_HC_ADDRESS" 2>/dev/null
 }
 
+# fm_backend_hc_visible_capture_ansi: the screen with its styling, which
+# `hc read` never carries. It takes the first paint of a watch-only
+# `hc attach --observe` (it never types or resizes): the rows after the
+# paint's last cursor home and before its cursor placement, kept to SGR
+# styling. The attach never ends by itself, so it is bounded. The paint is
+# used only when its text equals `hc read` of the screen just before the
+# attach (or, when the screen moved, just after it), so a cut-short, changed,
+# or misparsed paint fails and the caller reads the plain screen.
+# Verified on hc 0.1.14 with Claude Code 2.1.321.
+fm_backend_hc_visible_capture_ansi() {  # <target> [expected-label]
+  local raw body screen text plain home=$'\e[H' placement_re=$'\e\\[[0-9]+(;[0-9]+)?H'
+  fm_backend_hc_target_ready "$1" "${2:-}" || return 1
+  plain=$(fm_backend_hc_visible_capture "$1" "${2:-}") || return 1
+  raw=$(fm_backend_hc_env_run --bound 1 "$FM_BACKEND_HC_SESSION" attach --observe \
+    "$FM_BACKEND_HC_ADDRESS" </dev/null 2>/dev/null) || true
+  [[ $raw =~ $placement_re ]] || return 1
+  body=${raw%%"${BASH_REMATCH[0]}"*}
+  case "$body" in *"$home"*) ;; *) return 1 ;; esac
+  screen=$(printf '%s\n' "${body##*"$home"}" | LC_ALL=C sed -E \
+    -e $'s/\e\\][^\a\e]*(\a|\e\\\\)//g' \
+    -e $'s/\e\\[[?>=!][0-9;:]*[ -/]*[@-~]//g' \
+    -e $'s/\e\\[[0-9;:]*[ -/]*[@-ln-~]//g' \
+    -e $'s/\e[()*+].//g' -e $'s/\e[^[]//g' -e $'s/\r//g')
+  text=$(fm_backend_hc_screen_text "$screen")
+  if [ "$text" != "$(fm_backend_hc_screen_text "$plain")" ]; then
+    plain=$(fm_backend_hc_visible_capture "$1" "${2:-}") || return 1
+    [ "$text" = "$(fm_backend_hc_screen_text "$plain")" ] || return 1
+  fi
+  printf '%s\n' "$screen"
+}
+
+# fm_backend_hc_screen_text: a screen's text for comparison - SGR styling and
+# trailing blanks dropped (the command substitution drops trailing blank rows).
+fm_backend_hc_screen_text() {  # <screen>
+  printf '%s\n' "$1" | LC_ALL=C sed -E -e $'s/\e\\[[0-9;:]*m//g' -e 's/[[:space:]]+$//'
+}
+
 # fm_backend_hc_normalize_key: firstmate's key vocabulary onto hc key names.
 fm_backend_hc_normalize_key() {  # <key>
   case "$1" in
@@ -350,10 +407,18 @@ fm_backend_hc_composer_caps() {
   printf 'styled=0\ncursor=0\nidentity=0\nrows=%s\n' "$FM_COMPOSER_CAPTURE_LINES"
 }
 
+# fm_backend_hc_composer_state: the styled capture is preferred (styled=1 lets
+# the shared classifier strip ghost text, such as Claude's dim prompt
+# suggestion); without one, the plain screen degrades to the caps' styled=0.
 fm_backend_hc_composer_state() {  # <target> [expected-label] -> empty|pending|pending-unproven|unknown
-  local cap verdict
-  cap=$(fm_backend_hc_visible_capture "$1" "${2:-}") || { printf 'unknown'; return 0; }
-  verdict=$(fm_composer_classify_screen "$(fm_backend_hc_composer_caps)" "$cap")
+  local cap caps verdict
+  caps=$(fm_backend_hc_composer_caps)
+  if cap=$(fm_backend_hc_visible_capture_ansi "$1" "${2:-}"); then
+    caps=${caps/styled=0/styled=1}
+  else
+    cap=$(fm_backend_hc_visible_capture "$1" "${2:-}") || { printf 'unknown'; return 0; }
+  fi
+  verdict=$(fm_composer_classify_screen "$caps" "$cap")
   [ "$verdict" != need-identity ] || verdict=unknown
   printf '%s' "$verdict"
 }
