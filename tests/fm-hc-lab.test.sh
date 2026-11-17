@@ -122,3 +122,39 @@ printf 'ok - the lab server never inherits the operator Herdr or tmux markers\n'
     || fail "the lab Claude did not start with --safe-mode: $(tr '\n' ' ' < "$TMP_ROOT/claude-run")"
 )
 printf 'ok - a lab Claude starts with hooks off, and one that cannot is refused\n'
+
+# A real core rewrites terminals.json whenever one of its terminals changes its
+# title or status text, so the tripwire compares that file's terminal set.
+TERMS="$XDG_STATE_HOME/herdr-core/default/terminals.json"
+mkdir -p "$(dirname "$TERMS")"
+terms() { # <next_id> <id:title:msg>... - replaced atomically, as hc does
+  local next=$1 entry id rest sep='' body=''
+  shift
+  for entry in "$@"; do
+    id=${entry%%:*} rest=${entry#*:}
+    body="$body$sep\"$id\":{\"address\":\"t$id\",\"title\":\"${rest%%:*}\",\"status\":null,\"msg\":\"${rest#*:}\"}"
+    sep=,
+  done
+  printf '{"next_id":%s,"holder":null,"terminals":{%s}}\n' "$next" "$body" > "$TERMS.new"
+  mv "$TERMS.new" "$TERMS"
+}
+terms 3 '1:main:idle' '2:shell:'
+bash "$LAB" provision fm-hclab-text
+terms 3 '1:main - reviewing PR 12:working on the review, step 4 of 9' '2:shell:'
+bash "$LAB" teardown fm-hclab-text 2> "$TMP_ROOT/err" \
+  || fail "a title or msg change on an existing real terminal tripped the tripwire: $(cat "$TMP_ROOT/err")"
+printf 'ok - title or msg text changing on an existing real terminal passes the tripwire\n'
+for change in added removed replaced recreated; do
+  terms 3 '1:main:idle' '2:shell:'
+  bash "$LAB" provision "fm-hclab-$change"
+  case "$change" in
+    added) terms 4 '1:main:idle' '2:shell:' '3:lab:' ;;
+    removed) terms 3 '1:main:idle' ;;
+    replaced) terms 3 '1:main:idle' '3:lab:' ;; # only the ids differ
+    recreated) terms 4 '1:main:idle' '2:shell:' ;;
+  esac
+  refuse 'FLEET-STATE TRIPWIRE FAILED' bash "$LAB" teardown "fm-hclab-$change"
+  terms 3 '1:main:idle' '2:shell:'
+  bash "$LAB" teardown "fm-hclab-$change"
+done
+printf 'ok - a real terminal added, removed, replaced, or created and removed fails the tripwire\n'

@@ -3695,6 +3695,8 @@ The default socket path under the scratchpad temp directory exceeded the 103-byt
 
 `tests/fm-backend-hc-smoke.test.sh` passed inside a `bin/fm-hc-lab.sh` session (hc 0.1.14, 2026-10-30): an `fm-hclab-*` core with scratch XDG roots, a pinned `FM_HC_SOCKET`, and a fleet-state tripwire that verified the recorded real-core file metadata inventory unchanged afterward.
 Teardown swept the session's `serve`/`hold` daemons by their `HC_SESSION` env token.
+On 2026-11-17 on Linux, hc 0.1.14 and 0.1.21 each kept a core's terminals in `terminals.json` as `next_id`, `holder`, and `terminals` keyed by id (`"1": {"address": "t1", "title": ...}`), and a title change replaced the file under a new inode.
+The tripwire therefore compares that file as its terminal set (`next_id` and sorted ids) and every other file by metadata; `tests/fm-hc-lab.test.sh` pins the comparison.
 
 ```text
 ok - hc smoke: create_task started fm-hclab-smoke-28051-8595:t1
