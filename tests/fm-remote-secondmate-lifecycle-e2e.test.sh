@@ -4,6 +4,12 @@ set -u
 
 # shellcheck source=tests/lib.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+# Homes without config/backend auto-detect from the runner's terminal, so drop
+# every terminal marker: inside a Herdr app hc terminal the seed resolved hc.
+for _fm_marker in $(compgen -e); do
+  case "$_fm_marker" in HERDR_*|HC_*) unset "$_fm_marker" ;; esac
+done
+unset _fm_marker TMUX TMUX_PANE
 # shellcheck source=tests/remote-herdr-fixture.sh
 . "$(dirname "${BASH_SOURCE[0]}")/remote-herdr-fixture.sh"
 # shellcheck source=tests/herdr-client-pair-fixture.sh
