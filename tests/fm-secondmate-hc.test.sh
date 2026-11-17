@@ -226,9 +226,16 @@ setup_world late-child-task
 if FM_FAKE_HC_SERVER_FAIL=1 FM_FAKE_HC_LATE_TASK="$CHILD/state/late-worker.meta" spawn > "$TMP_ROOT/late-child-task.out" 2>&1; then
   fail 'spawn reported success although the hc core could not start'
 fi
-assert_absent "$PRIMARY/state/fleet-backend" 'the aborted creation left the primary bound'
 assert_line 'hc' "$CHILD/state/fleet-backend" 'an aborted creation removed a child pin that a later child task relies on'
+assert_line 'hc' "$PRIMARY/state/fleet-backend" 'an aborted creation released the primary pin while its child keeps hc'
 assert_grep 'kept the fleet runtime' "$TMP_ROOT/late-child-task.out" 'a kept child pin must be reported'
+# Once reconciliation clears the later task and both pins, the same abort releases both.
+rm -f "$CHILD/state/late-worker.meta" "$CHILD/state/fleet-backend" "$PRIMARY/state/fleet-backend"
+if FM_FAKE_HC_SERVER_FAIL=1 spawn > "$TMP_ROOT/late-child-task-clean.out" 2>&1; then
+  fail 'spawn reported success although the hc core could not start'
+fi
+assert_absent "$PRIMARY/state/fleet-backend" 'a clean abort after reconciliation left the primary bound'
+assert_absent "$CHILD/state/fleet-backend" 'a clean abort after reconciliation left the child bound'
 setup_world pinned-primary-abort
 printf 'hc\n' > "$PRIMARY/state/fleet-backend"
 touch "$PRIMARY/state/design.backlog-close"

@@ -299,14 +299,24 @@ fi
 grep -Eqx 'fm-remote-secondmate-control.sh release-backend rmate hc [0-9a-f]{64}' "$TMP/ssh.log" || fail 'abort must ask the child to release its pin'
 assert_grep 'hc' "$CHILD2/state/fleet-backend" 'an aborted creation removed a child pin that a later child task relies on'
 assert_grep 'backend=hc' "$CHILD2/state/late-worker.meta" 'the later child task record changed'
-assert_absent "$PARENT2/state/fleet-backend" 'the aborted creation left the parent bound'
+assert_grep 'hc' "$PARENT2/state/fleet-backend" 'an aborted creation released the parent pin while its child keeps hc'
 assert_grep "could not release the fleet runtime" "$TMP/remote-late-worker.out" 'a kept child pin must be reported'
-rm "$CHILD2/state/late-worker.meta"
-pass 'an aborted remote creation keeps the child pin when a child task started after binding'
+pass 'an aborted remote creation keeps the parent and child pins when a child task started after binding'
+
+# Once reconciliation clears the later task and both pins, the same abort releases both.
+rm -f "$CHILD2/state/late-worker.meta" "$CHILD2/state/fleet-backend" "$PARENT2/state/fleet-backend"
+: > "$TMP/ssh.log"
+if env HOME="$TMP/account" FM_HOME="$PARENT2" FM_BACKEND=hc FM_SSH_BIN="$TMP/fake-ssh" \
+  FAKE_SSH_LOG="$TMP/ssh.log" FAKE_CHILD="$CHILD2" FAKE_ROOT="$ROOT" \
+  "$ROOT/bin/fm-spawn.sh" rmate --secondmate > "$TMP/remote-late-worker-clean.out" 2>&1; then
+  fail 'remote creation succeeded on a host that is not ready'
+fi
+assert_absent "$PARENT2/state/fleet-backend" 'a clean abort after reconciliation left the parent bound'
+assert_absent "$CHILD2/state/fleet-backend" 'a clean abort after reconciliation left the child bound'
+pass 'after reconciliation the same aborted remote creation releases both pins'
 
 # Once the launch request leaves the parent, the endpoint may exist, so a
 # failed launch keeps both pins for reconciliation.
-rm -f "$CHILD2/state/fleet-backend"
 : > "$TMP/ssh.log"
 if env HOME="$TMP/account" FM_HOME="$PARENT2" FM_BACKEND=hc FM_SSH_BIN="$TMP/fake-ssh" \
   FAKE_SSH_LOG="$TMP/ssh.log" FAKE_CHILD="$CHILD2" FAKE_ROOT="$ROOT" FAKE_HOST_READY=1 \

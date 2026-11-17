@@ -1845,9 +1845,31 @@ spawn_fleet_bind() { # <state> <config> <backend>
 # A first secondmate creation that fails before its endpoint exists leaves both
 # homes as they were. A failure after endpoint creation starts keeps the pins,
 # because the endpoint may exist and reconciliation needs its runtime.
+# The child pin is released first; when it must stay, this spawn's own pin stays
+# too, so the parent and its second mate home never select different runtimes.
 spawn_release_new_fleet_pins() {
-  local pin_state lock
+  local pin_state lock child_kept=0
+  if [ -n "$SPAWN_NEW_CHILD_PIN_STATE" ]; then
+    if ! fm_fleet_backend_release_child "$SPAWN_NEW_CHILD_PIN_STATE" "$BACKEND" "$SPAWN_NEW_CHILD_PIN_DIGEST"; then
+      child_kept=1
+      echo "warning: kept the fleet runtime this aborted spawn bound in $SPAWN_NEW_CHILD_PIN_STATE; reconcile it before choosing another runtime" >&2
+    fi
+    SPAWN_NEW_CHILD_PIN_STATE=
+  fi
+  if [ -n "$SPAWN_REMOTE_CHILD_PIN" ]; then
+    # shellcheck disable=SC2086 # "<id> <backend> <digest>", all validated tokens.
+    if ! "$SCRIPT_DIR/fm-on.sh" ${SPAWN_REMOTE_CHILD_PIN%% *} fm-remote-secondmate-control.sh release-backend \
+      $SPAWN_REMOTE_CHILD_PIN </dev/null >/dev/null 2>&1; then
+      child_kept=1
+      echo "warning: could not release the fleet runtime this aborted spawn bound in remote secondmate ${SPAWN_REMOTE_CHILD_PIN%% *}'s home; remove its state/fleet-backend on that host once no endpoint exists" >&2
+    fi
+    SPAWN_REMOTE_CHILD_PIN=
+  fi
   for pin_state in ${SPAWN_NEW_FLEET_PINS[@]+"${SPAWN_NEW_FLEET_PINS[@]}"}; do
+    if [ "$child_kept" = 1 ]; then
+      echo "warning: kept the fleet runtime this aborted spawn bound in $pin_state, because its second mate home keeps it; reconcile both homes together" >&2
+      continue
+    fi
     lock="$pin_state/.fleet-backend.lock"
     if fm_lock_acquire_wait_max "$lock" 10; then
       rm -f -- "$pin_state/fleet-backend" && pin_state=
@@ -1857,18 +1879,6 @@ spawn_release_new_fleet_pins() {
       || echo "warning: could not release the fleet runtime this aborted spawn bound in $pin_state; remove $pin_state/fleet-backend once no task there uses it" >&2
   done
   SPAWN_NEW_FLEET_PINS=()
-  if [ -n "$SPAWN_NEW_CHILD_PIN_STATE" ]; then
-    fm_fleet_backend_release_child "$SPAWN_NEW_CHILD_PIN_STATE" "$BACKEND" "$SPAWN_NEW_CHILD_PIN_DIGEST" \
-      || echo "warning: kept the fleet runtime this aborted spawn bound in $SPAWN_NEW_CHILD_PIN_STATE; reconcile it before choosing another runtime" >&2
-    SPAWN_NEW_CHILD_PIN_STATE=
-  fi
-  if [ -n "$SPAWN_REMOTE_CHILD_PIN" ]; then
-    # shellcheck disable=SC2086 # "<id> <backend> <digest>", all validated tokens.
-    "$SCRIPT_DIR/fm-on.sh" ${SPAWN_REMOTE_CHILD_PIN%% *} fm-remote-secondmate-control.sh release-backend \
-      $SPAWN_REMOTE_CHILD_PIN </dev/null >/dev/null 2>&1 \
-      || echo "warning: could not release the fleet runtime this aborted spawn bound in remote secondmate ${SPAWN_REMOTE_CHILD_PIN%% *}'s home; remove its state/fleet-backend on that host once no endpoint exists" >&2
-    SPAWN_REMOTE_CHILD_PIN=
-  fi
 }
 
 spawn_abort_cleanup() {
