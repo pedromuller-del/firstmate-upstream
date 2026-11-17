@@ -5,7 +5,7 @@
 #   fm-remote-secondmate-control.sh launch <id> <harness> <model|-> <effort|-> {herdr|rex|hc} [traceparent]
 #   fm-remote-secondmate-control.sh validate-backend <id> <backend>
 #   fm-remote-secondmate-control.sh validate-inheritance <id>
-#   fm-remote-secondmate-control.sh release-backend <id> <backend>
+#   fm-remote-secondmate-control.sh release-backend <id> <backend> <task-set-digest>
 #   fm-remote-secondmate-control.sh relaunch <id> <harness> <model|default|-> <effort|default|->
 #   fm-remote-secondmate-control.sh state <id>
 #   fm-remote-secondmate-control.sh route <id>
@@ -308,23 +308,21 @@ cmd_validate_backend() { # <id> <selected-backend>
     rex:hc|rex:herdr)
       die "FM_BACKEND '$FM_BACKEND' conflicts with selected fleet backend 'rex'; refusing runtime change" ;;
   esac
-  local existed=0
-  if [ -e "$TARGET_HOME/state/fleet-backend" ] || [ -L "$TARGET_HOME/state/fleet-backend" ]; then existed=1; fi
-  fm_fleet_backend_bind "$TARGET_HOME/state" "$TARGET_HOME/config" "$2" >/dev/null || exit 1
-  # The creating parent releases a pin it saw reported here if it aborts before launch.
-  if [ "$existed" = 0 ] && [ -e "$TARGET_HOME/state/fleet-backend" ]; then printf 'fleet_pin=new\n'; fi
+  local digest
+  digest=$(fm_fleet_backend_bind_child "$TARGET_HOME/state" "$TARGET_HOME/config" "$2") || exit 1
+  # The creating parent passes this back to release-backend if it aborts before launch.
+  [ -z "$digest" ] || printf 'fleet_pin=new %s\n' "$digest"
 }
 
 # Undoes validate-backend's new pin for a creation that aborted before launch.
 # It refuses once this host records an endpoint, so it never unbinds a launched mate.
-cmd_release_backend() { # <id> <backend>
+cmd_release_backend() { # <id> <backend> <task-set-digest>
   validate_id "$1"
   validate_home "$1"
   if [ -e "$(meta_path "$1")" ] || [ -L "$(meta_path "$1")" ]; then
     die "remote secondmate $1 has an endpoint record; keeping its fleet runtime"
   fi
-  [ "$(fm_fleet_backend_read "$TARGET_HOME/state")" = "$2" ] || return 0
-  rm -f -- "$TARGET_HOME/state/fleet-backend"
+  fm_fleet_backend_release_child "$TARGET_HOME/state" "$2" "$3" || exit 1
 }
 
 cmd_launch() {
@@ -678,7 +676,7 @@ case "${1:-}" in
   inbox-probe) shift; [ "$#" -eq 1 ] || usage; cmd_inbox_probe "$1" ;;
   validate-backend) shift; [ "$#" -eq 2 ] || usage; cmd_validate_backend "$@" ;;
   validate-inheritance) shift; [ "$#" -eq 1 ] || usage; cmd_validate_inheritance "$@" ;;
-  release-backend) shift; [ "$#" -eq 2 ] || usage; cmd_release_backend "$@" ;;
+  release-backend) shift; [ "$#" -eq 3 ] || usage; cmd_release_backend "$@" ;;
   launch) shift; [ "$#" -ge 5 ] && [ "$#" -le 6 ] || usage; cmd_launch "$@" ;;
   relaunch) shift; [ "$#" -eq 4 ] || usage; cmd_relaunch "$@" ;;
   state) shift; [ "$#" -eq 1 ] || usage; validate_id "$1"; validate_home "$1"; state_value "$1" ;;

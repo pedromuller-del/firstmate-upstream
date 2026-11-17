@@ -16,6 +16,10 @@
 # recovery never do. Pass it explicitly to each child and bind against that
 # child's state/config.
 # Callers retain the existing task-set lock through binding and meta publication.
+# A creation that binds a child home uses bind_child, which pins under that
+# home's task-set lock and returns a task-set digest; release_child undoes the
+# pin only while the digest still matches, so it never unbinds a task that
+# started after the pin.
 # The fleet lock serializes pins; it does not replace task lifecycle locks.
 
 _fm_fleet_backend_check() {
@@ -191,4 +195,69 @@ except OSError as error:
 PY
   fi
   printf '%s\n' "$backend"
+)
+
+_fm_fleet_backend_locks() { # <state>
+  if ! command -v fm_lock_acquire_wait_max >/dev/null 2>&1; then
+    # shellcheck source=/dev/null
+    FM_STATE_OVERRIDE=$1 . "${BASH_SOURCE[0]%/*}/fm-wake-lib.sh" || return 1
+  fi
+}
+
+# Prints a digest of the names of <state>'s task records, including the endpoint
+# records of routes a remote parent placed under state/parent-route.
+fm_fleet_backend_task_set_digest() { # <state>
+  python3 - "$1" <<'PY'
+import hashlib
+import os
+import sys
+state = sys.argv[1]
+names = []
+for sub in ("", "parent-route"):
+    path = os.path.join(state, sub)
+    if os.path.isdir(path):
+        names += [os.path.join(sub, n) for n in os.listdir(path) if n.endswith(".meta")]
+print(hashlib.sha256("\n".join(sorted(names)).encode()).hexdigest())
+PY
+}
+
+# Binds a child home. When this call creates the pin, it prints the task-set
+# digest taken under the child's task-set lock; an existing pin prints nothing.
+fm_fleet_backend_bind_child() ( # <state> <config> <backend>
+  local state=$1 config=$2 backend=$3 lock existed=0
+  if [ -e "$state/fleet-backend" ] || [ -L "$state/fleet-backend" ]; then
+    fm_fleet_backend_bind "$state" "$config" "$backend" >/dev/null
+    return
+  fi
+  _fm_fleet_backend_locks "$state" || return 1
+  mkdir -p "$state" || return 1
+  lock=$(fm_task_set_lock_path "$state") || return 1
+  fm_lock_acquire_wait_max "$lock" 10 || {
+    echo "error: fleet backend: $state task set is busy; refusing to bind it now" >&2
+    return 1
+  }
+  trap 'fm_lock_release "$lock"' EXIT
+  if [ -e "$state/fleet-backend" ] || [ -L "$state/fleet-backend" ]; then existed=1; fi
+  fm_fleet_backend_bind "$state" "$config" "$backend" >/dev/null || return 1
+  if [ "$existed" = 0 ] && [ -e "$state/fleet-backend" ]; then fm_fleet_backend_task_set_digest "$state"; fi
+)
+
+# Undoes a pin bind_child created, only while the pin still names <backend> and
+# the task set still matches <digest>; otherwise it keeps the pin and fails.
+fm_fleet_backend_release_child() ( # <state> <backend> <digest>
+  local state=$1 backend=$2 digest=$3 lock pin
+  _fm_fleet_backend_locks "$state" || return 1
+  lock=$(fm_task_set_lock_path "$state") || return 1
+  fm_lock_acquire_wait_max "$lock" 10 || {
+    echo "error: fleet backend: $state task set is busy; keeping its runtime" >&2
+    return 1
+  }
+  trap 'fm_lock_release "$lock"' EXIT
+  pin=$(fm_fleet_backend_read "$state") || return 1
+  [ "$pin" = "$backend" ] || return 0
+  if [ "$(fm_fleet_backend_task_set_digest "$state")" != "$digest" ]; then
+    echo "error: fleet backend: $state gained or lost a task since binding; keeping its runtime for reconciliation" >&2
+    return 1
+  fi
+  rm -f -- "$state/fleet-backend"
 )

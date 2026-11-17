@@ -28,6 +28,8 @@ cmd = args[0]
 if cmd == '--version':
     print('hc 0.1.14')
 elif cmd == 'server':
+    if os.environ.get('FM_FAKE_HC_LATE_TASK'):
+        Path(os.environ['FM_FAKE_HC_LATE_TASK']).write_text('backend=hc\nwindow=fleet-test:t3\n')
     if os.environ.get('FM_FAKE_HC_SERVER_FAIL'):
         sys.exit(1)
     print('{}')
@@ -220,6 +222,21 @@ fi
 assert_absent "$PRIMARY/state/fleet-backend" 'an hc core that could not start left the primary bound'
 assert_absent "$CHILD/state/fleet-backend" 'an hc core that could not start left the child bound'
 assert_absent "$FM_FAKE_HC_DIR/terminal.json" 'an unavailable core created a terminal'
+setup_world late-child-task
+if FM_FAKE_HC_SERVER_FAIL=1 FM_FAKE_HC_LATE_TASK="$CHILD/state/late-worker.meta" spawn > "$TMP_ROOT/late-child-task.out" 2>&1; then
+  fail 'spawn reported success although the hc core could not start'
+fi
+assert_absent "$PRIMARY/state/fleet-backend" 'the aborted creation left the primary bound'
+assert_line 'hc' "$CHILD/state/fleet-backend" 'an aborted creation removed a child pin that a later child task relies on'
+assert_grep 'kept the fleet runtime' "$TMP_ROOT/late-child-task.out" 'a kept child pin must be reported'
+setup_world pinned-primary-abort
+printf 'hc\n' > "$PRIMARY/state/fleet-backend"
+touch "$PRIMARY/state/design.backlog-close"
+if spawn > "$TMP_ROOT/pinned-primary-abort.out" 2>&1; then
+  fail 'spawn ignored a pending backlog close'
+fi
+assert_line 'hc' "$PRIMARY/state/fleet-backend" 'aborted creation removed a primary pin it did not create'
+assert_absent "$CHILD/state/fleet-backend" 'aborted creation left the child bound'
 setup_world registry-error
 printf -- '- design - design fleet (home: %s; scope: design; projects: ; added 2026-11-15)\n' "$TMP_ROOT/elsewhere" > "$PRIMARY/data/secondmates.md"
 if spawn > "$TMP_ROOT/registry-error.out" 2>&1; then

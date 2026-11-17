@@ -86,15 +86,26 @@ if run_control validate-backend mate herdr >/dev/null 2>&1; then fail 'child bin
 pass 'pre-inheritance validation binds the child without contacting a runtime'
 
 [ -z "$(run_control validate-backend mate hc)" ] || fail 'an existing child pin must not be reported as new'
-run_control release-backend mate hc
+rm "$CHILD/state/fleet-backend"
+NEW_PIN=$(run_control validate-backend mate hc)
+[[ "$NEW_PIN" =~ ^fleet_pin=new\ [0-9a-f]{64}$ ]] || fail "a new child pin must be reported with its task-set digest: $NEW_PIN"
+# A child task that started after the pin relies on it, so release keeps it.
+printf 'backend=hc\nwindow=fm-remote:t3\n' > "$CHILD/state/late-worker.meta"
+if run_control release-backend mate hc "${NEW_PIN#fleet_pin=new }" > "$TMP/release" 2>&1; then
+  fail 'release removed a pin that a later child task relies on'
+fi
+assert_grep 'keeping its runtime for reconciliation' "$TMP/release" 'kept pin must say why'
+assert_grep 'hc' "$CHILD/state/fleet-backend" 'release removed a pin that a later child task relies on'
+rm "$CHILD/state/late-worker.meta"
+run_control release-backend mate hc "${NEW_PIN#fleet_pin=new }"
 assert_absent "$CHILD/state/fleet-backend" 'release must remove the pin of an aborted creation'
-[ "$(run_control validate-backend mate hc)" = fleet_pin=new ] || fail 'a new child pin must be reported to the creating parent'
+NEW_PIN=$(run_control validate-backend mate hc)
 write_meta
-if run_control release-backend mate hc > "$TMP/release" 2>&1; then fail 'release must refuse while an endpoint record exists'; fi
+if run_control release-backend mate hc "${NEW_PIN#fleet_pin=new }" > "$TMP/release" 2>&1; then fail 'release must refuse while an endpoint record exists'; fi
 assert_grep 'keeping its fleet runtime' "$TMP/release" 'refused release must say why'
 assert_grep 'hc' "$CHILD/state/fleet-backend" 'refused release removed the pin'
 rm "$CHILD/state/parent-route/mate.meta"
-pass 'validate-backend reports a new child pin, and release-backend removes it only before any endpoint record'
+pass 'release-backend removes a new child pin only while no endpoint record or later child task exists'
 
 write_meta
 OUT=$(run_control route mate)
@@ -256,6 +267,8 @@ mapfile -d '' args < <(printf '%s' "$4" | base64 -d)
 printf '%s\n' "${args[*]}" >> "$FAKE_SSH_LOG"
 case "${args[0]}:${args[1]:-}" in
   fm-remote-doctor.sh:*)
+    # A child worker that starts between binding and the abort.
+    [ -z "${FAKE_LATE_WORKER:-}" ] || printf 'backend=hc\nwindow=fm-remote:t3\n' > "$FAKE_CHILD/state/late-worker.meta"
     [ -n "${FAKE_HOST_READY:-}" ] && exit 0
     echo 'check hc-server=broken: fixture host is not ready'; exit 1 ;;
   fm-remote-secondmate-control.sh:launch) echo 'error: fixture launch failed after creating nothing provable' >&2; exit 1 ;;
@@ -271,11 +284,25 @@ if env HOME="$TMP/account" FM_HOME="$PARENT2" FM_BACKEND=hc FM_SSH_BIN="$TMP/fak
 fi
 assert_grep 'is not ready for a remote second mate' "$TMP/remote-abort.out" 'remote creation must stop at readiness'
 grep -qx 'fm-remote-secondmate-control.sh validate-backend rmate hc' "$TMP/ssh.log" || fail 'creation must validate the child before readiness'
-grep -qx 'fm-remote-secondmate-control.sh release-backend rmate hc' "$TMP/ssh.log" || fail 'abort must release the new child pin'
+grep -Eqx 'fm-remote-secondmate-control.sh release-backend rmate hc [0-9a-f]{64}' "$TMP/ssh.log" || fail 'abort must release the new child pin'
 assert_no_grep 'control.sh launch ' "$TMP/ssh.log" 'an unready host must never receive a launch'
 assert_absent "$PARENT2/state/fleet-backend" 'aborted remote creation left the parent bound'
 assert_absent "$CHILD2/state/fleet-backend" 'aborted remote creation left the child bound'
 pass 'a remote creation that fails readiness releases the new parent and child pins'
+
+: > "$TMP/ssh.log"
+if env HOME="$TMP/account" FM_HOME="$PARENT2" FM_BACKEND=hc FM_SSH_BIN="$TMP/fake-ssh" \
+  FAKE_SSH_LOG="$TMP/ssh.log" FAKE_CHILD="$CHILD2" FAKE_ROOT="$ROOT" FAKE_LATE_WORKER=1 \
+  "$ROOT/bin/fm-spawn.sh" rmate --secondmate > "$TMP/remote-late-worker.out" 2>&1; then
+  fail 'remote creation succeeded on a host that is not ready'
+fi
+grep -Eqx 'fm-remote-secondmate-control.sh release-backend rmate hc [0-9a-f]{64}' "$TMP/ssh.log" || fail 'abort must ask the child to release its pin'
+assert_grep 'hc' "$CHILD2/state/fleet-backend" 'an aborted creation removed a child pin that a later child task relies on'
+assert_grep 'backend=hc' "$CHILD2/state/late-worker.meta" 'the later child task record changed'
+assert_absent "$PARENT2/state/fleet-backend" 'the aborted creation left the parent bound'
+assert_grep "could not release the fleet runtime" "$TMP/remote-late-worker.out" 'a kept child pin must be reported'
+rm "$CHILD2/state/late-worker.meta"
+pass 'an aborted remote creation keeps the child pin when a child task started after binding'
 
 # Once the launch request leaves the parent, the endpoint may exist, so a
 # failed launch keeps both pins for reconciliation.
