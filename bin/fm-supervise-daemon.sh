@@ -2104,9 +2104,12 @@ fm_super_main() {
   echo "$$" > "$PIDFILE"
   # A daemon that refuses to start must not leave state/.afk behind: with the
   # flag present and no daemon, the watcher stays one-shot and nothing
-  # supervises the fleet. Armed only after this process owns the lock, so a
-  # second daemon that found a live owner never clears that owner's flag; the
-  # away-posture record stays, as on a home that runs no daemon.
+  # supervises the fleet. The flag is cleared only while this process owns the
+  # lock: startup_refuse clears it and the pidfile before releasing the lock,
+  # and an unexpected exit runs the same rollback from the EXIT trap, which
+  # never releases the lock. Once the lock is free, a second daemon may own it
+  # with its own state/.afk. A daemon that found a live owner exits before any
+  # of this, and the away-posture record stays, as on a home that runs no daemon.
   startup_rollback() {
     afk_active "$STATE" || return 0
     if afk_exit "$STATE" && ! afk_active "$STATE"; then
@@ -2115,6 +2118,13 @@ fm_super_main() {
     else
       echo "afk: the away-mode daemon could not start and state/.afk could not be removed" >&2
     fi
+  }
+  startup_refuse() {
+    trap - EXIT
+    startup_rollback
+    rm -f "$PIDFILE" 2>/dev/null || true
+    fm_lock_release "$LOCK" 2>/dev/null || true
+    exit 1
   }
   trap startup_rollback EXIT
   # The recorded identity is what proves this daemon still owns supervision after
@@ -2166,9 +2176,7 @@ fm_super_main() {
   if ! fm_backend_list_contains "$FM_SUPERVISOR_SUPPORTED_BACKENDS" "$BACKEND"; then
     echo "error: away-mode daemon does not support supervisor backend '$BACKEND' yet (supported: $FM_SUPERVISOR_SUPPORTED_BACKENDS); set FM_SUPERVISOR_BACKEND=tmux|herdr|rex|hc|t3code and FM_SUPERVISOR_TARGET to run firstmate's own pane under a supported backend" >&2
     log "startup failed: unsupported supervisor backend '$BACKEND' (source=$backend_source)"
-    fm_lock_release "$LOCK" 2>/dev/null || true
-    rm -f "$PIDFILE" 2>/dev/null || true
-    exit 1
+    startup_refuse
   fi
 
   # --- auto-discover the supervisor target (the endpoint running firstmate) ---
@@ -2209,9 +2217,7 @@ fm_super_main() {
   if ! fm_backend_target_exists "$BACKEND" "$TARGET"; then
     echo "error: supervisor target '$TARGET' does not resolve to a $BACKEND pane; set FM_SUPERVISOR_TARGET" >&2
     log "startup failed: target '$TARGET' not found (backend=$BACKEND)"
-    fm_lock_release "$LOCK" 2>/dev/null || true
-    rm -f "$PIDFILE" 2>/dev/null || true
-    exit 1
+    startup_refuse
   fi
   trap - EXIT
 

@@ -112,6 +112,42 @@ test_afk_start_accepts_hc_supervisor_backend() {
   pass "fm-afk-start.sh accepts hc as an away-mode supervisor backend and checks the hc target"
 }
 
+# A daemon that refuses at startup clears state/.afk while it still owns the
+# lock. Once it releases the lock, a second daemon may own it together with
+# its own state/.afk, which the refusing daemon must leave alone. The stand-in
+# second daemon takes the free lock at the refusing daemon's exit, the first
+# point after its release in either cleanup order.
+test_startup_refusal_leaves_a_later_daemons_flag() {
+  local dir state holder out
+  dir=$(make_supercase startup-refusal-race)
+  state="$dir/state"
+  afk_enter "$state"
+  sleep 300 &
+  holder=$!
+  out=$(
+    exit() {
+      unset -f exit
+      if [ ! -e "$state/.supervise-daemon.lock" ]; then
+        mkdir "$state/.supervise-daemon.lock"
+        printf '%s\n' "$holder" > "$state/.supervise-daemon.lock/pid"
+        printf '%s\n' "$holder" > "$state/.supervise-daemon.pid"
+        afk_enter "$state"
+      fi
+      builtin exit "$@"
+    }
+    FM_STATE_OVERRIDE="$state" FM_SUPERVISOR_BACKEND=unsupported fm_super_main 2>&1
+  )
+  assert_contains "$out" "does not support supervisor backend 'unsupported'" "the first daemon did not refuse at startup"
+  assert_contains "$out" "state/.afk was removed" "the refusing daemon did not clear its own state/.afk"
+  [ -e "$state/.afk" ] || fail "a refusing daemon removed the state/.afk of the daemon that took the lock after it"
+  assert_equals "$(cat "$state/.supervise-daemon.lock/pid" 2>/dev/null)" "$holder" "the second daemon lost its lock"
+  assert_equals "$(cat "$state/.supervise-daemon.pid" 2>/dev/null)" "$holder" "the second daemon lost its pidfile"
+  kill "$holder" 2>/dev/null
+  wait "$holder" 2>/dev/null
+  rm -rf "${state:?}/.supervise-daemon.lock"
+  pass "a daemon that refuses at startup clears state/.afk before freeing the lock, so a later daemon keeps its flag"
+}
+
 test_afk_start_reclaims_stale_daemon_lock_reused_pid() {
   local dir state out status lock
   dir=$(make_supercase afk-start-stale-lock-reused-pid)
@@ -3896,6 +3932,7 @@ test_afk_start_refuses_when_flag_cannot_be_written
 test_afk_start_ignores_stale_pidfile_without_lock
 test_afk_start_refuses_tern_supervisor_backend
 test_afk_start_accepts_hc_supervisor_backend
+test_startup_refusal_leaves_a_later_daemons_flag
 test_afk_start_reclaims_stale_daemon_lock_reused_pid
 test_daemon_state_root_uses_fm_home
 test_classify_routine_signal_self
