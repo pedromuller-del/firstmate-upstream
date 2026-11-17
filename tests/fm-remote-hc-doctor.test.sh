@@ -99,6 +99,7 @@ doctor --backend hc
 assert_contains "$DOCTOR_OUT" 'required hc=' 'hc must resolve the herdr-core binary'
 assert_contains "$DOCTOR_OUT" 'check hc=ok:' 'compatible hc must pass its version gate'
 assert_contains "$DOCTOR_OUT" 'check hc-server=fixable:' 'a missing hc core must need repair'
+assert_contains "$DOCTOR_OUT" "$CASE_HOME/.local/state/herdr-core/fm-remote/fm-remote.sock" 'check must use the same pinned account endpoint as repair'
 assert_no_grep 'server status' "$CASE_STATE/hc.calls" 'check mode must not autostart hc'
 assert_not_contains "$DOCTOR_OUT" 'check herdr-server=' 'hc must not check classic Herdr'
 doctor --backend hc --fix
@@ -106,7 +107,7 @@ doctor --backend hc --fix
 expect_code 0 "$DOCTOR_RC" "hc readiness repair failed: $DOCTOR_OUT"
 assert_contains "$DOCTOR_OUT" 'check hc-server=ok: session fm-remote' 'repair must prove the protocol'
 assert_no_grep 'dev.firstmate.herdr' "$CASE_LAUNCHCTL_LOG" 'hc must not install a classic Herdr agent'
-assert_grep 'fm-remote||server status' "$CASE_STATE/hc.calls" 'repair must start the dedicated hc session'
+assert_grep "fm-remote|$CASE_HOME/.local/state/herdr-core/fm-remote/fm-remote.sock|server status" "$CASE_STATE/hc.calls" 'repair must start the dedicated hc session at its pinned socket'
 assert_no_grep '/foreign' "$CASE_STATE/hc.calls" 'readiness must discard ambient socket overrides'
 pass 'hc check is read-only and explicit repair verifies its dedicated core'
 

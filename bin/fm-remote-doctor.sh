@@ -189,6 +189,8 @@ if [ "$DOCTOR_BACKEND" = hc ]; then
   fm_backend_source hc
   unset FM_HC_SOCKET HC_SOCKET HC_TERMINAL_SOCKET HC_TERMINAL_ID HC_SCOPE
   export HC_SESSION=fm-remote
+  export FM_HC_SOCKET
+  FM_HC_SOCKET=$(fm_remote_job_hc_socket "$HOME" "$HC_SESSION")
 fi
 
 PLATFORM=$(fm_remote_job_platform)

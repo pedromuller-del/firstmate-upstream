@@ -71,8 +71,8 @@
 #
 # The worker accepts only a tracked, non-symlink executable named fm-*.sh below
 # its configured FM_ROOT/bin. Every child receives env -i with the composed
-# PATH, HOME, FM_HOME, FM_ROOT_OVERRIDE, and FM_REMOTE_JOB_ACTIVE=1, plus USER
-# and LOGNAME when they are nonempty in the worker's environment. The PATH
+# PATH, HOME, FM_HOME, FM_ROOT_OVERRIDE, FM_HC_SOCKET, and FM_REMOTE_JOB_ACTIVE=1,
+# plus USER and LOGNAME when they are nonempty in the worker's environment. The PATH
 # is intentionally filesystem-discovered rather than login-shell-derived:
 # ~/.local/bin; nvm, asdf, and mise shims/install bins; Nix; Homebrew; and the
 # system tail. No shell startup files are evaluated. Each discovered set is
@@ -97,6 +97,11 @@
 # it to stop itself once its root is pruned, and
 # bin/fm-remote-job-reap-orphans.sh uses it to reap workers that were already
 # orphaned that way.
+
+# Remote jobs use one account-local endpoint regardless of the login environment.
+fm_remote_job_hc_socket() { # <account-home> <session>
+  printf '%s/.local/state/herdr-core/%s/%s.sock' "$1" "$2" "$2"
+}
 
 FM_REMOTE_JOB_LABEL=dev.firstmate.remote-job
 FM_REMOTE_JOB_MAX_BYTES=${FM_REMOTE_JOB_MAX_BYTES:-1048576}

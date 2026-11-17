@@ -55,12 +55,31 @@ cleanup_remote_job_fixture() {
 trap cleanup_remote_job_fixture EXIT
 
 cp "$ROOT/bin/fm-remote-job-lib.sh" "$ROOT/bin/fm-remote-job-worker.sh" \
-  "$ROOT/bin/fm-remote-delta-read.sh" "$REMOTE_ROOT/bin/"
+  "$ROOT/bin/fm-remote-delta-read.sh" "$ROOT/bin/fm-backend.sh" \
+  "$ROOT/bin/fm-fleet-backend-lib.sh" "$ROOT/bin/fm-backend-hometag-lib.sh" \
+  "$ROOT/bin/fm-composer-lib.sh" "$ROOT/bin/fm-agent-process-lib.sh" \
+  "$ROOT/bin/fm-session-lock-lib.sh" "$ROOT/bin/fm-cursor-lib.sh" \
+  "$ROOT/bin/fm-omp-process-lib.sh" "$ROOT/bin/fm-gemini-lib.sh" \
+  "$ROOT/bin/fm-hermes-process-lib.sh" "$ROOT/bin/fm-timeout-lib.sh" "$REMOTE_ROOT/bin/"
+mkdir -p "$REMOTE_ROOT/bin/backends"
+cp "$ROOT/bin/backends/hc.sh" "$REMOTE_ROOT/bin/backends/"
+cat > "$REMOTE_ROOT/bin/hc" <<'SH'
+#!/bin/bash
+printf 'hc_socket=%s\n' "${HC_SOCKET:-}"
+SH
+chmod +x "$REMOTE_ROOT/bin/hc"
+ln -s hc "$REMOTE_ROOT/bin/herdr-core"
 printf 'fixture\n' > "$REMOTE_ROOT/AGENTS.md"
 cat > "$REMOTE_ROOT/bin/fm-probe-job.sh" <<'SH'
 #!/bin/bash
-set -u
-printf 'home=%s\nroot=%s\nactive=%s\npath=%s\n' "$FM_HOME" "$FM_ROOT_OVERRIDE" "${FM_REMOTE_JOB_ACTIVE:-}" "$PATH"
+set -eu
+printf 'home=%s\nroot=%s\nactive=%s\npath=%s\nsocket=%s\n' "$FM_HOME" "$FM_ROOT_OVERRIDE" "${FM_REMOTE_JOB_ACTIVE:-}" "$PATH" "${FM_HC_SOCKET:-}"
+. "$FM_ROOT_OVERRIDE/bin/fm-backend.sh"
+fm_backend_source hc
+[ "$(command -v herdr-core)" = "$FM_ROOT_OVERRIDE/bin/herdr-core" ]
+[ "$(command -v hc)" = "$FM_ROOT_OVERRIDE/bin/hc" ]
+[ "$(fm_backend_hc_bin)" = "$FM_ROOT_OVERRIDE/bin/herdr-core" ]
+fm_backend_hc_cli fm-remote server status --json
 printf 'args:'
 printf ' <%s>' "$@"
 printf '\n'
@@ -220,6 +239,23 @@ export FM_REMOTE_JOB_TIMEOUT=5
 # shellcheck source=bin/fm-remote-job-lib.sh
 . "$ROOT/bin/fm-remote-job-lib.sh"
 
+mkdir -p "$TMP_ROOT/xdg-runtime"
+for runtime in "$TMP_ROOT/xdg-runtime" ''; do
+  fm_remote_job_stage "$ACCOUNT_HOME" "$REMOTE_ROOT" "$REMOTE_HOME" fm-probe-job.sh </dev/null >/dev/null \
+    || fail 'could not stage hc endpoint probe'
+  if [ -n "$runtime" ]; then
+    HOME="$ACCOUNT_HOME" XDG_RUNTIME_DIR="$runtime" "$BASH" "$REMOTE_ROOT/bin/fm-remote-job-worker.sh" --lane "$FM_REMOTE_JOB_ID"
+  else
+    env -u XDG_RUNTIME_DIR HOME="$ACCOUNT_HOME" "$BASH" "$REMOTE_ROOT/bin/fm-remote-job-worker.sh" --lane "$FM_REMOTE_JOB_ID"
+  fi
+  assert_grep "hc_socket=$ACCOUNT_HOME/.local/state/herdr-core/fm-remote/fm-remote.sock" \
+    "$FM_REMOTE_JOB_JOBS/$FM_REMOTE_JOB_ID/stdout" 'worker hc endpoint differs with XDG runtime'
+  [ "$(fm_remote_job_read_single_line "$FM_REMOTE_JOB_JOBS/$FM_REMOTE_JOB_ID/exit" 64)" = 0 ] \
+    || fail 'hc endpoint probe failed'
+  fm_remote_job_reap "$ACCOUNT_HOME" "$FM_REMOTE_JOB_ID" || fail 'could not reap hc endpoint probe'
+done
+pass 'worker hc adapter pins the same endpoint with and without XDG runtime'
+
 # ps lstart follows the caller's locale (de_DE renders "Fr. 16 Okt. ..."),
 # while lock and claim ownership records are written by one process and
 # verified by others, including SSH callers with no locale. A recorded live
@@ -359,6 +395,8 @@ OUT=$(<"$FM_REMOTE_JOB_STDOUT")
 assert_contains "$OUT" "home=$REMOTE_HOME" "the worker did not pass the staged FM_HOME"
 assert_contains "$OUT" "root=$REMOTE_ROOT" "the worker did not pass the configured root"
 assert_contains "$OUT" 'active=1' "the target did not execute inside the worker environment"
+assert_contains "$OUT" "socket=$ACCOUNT_HOME/.local/state/herdr-core/fm-remote/fm-remote.sock" "the worker must pin the account hc endpoint"
+assert_contains "$OUT" "hc_socket=$ACCOUNT_HOME/.local/state/herdr-core/fm-remote/fm-remote.sock" "the hc adapter must pass the worker's pin to hc"
 # shellcheck disable=SC2016 # Literal shell-looking expected output is an injection probe.
 assert_contains "$OUT" 'args: <two words> <$(not executed)>' "the worker changed argv boundaries"
 assert_contains "$OUT" 'stdin=first line' "the worker lost staged stdin"
