@@ -3821,7 +3821,7 @@ Real Herdr.app exercise on 2026-11-02: the official herdr-app 0.1.11 bundle (sha
 
 `bin/fm-supervisor-target-lib.sh` now resolves `$HC_TERMINAL_ID`+`$HC_TERMINAL_SOCKET` to `<session>:<address>`/`hc`, and `bin/fm-supervise-daemon.sh` supports `tmux herdr rex hc t3code`.
 Away mode on hc starts its daemon in a hidden labeled terminal of the captain's core (`bin/fm-afk-launch.sh`; `tests/fm-afk-launch.test.sh` covers it with a fake core and an owned lab core).
-On 2026-11-17 with hc 0.1.14, the real daemon delivered one escalation digest, and for a Claude primary one record-backed doorbell, into an hc terminal running the composer stub from `tests/fm-afk-inject-e2e.test.sh`.
+On 2026-11-16 with hc 0.1.14, a lab run of scenarios C and D of `tests/fm-afk-inject-e2e.test.sh`, adapted from tmux to an owned hc core (the adapted script is not tracked), showed the real daemon delivering one escalation digest, and for a Claude primary one record-backed doorbell, into an hc terminal running that test's composer stub.
 Away-mode injection into a real Claude Code composer on hc is recorded under [Away-mode supervisor](#away-mode-supervisor); a Claude Code supervisor inside the Herdr app is not verified.
 
 ### Local fleet evidence on hc 0.1.21
