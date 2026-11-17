@@ -817,6 +817,8 @@ fm_afk_launch_create_hc() {  # <captain-target> <captain-backend>
   fi
   session=$FM_BACKEND_HC_SESSION
   fm_backend_hc_version_check || { fm_afk_launch_log "herdr-core is unavailable or older than the verified minimum"; return 1; }
+  # Without jq a created terminal could be neither addressed nor reclaimed.
+  jq -n true >/dev/null 2>&1 || { fm_afk_launch_log "jq is required to read hc output; no daemon terminal was created"; return 1; }
   label=${FM_AFK_LAUNCH_LABEL:-"$FM_AFK_LAUNCH_WS_LABEL-$$-${RANDOM:-0}-$(date '+%s')"}
   if ! fm_backend_hc_atom_valid "$label"; then
     fm_afk_launch_log "invalid hc daemon label '$label'"

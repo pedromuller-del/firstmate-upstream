@@ -2019,6 +2019,28 @@ unit_hc_failed_create_reclaims_its_labeled_terminal() {
   done
 }
 
+# A host whose jq cannot run could neither address nor reclaim a created
+# terminal, so the launcher must refuse before asking the core to create one.
+unit_hc_missing_jq_refuses_before_create() {
+  local st dir rc
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-nojq.XXXXXX")
+  dir="$st/fake"
+  hc_fake_install "$dir"
+  enter_posture "$st" || fail "hc no-jq: could not enter fixture posture"
+  mkdir -p "$st/nojq"
+  printf '#!/bin/sh\nexit 127\n' > "$st/nojq/jq"
+  chmod +x "$st/nojq/jq"
+  PATH="$st/nojq:$PATH" hc_launch "$st" "$dir" start > "$st/out" 2>&1
+  rc=$?
+  if [ "$rc" -ne 0 ] && ! grep -q '^run' "$dir/calls" && [ ! -e "$dir/terms/t5" ] \
+    && [ ! -e "$st/state/.afk-daemon-terminal" ] && grep -q 'jq is required' "$st/out"; then
+    pass "hc start (no jq): refuses before creating a daemon terminal"
+  else
+    fail "hc no-jq: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls" 2>/dev/null)"
+  fi
+  rm -rf "$st"
+}
+
 # ---------------------------------------------------------------------------
 # E2E hc: the same topology invariant on an owned fm-hclab core session. The
 # daemon terminal joins the captain's core but carries no herdr.space label, so
@@ -2318,6 +2340,7 @@ unit_hc_malformed_record_fails_closed
 unit_hc_close_refuses_a_foreign_terminal
 unit_hc_unreadable_core_keeps_the_record
 unit_hc_failed_create_reclaims_its_labeled_terminal
+unit_hc_missing_jq_refuses_before_create
 e2e_herdr
 e2e_tmux
 e2e_rex
