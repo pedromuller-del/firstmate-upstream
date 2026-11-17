@@ -1717,15 +1717,18 @@ unit_clear_failure_aborts_entry() {
   st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-clear-fail.XXXXXX")
   mkdir -p "$st/state"
   : > "$st/state/.subsuper-escalations"
+  # A flag standing with no live daemon is an orphan; the rollback must not put it back.
+  printf 'away\n1\n' > "$st/state/.afk"
   if FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" bash -c '
     . "$1"
+    fm_afk_launch_record_require() { return 0; }
     fm_afk_launch_reconcile() { return 0; }
     fm_afk_clear_stale_artifacts() { return 1; }
     ! fm_afk_launch_start_native
   ' _ "$LAUNCH" && [ ! -e "$st/state/.afk" ] && [ -e "$st/state/.subsuper-escalations" ]; then
-    pass "clear failure: native entry aborts and restores prior state"
+    pass "clear failure: native entry aborts, restores prior artifacts, and drops an orphan state/.afk"
   else
-    fail "clear failure: native entry proceeded or lost prior state"
+    fail "clear failure: native entry proceeded, lost prior artifacts, or restored an orphan state/.afk"
   fi
   rm -rf "$st"
 }
@@ -1753,15 +1756,26 @@ unit_incomplete_restore_retains_backup() {
   st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-restore-fail.XXXXXX")
   mkdir -p "$st/state"
   backup=$(mktemp -d "$st/state/.afk-launch-backup.XXXXXX")
-  printf 'prior\n' > "$backup/.afk"
+  printf 'prior\n' > "$backup/.subsuper-escalations"
   if FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" bash -c '
     . "$1"
     cp() { return 1; }
-    ! fm_afk_launch_restore_backup "$2" 1
-  ' _ "$LAUNCH" "$backup" && [ -d "$backup" ] && [ -e "$backup/.afk" ]; then
+    ! fm_afk_launch_restore_backup "$2" 0
+  ' _ "$LAUNCH" "$backup" && [ -d "$backup" ] && [ -e "$backup/.subsuper-escalations" ]; then
     pass "rollback restore: incomplete restoration retains its recovery backup"
   else
     fail "rollback restore: incomplete restoration discarded its backup"
+  fi
+  backup=$(mktemp -d "$st/state/.afk-launch-backup.XXXXXX")
+  printf 'away\n1\n' > "$backup/.afk"
+  if FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" bash -c '
+    . "$1"
+    daemon_lock_held_by_live_daemon() { return 0; }
+    fm_afk_launch_restore_backup "$2" 1
+  ' _ "$LAUNCH" "$backup" && [ "$(head -n 1 "$st/state/.afk" 2>/dev/null)" = away ]; then
+    pass "rollback restore: a prior state/.afk returns while a live daemon owns it"
+  else
+    fail "rollback restore: a live daemon's prior state/.afk was not restored"
   fi
   rm -rf "$st"
 }

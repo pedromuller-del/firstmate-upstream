@@ -638,7 +638,9 @@ fm_afk_launch_restore_backup() {  # <backup> <had-afk>
     "$FM_AFK_LAUNCH_STATE"/.subsuper-dialog-* \
     "$FM_AFK_LAUNCH_STATE"/.subsuper-paused-* \
     "$FM_AFK_LAUNCH_STATE"/.subsuper-pause-until-due-* || result=1
-  if [ "$had_afk" -eq 1 ]; then
+  # A prior flag with no live daemon behind it was already an orphan: putting
+  # it back would leave the watcher one-shot with nothing supervising.
+  if [ "$had_afk" -eq 1 ] && daemon_lock_held_by_live_daemon; then
     cp "$backup/.afk" "$FM_AFK_LAUNCH_STATE/.afk" || result=1
   fi
   for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$backup"/.subsuper-stale-* "$backup"/.subsuper-reported-stale-* "$backup"/.subsuper-dialog-* "$backup"/.subsuper-paused-* "$backup"/.subsuper-pause-until-due-*; do
