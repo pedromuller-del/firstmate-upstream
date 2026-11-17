@@ -3785,7 +3785,7 @@ Real Herdr.app exercise on 2026-11-02: the official herdr-app 0.1.11 bundle (sha
 | Marker-less process with no `herdr-app.sock` at all | Undetected, resolving `tmux`. |
 | Real `default` core file-meta before/after | Byte-identical - the lab never drove the shared core. |
 
-`bin/fm-supervisor-target-lib.sh` now resolves `$HC_TERMINAL_ID`+`$HC_TERMINAL_SOCKET` to `<session>:<address>`/`hc`; `bin/fm-supervise-daemon.sh` still supports only `tmux herdr rex t3code` and refuses the resolved backend loudly.
+`bin/fm-supervisor-target-lib.sh` now resolves `$HC_TERMINAL_ID`+`$HC_TERMINAL_SOCKET` to `<session>:<address>`/`hc`, and `bin/fm-supervise-daemon.sh` supports `tmux herdr rex hc t3code`.
 
 ### Not verified
 

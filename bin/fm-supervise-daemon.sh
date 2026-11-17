@@ -86,15 +86,16 @@
 #                                   $REX_SESSION/$REX_BLOCK under rex, or the
 #                                   home's one live T3 thread - then firstmate:0
 #                                   fallback). Accepts a tmux target, a herdr
-#                                   "<session>:<pane-id>", a rex target, or a T3
-#                                   thread id; which one it's read as is decided
-#                                   by FM_SUPERVISOR_BACKEND (below),
-#                                   independently.
-#          FM_SUPERVISOR_BACKEND    supervisor endpoint BACKEND (tmux|herdr|rex|t3code;
+#                                   "<session>:<pane-id>", a rex target, an hc
+#                                   "<session>:<address>", or a T3 thread id;
+#                                   which one it's read as is decided by
+#                                   FM_SUPERVISOR_BACKEND (below), independently.
+#          FM_SUPERVISOR_BACKEND    supervisor endpoint BACKEND (tmux|herdr|rex|hc|t3code;
 #                                   override; otherwise resolved by
 #                                   bin/fm-supervisor-target-lib.sh - $TMUX_PANE
 #                                   selects tmux, $HERDR_ENV=1 selects herdr,
-#                                   TERM_PROGRAM=rex selects rex, then T3
+#                                   TERM_PROGRAM=rex selects rex, the hc
+#                                   terminal marker pair selects hc, then T3
 #                                   discovery behind its explicit-selection gate
 #                                   - falling back to tmux).
 #                                   zellij, orca, cmux, paseo, and tern are not yet
@@ -210,8 +211,9 @@ FM_HOME="${FM_HOME:-${FM_ROOT_OVERRIDE:-$FM_ROOT}}"
 . "$FM_DAEMON_DIR/fm-busy-lib.sh"
 
 # --- tunables ---------------------------------------------------------------
-# Supervisor backends this daemon knows how to inject into today. rex goes
-# through the same dispatcher primitives as herdr (bin/backends/rex.sh). zellij,
+# Supervisor backends this daemon knows how to inject into today. rex and hc go
+# through the same dispatcher primitives as herdr (bin/backends/rex.sh,
+# bin/backends/hc.sh). zellij,
 # orca, cmux, paseo, and tern are real backends elsewhere in firstmate
 # (bin/fm-backend.sh) but this daemon has no verified composer/busy primitives
 # wired up for them yet - see docs/herdr-backend.md and AGENTS.md section 4's
@@ -219,7 +221,7 @@ FM_HOME="${FM_HOME:-${FM_ROOT_OVERRIDE:-$FM_ROOT}}"
 # instead of silently running tmux primitives against a pane that is not a tmux
 # pane. t3code injects through the adapter's t3_thread_send, with its
 # thread status table as the busy verdict.
-FM_SUPERVISOR_SUPPORTED_BACKENDS="tmux herdr rex t3code"
+FM_SUPERVISOR_SUPPORTED_BACKENDS="tmux herdr rex hc t3code"
 INJECT_SKIP_DEFAULT="heartbeat"
 STALE_ESCALATE_SECS_DEFAULT=240
 ESCALATE_BATCH_SECS_DEFAULT=90
@@ -2108,10 +2110,10 @@ fm_super_main() {
     log "warn: could not record this daemon's process identity; the turn-end guard cannot recognize away-mode supervision"
   fi
 
-  # --- auto-discover the supervisor BACKEND (tmux, herdr, or t3code) first --
+  # --- auto-discover the supervisor BACKEND (tmux, herdr, rex, hc, or t3code) first --
   # Priority: FM_SUPERVISOR_BACKEND override > $TMUX_PANE (tmux) > $HERDR_ENV=1
-  # (herdr) > TERM_PROGRAM=rex (rex) > a live T3 thread in this home (t3code) >
-  # tmux fallback. Resolved before the target below, since target discovery
+  # (herdr) > TERM_PROGRAM=rex (rex) > the hc terminal marker pair (hc) > a live
+  # T3 thread in this home (t3code) > tmux fallback. Resolved before the target below, since target discovery
   # composes a herdr "<session>:<pane-id>" string using the same
   # $HERDR_PANE_ID/$HERDR_SESSION markers this checks. Exporting the result
   # into FM_SUPERVISOR_BACKEND makes inject_msg/pane_is_busy/pane_input_pending
@@ -2127,6 +2129,8 @@ fm_super_main() {
       backend_source="HERDR_ENV"
     elif fm_supervisor_in_rex; then
       backend_source="TERM_PROGRAM"
+    elif [ "$discovered_backend" = hc ]; then
+      backend_source="HC_TERMINAL_ID"
     elif [ "$discovered_backend" = t3code ]; then
       backend_source="T3_THREAD"
     else
@@ -2143,7 +2147,7 @@ fm_super_main() {
   # refusal the task calls for, instead of a confusing "does not resolve to a
   # tmux pane" error.
   if ! fm_backend_list_contains "$FM_SUPERVISOR_SUPPORTED_BACKENDS" "$BACKEND"; then
-    echo "error: away-mode daemon does not support supervisor backend '$BACKEND' yet (supported: $FM_SUPERVISOR_SUPPORTED_BACKENDS); set FM_SUPERVISOR_BACKEND=tmux|herdr|rex|t3code and FM_SUPERVISOR_TARGET to run firstmate's own pane under a supported backend" >&2
+    echo "error: away-mode daemon does not support supervisor backend '$BACKEND' yet (supported: $FM_SUPERVISOR_SUPPORTED_BACKENDS); set FM_SUPERVISOR_BACKEND=tmux|herdr|rex|hc|t3code and FM_SUPERVISOR_TARGET to run firstmate's own pane under a supported backend" >&2
     log "startup failed: unsupported supervisor backend '$BACKEND' (source=$backend_source)"
     fm_lock_release "$LOCK" 2>/dev/null || true
     rm -f "$PIDFILE" 2>/dev/null || true
@@ -2168,6 +2172,8 @@ fm_super_main() {
       target_source="HERDR_ENV(HERDR_PANE_ID)"
     elif fm_supervisor_in_rex; then
       target_source="TERM_PROGRAM(REX_BLOCK)"
+    elif [ -n "${HC_TERMINAL_ID:-}" ] && [ -n "${HC_TERMINAL_SOCKET:-}" ]; then
+      target_source="HC_TERMINAL_ID"
     elif [ "$resolved" = 1 ]; then
       target_source="T3_THREAD"
     else

@@ -92,6 +92,26 @@ test_afk_start_refuses_tern_supervisor_backend() {
   pass "fm-afk-start.sh refuses tern as an away-mode supervisor backend (unsupported; documented in docs/tern-backend.md)"
 }
 
+test_afk_start_accepts_hc_supervisor_backend() {
+  local dir state out status
+  dir=$(make_supercase afk-start-hc-supported)
+  state="$dir/state"
+  # A fake core that knows no terminal: startup passes the backend gate and
+  # stops at the target check, so no daemon loop runs.
+  # shellcheck disable=SC2016 # The fake script reads its own argument.
+  printf '#!/bin/sh\ncase "$1" in --version) echo "hc 0.1.14" ;; get) exit 3 ;; *) exit 88 ;; esac\n' > "$dir/hc"
+  chmod +x "$dir/hc"
+
+  out=$(FM_STATE_OVERRIDE="$state" FM_HC_BIN="$dir/hc" FM_HC_SOCKET="$dir/core.sock" \
+    FM_SUPERVISOR_BACKEND=hc FM_SUPERVISOR_TARGET=fakeses:t9 "$AFK_START" 2>&1)
+  status=$?
+
+  [ "$status" -ne 0 ] || fail "fm-afk-start.sh should stop at the missing fake hc terminal"
+  assert_not_contains "$out" "does not support supervisor backend 'hc'" "away mode refused hc as a supervisor backend"
+  assert_contains "$out" "supervisor target 'fakeses:t9' does not resolve to a hc pane" "hc startup did not reach the hc target check"
+  pass "fm-afk-start.sh accepts hc as an away-mode supervisor backend and checks the hc target"
+}
+
 test_afk_start_reclaims_stale_daemon_lock_reused_pid() {
   local dir state out status lock
   dir=$(make_supercase afk-start-stale-lock-reused-pid)
@@ -3578,14 +3598,13 @@ test_discover_supervisor_hc() {
     HC_TERMINAL_ID=t9 HC_TERMINAL_SOCKET=/tmp/fm-test.sock discover_supervisor_backend)
   [ "$out" = herdr ] || fail "herdr markers nested in an hc terminal must keep herdr: $out"
 
-  # The resolution is deliberately fail-closed: the away daemon's supported
-  # list does not name hc, so it refuses at startup with the supported set
-  # rather than silently steering the tmux fallback.
-  if fm_backend_list_contains "$FM_SUPERVISOR_SUPPORTED_BACKENDS" hc; then
-    fail "the away daemon must not list hc as a supported supervisor backend"
+  # The away daemon injects into the resolved hc terminal through the hc
+  # adapter's busy, composer, and submit primitives.
+  if ! fm_backend_list_contains "$FM_SUPERVISOR_SUPPORTED_BACKENDS" hc; then
+    fail "the away daemon must list hc as a supported supervisor backend"
   fi
 
-  pass "discover_supervisor_{target,backend}: hc markers resolve <session>:<address> + hc; bare id, nested tmux/herdr keep their verdicts; supported list stays closed to hc"
+  pass "discover_supervisor_{target,backend}: hc markers resolve <session>:<address> + hc; bare id, nested tmux/herdr keep their verdicts; the daemon supports hc"
 }
 
 # --- t3code supervisor discovery and busy verdict --------------------------
@@ -3876,6 +3895,7 @@ fi
 test_afk_start_refuses_when_flag_cannot_be_written
 test_afk_start_ignores_stale_pidfile_without_lock
 test_afk_start_refuses_tern_supervisor_backend
+test_afk_start_accepts_hc_supervisor_backend
 test_afk_start_reclaims_stale_daemon_lock_reused_pid
 test_daemon_state_root_uses_fm_home
 test_classify_routine_signal_self
@@ -4151,3 +4171,65 @@ test_dialog_name_survives_away_self_handle
 test_seen_terminal_dialog_stale_clears_like_a_plain_stale
 test_dialog_name_joins_unseen_status_escalation
 test_dialog_name_after_demand_deep_inspection_still_escalates
+
+# The hc delivery chain through the real adapter, with only the hc binary
+# faked: native `working` defers, text the plain read cannot prove is a
+# suggestion defers, a bare shell prompt defers, and an idle Claude composer
+# gets exactly one `hc send --wait` whose native turn start confirms delivery.
+test_inject_msg_hc_guards_and_submit_through_adapter() {
+  local dir state nbsp rule idle case status screen rc sent
+  dir=$(make_supercase inject-hc-adapter)
+  state="$dir/state"
+  afk_enter "$state"
+  cat > "$dir/hc" <<'SH'
+#!/bin/sh
+D=$(dirname "$0")
+case "$1" in
+  --version) echo "hc 0.1.14" ;;
+  get) cat "$D/hc-get.json" ;;
+  read) cat "$D/hc-screen.txt" ;;
+  send) printf '%s\n' "$*" >> "$D/hc-sent.log"; echo '{"started":true,"wait":{"status":"working"}}' ;;
+  *) echo '{}' ;;
+esac
+SH
+  chmod +x "$dir/hc"
+  nbsp=$(printf '\302\240')
+  rule='────────────────────────'
+  idle="transcript"$'\n'"$rule"$'\n'"❯$nbsp"$'\n'"$rule"
+  for case in busy typed shell idle; do
+    : > "$dir/hc-sent.log"
+    status=idle
+    screen=$idle
+    case "$case" in
+      busy) status=working ;;
+      typed) screen="transcript"$'\n'"$rule"$'\n'"❯ fix the login bug"$'\n'"$rule" ;;
+      shell) screen='user@host:~$ ' ;;
+    esac
+    printf '{"state":"live","status":{"state":"%s"},"labels":{}}\n' "$status" > "$dir/hc-get.json"
+    printf '%s\n' "$screen" > "$dir/hc-screen.txt"
+    rc=0
+    FM_HC_BIN="$dir/hc" FM_HC_SOCKET="$dir/core.sock" FM_SUPERVISOR_BACKEND=hc \
+      FM_SUPERVISOR_TARGET=lab:t9 inject_msg "hello hc" "$state" || rc=$?
+    sent=$(wc -l < "$dir/hc-sent.log" | tr -d ' ')
+    case "$case" in
+      busy)
+        [ "$rc" -ne 0 ] && [ "$sent" = 0 ] || fail "hc: a working supervisor was typed into (rc=$rc sent=$sent)"
+        assert_contains "$INJECT_LAST_FAILURE" "supervisor pane busy" "hc: the native busy deferral was not named"
+        ;;
+      typed|shell)
+        [ "$rc" -ne 0 ] && [ "$sent" = 0 ] || fail "hc: a $case composer was typed into (rc=$rc sent=$sent)"
+        assert_contains "$INJECT_LAST_FAILURE" "state=unknown" "hc: the $case composer was not deferred as unproven"
+        ;;
+      idle)
+        [ "$rc" -eq 0 ] && [ "$sent" = 1 ] || fail "hc: an idle Claude composer did not get one confirmed send (rc=$rc sent=$sent)"
+        assert_contains "$(cat "$dir/hc-sent.log")" "--wait" "hc: delivery did not wait for the native turn start"
+        sed 's/.* -- //' "$dir/hc-sent.log" > "$dir/hc-typed.log"
+        delivered_digest "$dir/hc-typed.log" | grep -F 'hello hc' >/dev/null \
+          || fail "hc: the delivered doorbell's record does not hold the digest: $(cat "$dir/hc-sent.log")"
+        ;;
+    esac
+  done
+  pass "inject_msg on hc: busy, unproven text and a shell defer untyped; an idle composer gets one confirmed send"
+}
+
+test_inject_msg_hc_guards_and_submit_through_adapter
