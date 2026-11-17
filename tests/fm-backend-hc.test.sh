@@ -419,6 +419,28 @@ test_composer_state_reads_ghost_text_from_the_attach_paint() {
   pass "hc: the composer read takes Claude's dim suggestion from the attach paint and falls back to the plain read"
 }
 
+# A Claude drawn on the alternate screen (a real macOS paint, hc 0.1.21, its
+# transcript rows blanked) is painted after the main screen and that screen's
+# own cursor placement; only the alternate screen's rows are visible.
+test_composer_state_reads_ghost_text_on_the_alternate_screen() {
+  local tag out fixture
+  setup_case composer-styled-alt
+  tag=$(hometag_of)
+  write_terminal "$D" t1 live fm-a1 "$tag" claude /usr/bin/claude
+  fixture="$FM_TEST_ROOT/tests/fixtures/claude-2.1.321-hc-0.1.21-macos/try-placeholder-alt-screen"
+  cp "$fixture.read" "$D/read.txt"
+  cp "$fixture.paint" "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" empty "Claude's dim Try placeholder on the alternate screen must read empty"
+  LC_ALL=C sed $'s/\e\\[2m//g' "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" pending "the same placeholder text without the dim on the alternate screen is typed text"
+  head -c 700 "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "a paint cut before the alternate screen's rows must fall back to the plain read"
+  pass "hc: the composer read takes the alternate screen's rows from a paint that also carries the main screen"
+}
+
 # Pi's composer is blank or typed rows between two solid rules (hc 0.1.14, pi
 # 1.5.0, proof/pi-hc-composer-probe-18ee7a94.log); only a live idle Pi proves it empty.
 pi_screen() {  # <file> <composer-row> [busy-row]
@@ -518,5 +540,6 @@ fm_test_run \
   test_container_ensure_gates_binary_version_and_generation \
   test_send_text_submit_confirms_through_send_wait \
   test_composer_state_reads_ghost_text_from_the_attach_paint \
+  test_composer_state_reads_ghost_text_on_the_alternate_screen \
   test_pi_composer_is_proven_by_its_foreground_and_status \
   test_send_delimiters_and_binary_socket_pins

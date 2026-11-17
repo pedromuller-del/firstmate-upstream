@@ -3741,6 +3741,12 @@ Claude Code reports native status through hc: `idle` at start, `working` mid-tur
 Claude draws both the fresh `Try "..."` placeholder and the post-turn suggestion with SGR 2 (dim), which only the attach paint carries.
 The paint arrived within 0.15 seconds; `hc attach --observe` left the terminal size unchanged, and the bounded read left no attach process under the `timeout`, perl, and bash timeout mechanisms.
 `tests/fm-backend-hc-liveness-live-e2e.test.sh` refreshes the idle-Claude part of this record: an idle Claude must read `empty` through the styled paint.
+
+On 2026-11-17 on macOS 27.2.1 arm64 with hc 0.1.21, Claude Code 2.1.321 drew its idle composer and dim `Try "..."` placeholder on the alternate screen (`ESC[?1049h`), under both bash 3.2.57 and bash 5.3.15.
+hc 0.1.21 paints a terminal on its alternate screen in two parts: the main screen with its own cursor placement, then the switch to the alternate screen, its rows, and the real cursor placement; hc 0.1.14 switches first and never paints the main screen.
+Reading only up to the first placement took the empty main screen, so the styled read failed and the composer read `unknown`; the read now takes the rows after the switch.
+In owned Linux lab cores, a program that writes to the main screen and then draws a dim composer on the alternate screen reads `empty` (and `pending` without the dim) on hc 0.1.14 and 0.1.21; before the change, hc 0.1.21 read `unknown`.
+`tests/fm-backend-hc.test.sh` pins this with the real macOS paint in `tests/fixtures/claude-2.1.321-hc-0.1.21-macos/`, whose transcript rows are blanked.
 A Claude Code supervisor inside the Herdr app is not verified.
 
 ### Spawn, steer, peek, and teardown

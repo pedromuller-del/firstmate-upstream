@@ -342,17 +342,22 @@ fm_backend_hc_visible_capture() {  # <target> [expected-label]
 # `hc read` never carries. It takes the first paint of a watch-only
 # `hc attach --observe` (it never types or resizes): the rows after the
 # paint's last cursor home and before its cursor placement, kept to SGR
-# styling. The attach never ends by itself, so it is bounded. The paint is
-# used only when its text equals `hc read` of the screen just before the
-# attach (or, when the screen moved, just after it), so a cut-short, changed,
-# or misparsed paint fails and the caller reads the plain screen.
-# Verified on hc 0.1.14 with Claude Code 2.1.321.
+# styling. A terminal on its alternate screen is painted twice: the main
+# screen with its own cursor placement, then the switch to the alternate
+# screen, whose rows are the visible ones. The attach never ends by itself,
+# so it is bounded. The paint is used only when its text equals `hc read` of
+# the screen just before the attach (or, when the screen moved, just after
+# it), so a cut-short, changed, or misparsed paint fails and the caller reads
+# the plain screen.
+# Verified with Claude Code 2.1.321 on hc 0.1.14 and 0.1.21, including its
+# alternate screen on 0.1.21.
 fm_backend_hc_visible_capture_ansi() {  # <target> [expected-label]
-  local raw body screen text plain home=$'\e[H' placement_re=$'\e\\[[0-9]+(;[0-9]+)?H'
+  local raw body screen text plain home=$'\e[H' alt=$'\e[?1049h' placement_re=$'\e\\[[0-9]+(;[0-9]+)?H'
   fm_backend_hc_target_ready "$1" "${2:-}" || return 1
   plain=$(fm_backend_hc_visible_capture "$1" "${2:-}") || return 1
   raw=$(fm_backend_hc_env_run --bound 1 "$FM_BACKEND_HC_SESSION" attach --observe \
     "$FM_BACKEND_HC_ADDRESS" </dev/null 2>/dev/null) || true
+  case "$raw" in *"$alt"*) raw=${raw#*"$alt"} ;; esac
   [[ $raw =~ $placement_re ]] || return 1
   body=${raw%%"${BASH_REMATCH[0]}"*}
   case "$body" in *"$home"*) ;; *) return 1 ;; esac

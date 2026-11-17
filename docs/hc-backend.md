@@ -145,7 +145,7 @@ An input, capture, or close that carries the task label refuses a terminal whose
 | Create task | `hc run --bg --no-parent --outlive-parent --no-notify --cwd <project> --label ...` |
 | Capture | `hc read --lines <n>` |
 | Visible capture | `hc read --lines 0` |
-| Composer state | The first paint of a watch-only `hc attach --observe`, bounded to one second and kept only when its text equals `hc read`; otherwise the plain screen |
+| Composer state | The first paint of a watch-only `hc attach --observe` (the alternate screen's rows when the terminal is on it), bounded to one second and kept only when its text equals `hc read`; otherwise the plain screen |
 | Send a line and submit | `hc send` |
 | Submit with confirmation | `hc send --wait`; see submit safety under Limits |
 | Named key | `hc keys` |
