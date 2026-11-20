@@ -32,7 +32,8 @@ It stops at the finding, routes the decision to firstmate, and applies only the 
    - a product or architecture call not settled by accepted intent
    - repeated same-theme findings when incremental corrections are preserving a questionable abstraction rather than closing independent defects
    - destructive, irreversible, and genuinely security-sensitive choices, which always escalate under the stronger existing captain boundary
-5. Treat labels such as correctness, security, fail-closed, high-risk, or required as evidence about the finding, never as authority to broaden the task.
+5. A task whose captain hold reason starts with `Refine later` (a Focus pin) escalates every finding, even an unambiguous one; firstmate decides nothing on it and relays only the captain's own words, through `fm-send --captain-word`.
+6. Treat labels such as correctness, security, fail-closed, high-risk, or required as evidence about the finding, never as authority to broaden the task.
 
 ## Captain-facing escalation
 

@@ -1003,6 +1003,38 @@ second line"
   pass "fm-send --resolve-key: an unresolvable key refuses without swallowing the message"
 }
 
+# A "Refine later" pin is a captain hold on the task's own backlog item. While it
+# is active an answer without --captain-word refuses before anything is sent, and
+# a relayed captain answer closes the key with a close note that says so.
+test_refine_later_pin_requires_captain_word() {
+  local dir fb log home err
+  dir="$TMP_ROOT/pinned"; mkdir -p "$dir"
+  fb=$(make_stubs "$dir"); log="$dir/send.log"; err="$dir/send.err"
+  home=$(setup_home pinned)
+  mkdir -p "$home/data"
+  fm_write_meta "$home/state/t15.meta" "window=sess:fm-t15" "kind=ship"
+  printf 'needs-decision [key=shape]: 404 or empty list\n' > "$home/state/t15.status"
+  FM_HOME="$home" "$ROOT/bin/fm-tasks-axi.sh" add t15 "pinned work" --kind ship >/dev/null 2>&1 \
+    || fail "could not add the pinned task"
+  FM_HOME="$home" "$ROOT/bin/fm-captain-hold.sh" hold t15 --reason "Refine later: pinned in Focus" >/dev/null 2>&1 \
+    || fail "could not pin the task"
+
+  : > "$log"
+  env PATH="$fb:$PATH" FM_ROOT_OVERRIDE="$home" FM_HOME="$home" FM_SEND_LOG="$log" FM_SEND_SETTLE=0 \
+    "$SEND" t15 --resolve-key shape "404" >/dev/null 2>"$err" \
+    && fail "an answer without --captain-word closed a pinned task's decision"
+  assert_contains "$(cat "$err")" "pinned 'Refine later'" "the refusal must name the pin"
+  [ ! -d "$home/state/t15.inbox" ] || fail "a refused answer still enqueued an inbox record"
+  grep -F 'resolved' "$home/state/t15.status" >/dev/null && fail "a refused answer closed the key"
+
+  run_send "$fb" "$home" "$log" t15 --resolve-key shape --captain-word "empty list" \
+    || fail "a relayed captain answer to a pinned task refused"
+  assert_contains "$(tail -n 1 "$home/state/t15.status")" "resolved [key=shape]" "the captain answer must close the key"
+  assert_contains "$(tail -n 1 "$home/state/t15.status")" "answered (captain word): empty list" \
+    "the close note must record that the captain decided"
+  pass "fm-send --resolve-key: a Refine-later pin needs --captain-word, and the close records it"
+}
+
 # An empty status open set is not an empty task. fm-captain-hold's `complete`
 # transfers a decision to a durable captain-held task and writes the
 # "captain-held [key=k]" line that the fold drops, so the status log folds to
@@ -1198,3 +1230,4 @@ test_stamped_close_line_stays_within_the_status_line_cap
 test_failed_close_recovery_command_is_shell_safe
 test_remote_reserved_pending_reply_key_closes_locally
 test_decision_answer_partition_relocates_under_the_record
+test_refine_later_pin_requires_captain_word

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Steer a task by durable record: write the message into the task's steering
 # inbox and ring a constant doorbell through its backend endpoint, best-effort.
-# Usage: fm-send.sh <target> [--resolve-key <key>]... [--fire-and-forget <delivery-id>] <text...>
+# Usage: fm-send.sh <target> [--resolve-key <key>]... [--captain-word] [--fire-and-forget <delivery-id>] <text...>
 #   <target> may be an exact task id, a legacy fm-<id> task label resolved
 #   through this home's state/<id>.meta, or an explicit well-formed backend
 #   target. fm-send refuses unresolved guesses rather than falling back to a
@@ -193,6 +193,11 @@
 # open-decision ledger fm-wake-drain folds lives in this home's own state dir
 # (a remote mate's escalations reach it through the parent-replies ingest);
 # only the answer message crosses the backend or remote transport.
+# A task whose captain hold reason starts with "Refine later" (a Focus pin) is
+# the captain's to decide: --resolve-key on it refuses before sending unless
+# --captain-word marks the answer as the captain's own relayed words, and the
+# close note then reads "answered (captain word): <excerpt>". The mark is a
+# record the sender sets, not proof of who answered.
 #
 # Answering a decision is the gate-answer path and is main-owned while
 # attended: when any named key is an open needs-decision or a captain-held task
@@ -517,6 +522,7 @@ fi
 # message exactly as before, so ordinary sends are byte-identical.
 RESOLVE_KEYS=
 FIRE_AND_FORGET_ID=
+CAPTAIN_WORD=
 fm_send_add_resolve_key() { # <key>
   local k=$1
   case "$k" in
@@ -565,6 +571,10 @@ while :; do
       exit 1
     }
     FIRE_AND_FORGET_ID=${1#--fire-and-forget=}
+    shift
+    ;;
+  --captain-word)
+    CAPTAIN_WORD=1
     shift
     ;;
   *) break ;;
@@ -688,7 +698,17 @@ fm_send_resolve_close_note() { # <key> <excerpt>
     printf '%s' "$owned"
     return 0
   fi
-  printf 'answered: %s' "$excerpt"
+  printf 'answered%s: %s' "${CAPTAIN_WORD:+ (captain word)}" "$excerpt"
+}
+
+# A "Refine later" pin is a captain hold on the task's own backlog item; while it
+# is active only the captain's relayed words may close that task's decisions.
+fm_send_refine_pinned() { # <task-id>
+  local show
+  show=$(FM_HOME="$FM_HOME" FM_DATA_OVERRIDE='' "$SCRIPT_DIR/fm-tasks-axi.sh" show "$1" --full 2>/dev/null) || return 1
+  printf '%s\n' "$show" | grep -q '^  state: done$' && return 1
+  printf '%s\n' "$show" | grep -q '^  hold_kind: captain$' || return 1
+  printf '%s\n' "$show" | grep -q '^  hold_reason: "\{0,1\}Refine later'
 }
 
 if [ -n "$FIRE_AND_FORGET_ID" ]; then
@@ -723,6 +743,10 @@ if [ -n "$RESOLVE_KEYS" ]; then
     exit 1
   fi
   RESOLVE_TASK_ID=$(fm_send_id_from_meta "$TARGET_META")
+  if [ -z "$CAPTAIN_WORD" ] && fm_send_refine_pinned "$RESOLVE_TASK_ID"; then
+    echo "error: $RESOLVE_TASK_ID is pinned 'Refine later' by the captain: relay only the captain's own answer, with --captain-word; nothing was sent." >&2
+    exit 1
+  fi
   RESOLVE_STATUS_FILE="$STATE/$RESOLVE_TASK_ID.status"
   resolve_open_set=$(status_open_decisions "$RESOLVE_STATUS_FILE")
   resolve_resend_args=
