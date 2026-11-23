@@ -1,7 +1,7 @@
 # hc runtime backend
 
 hc is an experimental session-provider backend for herdr-core, the terminal core under Herdr.app.
-It provides task terminals while Treehouse continues to provide git worktrees, the same split tmux uses.
+It provides task terminals while Treehouse reserves the task worktrees with durable leases.
 herdr-core is not Herdr 1: the `herdr` backend ([`herdr-backend.md`](herdr-backend.md)) talks to the `herdr` multiplexer, and the two share no socket, id space, or CLI.
 [`configuration.md`](configuration.md#runtime-backend-configbackend--fm_backend) owns shared selection and metadata semantics.
 This page owns operator setup and supported limits; the adapter header in `bin/backends/hc.sh` explains implementation decisions.
@@ -112,7 +112,11 @@ These machine options are documented by `hc machine add --help`; the installed H
 
 ## Task shape and metadata
 
-Each task is one hc terminal running the user's login shell in the project directory, started with `--no-parent --outlive-parent --no-notify` so it is independent of whichever hc terminal Firstmate itself runs in.
+Each task is one hc terminal running the user's login shell, started with `--no-parent --outlive-parent --no-notify` so it is independent of whichever hc terminal Firstmate itself runs in.
+For a new worker, Firstmate leases a Treehouse copy before opening the terminal, then opens it directly in that copy.
+If the pool is full, the Treehouse refusal is reported without opening a terminal.
+The lease does not depend on a shell staying alive.
+A secondmate opens directly in its provisioned home, with no pool allocation.
 The terminal carries these labels:
 
 | Label | Value | Purpose |
@@ -142,7 +146,7 @@ An input, capture, or close that carries the task label refuses a terminal whose
 | Operation | hc command |
 | --- | --- |
 | Container ensure | `hc server status` plus the `hello` generation handshake over `hc connect` |
-| Create task | `hc run --bg --no-parent --outlive-parent --no-notify --cwd <project> --label ...` |
+| Create task | `hc run --bg --no-parent --outlive-parent --no-notify --cwd <task-directory> --label ...` |
 | Capture | `hc read --lines <n>` |
 | Visible capture | `hc read --lines 0` |
 | Composer state | The first paint of a watch-only `hc attach --observe` (the alternate screen's rows when the terminal is on it), bounded to one second and kept only when its text equals `hc read`; otherwise the plain screen |
@@ -156,6 +160,10 @@ An input, capture, or close that carries the task label refuses a terminal whose
 
 ## Limits
 
+- If a fresh spawn fails before committing its task record, Firstmate closes the terminal it created, using the task's identity labels.
+  It returns its clean lease on a pre-launch failure only when no terminal could still be using it.
+  If launch may have reached the worker, Firstmate keeps the lease for inspection rather than resetting possible work.
+- See [Transactional relaunch](agent-control.md#transactional-relaunch) for recovery into a recorded worktree.
 - `hc send` always presses Enter, so hc cannot type without submitting.
   `bin/fm-spawn.sh` pastes and submits the spawn launch line with `hc send` and consumes the Enter that follows it.
 - Submitting a message uses one bounded `hc send --wait`.

@@ -1748,6 +1748,8 @@ T3CODE_LAUNCH_UNCONFIRMED=0
 T3CODE_PROJECT_ID=
 T3CODE_MODEL_SELECTION=
 HERDR_LEASED=0
+HC_LEASED=0
+HC_FRESH_ABORT_TARGET=
 HC_REBIND_ABORT_TARGET=
 HERDR_PROJECTION_ABORT_CLEANUP=0
 HERDR_PROJECTION_ABORT_SESSION=
@@ -2029,14 +2031,35 @@ spawn_abort_cleanup() {
         || echo "warning: could not return the leased worktree $WT for $ID; run 'treehouse return --force $WT' from $PROJ_ABS" >&2
     fi
   fi
-  if [ "$SPAWN_TASK_LOCK_HELD" = 1 ]; then
-    SPAWN_TASK_LOCK_HELD=0
-    fm_lock_release "$SPAWN_TASK_LOCK" || true
-  fi
   if [ "$SPAWN_FRESH_COMMIT_PENDING" = 1 ]; then
     if ! spawn_fresh_commit_rollback; then
       status=1
     fi
+  fi
+  if [ "$status" -ne 0 ] && [ ! -e "$STATE/$ID.meta" ] && [ ! -L "$STATE/$ID.meta" ]; then
+    if [ -n "$HC_FRESH_ABORT_TARGET" ]; then
+      if fm_backend_hc_kill "$HC_FRESH_ABORT_TARGET" '' "fm-$ID"; then
+        SPAWN_ENDPOINT_CLOSED=1
+      else
+        echo "warning: could not close hc terminal $HC_FRESH_ABORT_TARGET for $ID; reconcile it before retrying" >&2
+      fi
+    fi
+    if [ "$HC_LEASED" = 1 ]; then
+      local hc_slot_status
+      # Do not reset a copy a worker might have written to, or release a
+      # lease while an unconfirmed terminal could still be using it.
+      if ! { [ "$SPAWN_LAUNCH_SENT" = 0 ] && [ "$SPAWN_TREEHOUSE_PROJECT_LOCK_HELD" = 1 ] &&
+        { [ "$SPAWN_ENDPOINT_CREATE_STARTED" = 0 ] || [ "$SPAWN_ENDPOINT_CLOSED" = 1 ]; } &&
+        hc_slot_status=$(git -C "$WT" status --porcelain --untracked-files=all 2>/dev/null) &&
+        [ -z "$hc_slot_status" ] &&
+        (cd "$PROJ_ABS" && treehouse return --force --if-lease-holder "$ID" "$WT") >/dev/null; }; then
+        echo "warning: the worktree $WT stays leased to $ID after the failed spawn; inspect it before returning it to the pool" >&2
+      fi
+    fi
+  fi
+  if [ "$SPAWN_TASK_LOCK_HELD" = 1 ]; then
+    SPAWN_TASK_LOCK_HELD=0
+    fm_lock_release "$SPAWN_TASK_LOCK" || true
   fi
   if [ "$SPAWN_META_LOCK_HELD" = 1 ]; then
     SPAWN_META_LOCK_HELD=0
@@ -5098,7 +5121,7 @@ if fm_backlog_transition_applies "$CONFIG" "$DATA" "$KIND"; then
       echo "error: spawn refused - the supervision branch under the away-posture record may dispatch only queued unblocked work (already queued, or filed by the branch from the captain's away words); task $ID has no dispatchable backlog item in this home" >&2
       exit 1
     fi
-  elif ! fm_backlog_row_dispatchable "$BACKLOG_ROW_STATE"; then
+  elif ! fm_backlog_row_dispatchable "$BACKLOG_ROW_STATE" "$RELAUNCH"; then
     echo "error: this home's backlog item $ID is not dispatchable in state $BACKLOG_ROW_STATE; refusing before creating its endpoint or local copy" >&2
     exit 1
   fi
@@ -5131,6 +5154,13 @@ if [ "$RELAUNCH" -eq 1 ]; then
   # uncommitted changes are exactly as the previous agent left them, and nothing
   # below may touch them.
   [ "$KIND" = secondmate ] || WT=$RELAUNCH_WT
+  if [ "$BACKEND" = hc ] && [ "$KIND" != secondmate ] && [ "$RELAUNCH_STATE" = dead ]; then
+    # hc can report the terminal's launch cwd after the nested shell exits.
+    hc_relaunch_path=$(fm_backend_hc_current_path "$RELAUNCH_TARGET" "$W")
+    if [ -z "$hc_relaunch_path" ] || [ "$(real_path_or_raw "$hc_relaunch_path")" != "$(real_path_or_raw "$WT")" ]; then
+      RELAUNCH_REBIND=1
+    fi
+  fi
   if [ "$RELAUNCH_REBIND" -eq 0 ]; then
     # Adopt the recorded endpoint instead of creating one. This is what keeps a
     # relaunch a REPLACEMENT rather than a second copy of the task: no new
@@ -5147,8 +5177,15 @@ if [ "$RELAUNCH" -eq 1 ]; then
       finished)
         fm_backend_hc_kill "$RELAUNCH_TARGET" '' "$W" || exit 1
         ;;
+      ready)
+        if [ "$(fm_control_hc_recovery_state "$RELAUNCH_META" "$ID" "$RELAUNCH_TARGET")" != dead ]; then
+          echo "error: hc terminal $RELAUNCH_TARGET is no longer proven agent-free; refusing replacement" >&2
+          exit 1
+        fi
+        fm_backend_hc_kill "$RELAUNCH_TARGET" '' "$W" || exit 1
+        ;;
       *)
-        echo "error: hc terminal $RELAUNCH_TARGET is no longer proven absent or owned and finished; refusing replacement" >&2
+        echo "error: hc terminal $RELAUNCH_TARGET is no longer proven absent or owned and agent-free; refusing replacement" >&2
         exit 1
         ;;
     esac
@@ -5550,12 +5587,25 @@ EOF
     T="$TERN_SESSION_ID:$TERN_BLOCK_ID"
     ;;
   hc)
+    hc_launch_dir=$PROJ_ABS
+    HC_PRESENTATION_HOME=
+    if [ "$KIND" = secondmate ]; then
+      HC_PRESENTATION_HOME=$PROJ_ABS
+    else
+      # Acquire before opening an endpoint: a full pool needs no terminal.
+      WT=$(cd "$PROJ_ABS" && treehouse get --lease --lease-holder "$ID") || {
+        echo "error: treehouse get --lease failed for $ID in $PROJ_ABS" >&2
+        exit 1
+      }
+      validate_spawn_worktree "treehouse get --lease" "$WT (leased to $ID)"
+      HC_LEASED=1
+      hc_launch_dir=$WT
+    fi
     HC_SES=$(fm_backend_hc_container_ensure) || exit 1
     SPAWN_ENDPOINT_CREATE_STARTED=1
-    HC_PRESENTATION_HOME=
-    [ "$KIND" != secondmate ] || HC_PRESENTATION_HOME=$PROJ_ABS
-    HC_TERMINAL=$(fm_backend_hc_create_task "$HC_SES" "$W" "$PROJ_ABS" "$HC_PRESENTATION_HOME") || exit 1
+    HC_TERMINAL=$(fm_backend_hc_create_task "$HC_SES" "$W" "$hc_launch_dir" "$HC_PRESENTATION_HOME") || exit 1
     T="$HC_SES:$HC_TERMINAL"
+    HC_FRESH_ABORT_TARGET=$T
     ;;
   orca)
     set +e
@@ -6281,8 +6331,8 @@ elif [ "$RELAUNCH" -eq 1 ]; then
   fi
   [ "$KIND" = secondmate ] || validate_spawn_worktree "relaunch" "$T"
 elif [ "$KIND" != secondmate ] && [ "$BACKEND" != orca ]; then
-  # A t3code slot was leased and validated in its target branch above.
-  if [ "$BACKEND" = t3code ]; then
+  # hc and t3code leased and validated their slots before endpoint creation.
+  if [ "$BACKEND" = t3code ] || [ "$BACKEND" = hc ]; then
     :
   elif [ "$BACKEND" = herdr ]; then
     spawn_lease_herdr_slot
@@ -6353,9 +6403,8 @@ elif [ "$KIND" != secondmate ] && [ "$BACKEND" != orca ]; then
     fi
   fi
 
-  # Claim the pool slot for this task. Except on Herdr, whose slot
-  # spawn_lease_herdr_slot leased durably, the interactive `treehouse get` sent
-  # to the pane above records only a process lease, so Treehouse cannot say
+  # Claim the pool slot for this task. Without a durable lease, the
+  # interactive `treehouse get` records only a process lease, so Treehouse cannot say
   # which task a slot belongs to once that task's worker exits - and that is
   # exactly when the slot is handed on and this task's worktree= line goes
   # stale. The claim is what lets
@@ -7636,7 +7685,7 @@ fi
 # point below so every earlier launch-delivery failure remains unwindable.
 spawn_commit_backlog_transition() {
   [ "$BACKLOG_TRANSITION" = 1 ] || return 0
-  fm_backlog_atomic_transition dispatch "$STATE/$ID.meta" "$DATA" "$ID" "$STATE"
+  fm_backlog_atomic_transition dispatch "$STATE/$ID.meta" "$DATA" "$ID" "$STATE" "$RELAUNCH"
 }
 
 # The deferred-signal exit path's preservation report. A claim about preserved
@@ -7660,7 +7709,8 @@ spawn_report_preserved_state() {
     fi
     return 1
   fi
-  if [ "$FM_BACKLOG_ROW_STATE" = "in_flight no no" ]; then
+  if [ "$FM_BACKLOG_ROW_STATE" = "in_flight no no" ] ||
+    { [ "$RELAUNCH" = 1 ] && fm_backlog_row_in_flight "$FM_BACKLOG_ROW_STATE"; }; then
     SPAWN_PRESERVED_CLAIM="verified preserved: its paired task record is present and its backlog item is In flight"
     return 0
   fi

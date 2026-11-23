@@ -6,8 +6,8 @@
 # behavior with a stub so it runs everywhere.
 set -u
 
-# shellcheck source=tests/lib.sh
-. "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+# shellcheck source=tests/fixtures.sh
+. "$(dirname "${BASH_SOURCE[0]}")/fixtures.sh"
 
 TMP_ROOT=$(fm_test_tmproot fm-backend-hc-tests)
 
@@ -39,8 +39,34 @@ case "$cmd" in
     IFS= read -r _req || true
     printf '{"jsonrpc":"2.0","id":1,"result":{"generation":%s}}\n' "${FAKE_HC_GENERATION:-1}"
     ;;
-  ls) cat "$D/ls.json" 2>/dev/null || printf '{"terminals":[]}\n' ;;
-  run) cat "$D/run.json" ;;
+  ls)
+    if [ -e "$D/lifecycle" ]; then
+      set -- "$D"/t*.json
+      if [ -f "$1" ]; then
+        jq -s '{terminals: .}' "$@"
+      else
+        printf '{"terminals":[]}\n'
+      fi
+    else
+      cat "$D/ls.json" 2>/dev/null || printf '{"terminals":[]}\n'
+    fi ;;
+  run)
+    if [ -e "$D/lifecycle" ]; then
+      home= task= cwd=
+      while [ "$#" -gt 0 ]; do
+        case "$1" in
+          --cwd) cwd=$2; shift ;;
+          firstmate.task=*) task=${1#*=} ;;
+          firstmate.home=*) home=${1#*=} ;;
+        esac
+        shift
+      done
+      jq -n --arg cwd "$cwd" --arg task "$task" --arg home "$home" \
+        '{address:"t9",state:"live",cwd:$cwd,labels:{"firstmate.task":$task,"firstmate.home":$home},foreground:{name:"zsh",argv:["/bin/zsh"],pid:1}}' > "$D/t9.json"
+      jq '{address}' "$D/t9.json"
+    else
+      cat "$D/run.json"
+    fi ;;
   get)
     [ -f "$D/$last.exit" ] && exit "$(cat "$D/$last.exit")"
     [ -f "$D/$last.json" ] || { printf '{"error":{"kind":"not_found"}}\n' >&2; exit 3; }
@@ -55,6 +81,19 @@ case "$cmd" in
     exec sleep 31
     ;;
   send)
+    if [ -e "$D/lifecycle" ]; then
+      target=$3
+      case "$last" in
+        ". '"*"'") staged=${last#". '"}; staged=${staged%"'"}; last=$(< "$staged") ;;
+      esac
+      case "$last" in
+        'treehouse get') : > "$D/interactive-get" ;;
+        'cd -- '*) [ ! -e "$D/refuse-cd" ] || exit 1 ;;
+        *'encode launch-brief'*)
+          jq '.foreground = {name:"codex",argv:["codex"],pid:1}' "$D/$target.json" > "$D/launched"
+          mv "$D/launched" "$D/$target.json" ;;
+      esac
+    fi
     if [ -f "$D/send.exit" ]; then
       printf '{"error":{"kind":"%s"}}\n' "$(cat "$D/send.kind" 2>/dev/null || echo blocked)" >&2
       exit "$(cat "$D/send.exit")"
@@ -521,7 +560,110 @@ test_required_tool_check_uses_the_adapter_resolver() {
   pass "hc: the bootstrap tool check resolves hc exactly as the adapter does"
 }
 
+setup_hc_worker() {
+  setup_case "$1"
+  : > "$D/lifecycle"
+  HC_WORKER_ID="hcworker-$$"
+  fm_test_spawn_home "$HOMEDIR" codex
+  fm_test_spawn_brief "$HOMEDIR" "$HC_WORKER_ID"
+  fm_git_init_commit "$D/project"
+  git clone -q "$D/project" "$D/slot" || fail "could not clone fixture copy"
+  fm_fake_exit0 "$FB" codex
+  fm_test_fake_sleep_noop "$FB"
+  mkdir -p "$D/user-home"
+  # This fake is the only Treehouse binary the subject can reach.
+  cat > "$FB/treehouse" <<'SH'
+#!/usr/bin/env bash
+D=$FAKE_HC_DIR
+case "${1:-}" in
+  get)
+    [ "$2" = --lease ] || exit 2
+    [ ! -e "$D/pool-full" ] && [ ! -e "$D/leased" ] || { echo 'all 16 worktrees are in use or dirty' >&2; exit 1; }
+    : > "$D/leased"
+    printf '%s\n' "$D/slot" ;;
+  return) rm -f "$D/leased" ;;
+  *) exit 2 ;;
+esac
+SH
+  chmod +x "$FB/treehouse"
+}
+
+hc_worker_command() {
+  FAKE_HC_DIR=$D PATH="$FB:$PATH" FM_HC_BIN="$FB/hc" FM_HOME=$HOMEDIR HOME="$D/user-home" \
+    HC_SESSION=fmtest FM_SPAWN_NO_GUARD=1 FM_CONTROL_POLL=0.05 FM_CONTROL_LAUNCH_WAIT=2 \
+    bash "$FM_TEST_ROOT/bin/$1.sh" "${@:2}"
+}
+
+hc_worker_spawn() {
+  hc_worker_command fm-spawn "$HC_WORKER_ID" "$D/project" --backend hc --mode local-only --yolo off
+}
+
+test_hc_relaunch_replaces_a_shell_in_the_primary_checkout() {
+  local tag rc=0 out meta id
+  setup_hc_worker worker-relaunch
+  id=$HC_WORKER_ID
+  tag=$(FM_HOME="$HOMEDIR" FM_ROOT_OVERRIDE="$FM_TEST_ROOT" bash -c '
+    . "$1/bin/fm-backend.sh"
+    fm_backend_source hc && fm_backend_hometag' bash "$FM_TEST_ROOT")
+  write_terminal "$D" t2 live "fm-$id" "$tag" zsh /bin/zsh
+  jq --arg cwd "$D/project" '.cwd = $cwd | del(.foreground.cwd)' "$D/t2.json" > "$D/original"
+  mv "$D/original" "$D/t2.json"
+  meta="$HOMEDIR/state/$id.meta"
+  printf 'window=fmtest:t2\nendpoint_task_id=%s\nworktree=%s/slot\nproject=%s/project\nharness=codex\nkind=ship\nmode=local-only\nyolo=off\nbranch=fm/%s\nbackend=hc\nhc_session=fmtest\nhc_terminal=t2\n' "$id" "$D" "$D" "$id" > "$meta"
+  printf 'uncommitted work\n' > "$D/slot/local-work"
+
+  out=$(hc_worker_command fm-control "$id" relaunch --note 'continue in the existing copy' 2>&1) || rc=$?
+  expect_code 0 "$rc" "relaunch should replace the leftover shell"$'\n'"$out"
+  [ ! -e "$D/t2.json" ] || fail "the old terminal is still present"
+  assert_equals "$(jq -r .cwd "$D/t9.json")" "$D/slot" "the replacement should start in the recorded copy"
+  assert_equals "$(< "$D/slot/local-work")" 'uncommitted work' "relaunch should preserve local changes"
+  assert_grep 'window=fmtest:t9' "$meta" "the replacement should own the recorded endpoint"
+  assert_grep 'hc_terminal=t9' "$meta" "the hc identity should agree with the recorded endpoint"
+  # Direct relaunch must not replace a live agent, even if hc reports the wrong cwd.
+  jq --arg cwd "$D/project" '.cwd = $cwd' "$D/t9.json" > "$D/live"
+  mv "$D/live" "$D/t9.json"
+  rc=0
+  out=$(hc_worker_command fm-spawn "$id" --relaunch 2>&1) || rc=$?
+  expect_code 1 "$rc" "direct relaunch should refuse the live agent"$'\n'"$out"
+  assert_contains "$out" "reads 'alive'" "refusal should name the live agent"
+  assert_equals "$(jq -r .foreground.name "$D/t9.json")" codex "the live agent should not be retired"
+  pass "hc: relaunch replaces a shell-only terminal in the wrong directory, not a live agent"
+}
+
+test_hc_spawn_refuses_a_full_pool_before_opening_a_terminal() {
+  local rc=0 out
+  setup_hc_worker worker-full
+  : > "$D/pool-full"
+  out=$(hc_worker_spawn 2>&1) || rc=$?
+  expect_code 1 "$rc" "full pool should refuse immediately"$'\n'"$out"
+  assert_contains "$out" 'all 16 worktrees are in use or dirty' "spawn should report the actual Treehouse refusal"
+  [ ! -e "$D/t9.json" ] && [ ! -e "$D/interactive-get" ] || fail "full pool opened an interactive terminal"
+  [ ! -e "$HOMEDIR/state/$HC_WORKER_ID.meta" ] || fail "full pool published a task record"
+  pass "hc: a full pool is reported before opening a terminal"
+}
+
+test_hc_spawn_cleans_up_failed_launch_and_can_retry() {
+  local rc=0 out
+  setup_hc_worker worker-retry
+  : > "$D/refuse-cd"
+  out=$(hc_worker_spawn 2>&1) || rc=$?
+  expect_code 1 "$rc" "spawn should fail when its terminal refuses worktree entry"$'\n'"$out"
+  assert_contains "$out" 'could not be moved into its recorded worktree' "the failure must be after allocation and terminal creation"
+  [ ! -e "$D/t9.json" ] && [ ! -e "$D/leased" ] || fail "failed spawn kept its terminal or lease"
+  [ ! -e "$HOMEDIR/state/$HC_WORKER_ID.meta" ] || fail "failed spawn kept its provisional task record"
+  rm "$D/refuse-cd"
+  rc=0
+  out=$(hc_worker_spawn 2>&1) || rc=$?
+  expect_code 0 "$rc" "the same task id should be retryable"$'\n'"$out"
+  assert_equals "$(jq -r .cwd "$D/t9.json")" "$D/slot" "spawn should start in the leased copy"
+  [ -e "$D/leased" ] && [ ! -e "$D/interactive-get" ] || fail "retry relied on a shell to hold the copy"
+  pass "hc: failed spawn removes its terminal and lease, and the same id can retry"
+}
+
 fm_test_run \
+  test_hc_relaunch_replaces_a_shell_in_the_primary_checkout \
+  test_hc_spawn_refuses_a_full_pool_before_opening_a_terminal \
+  test_hc_spawn_cleans_up_failed_launch_and_can_retry \
   test_hc_is_spawn_capable_and_needs_app_signals \
   test_required_tool_check_uses_the_adapter_resolver \
   test_create_task_is_independent_labeled_and_refuses_duplicates \

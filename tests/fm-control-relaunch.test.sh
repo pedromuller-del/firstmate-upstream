@@ -3124,13 +3124,18 @@ test_relaunch_reverifies_an_already_in_flight_item_instead_of_rewriting_it() {
   dir=$(new_case reverify rl40)
   add_ship_task "$dir" rl40 claude
   seed_backlog "$dir" rl40 in_flight
+  local file="$dir/home/data/backlog.md"
+  tasks-axi hold rl40 --kind parked --reason 'review pending' --file "$file" >/dev/null \
+    || fail "could not hold the in-flight fixture"
+  cp "$file" "$file.before"
   break_tasks_axi_start "$dir"
 
   out=$(run_control "$dir" rl40 relaunch --note "picking the work back up") || rc=$?
   expect_code 0 "$rc" "a relaunch must not re-run a transition the row already reflects"$'\n'"$out"
   [ "$(backlog_state "$dir" rl40)" = in_flight ] \
     || fail "a relaunch changed an already In-flight item to $(backlog_state "$dir" rl40)"
-  pass "relaunch re-reads the backlog item instead of blindly re-running the transition"
+  cmp -s "$file" "$file.before" || fail "a relaunch changed the in-flight item's hold"
+  pass "relaunch re-reads a held In-flight item without rewriting it"
 }
 
 test_relaunch_moves_a_drifted_item_back_in_flight() {
