@@ -767,7 +767,15 @@ elif [ "$REEMIT" -eq 1 ]; then
     FM_TASKS_AXI_CHECK_REASON="$TASKS_AXI_CHECK_REASON" "$SCRIPT_DIR/fm-bootstrap.sh" 2>&1)
 else
   BOOT_OUT=$(
-    "$SCRIPT_DIR/fm-herdr-session-cleanup.sh" 2>&1 || true
+    cleanup_budget=${FM_HERDR_CLEANUP_TIMEOUT:-10}
+    case "$cleanup_budget" in [1-9]|10) ;; *) cleanup_budget=10 ;; esac
+    cleanup_rc=0
+    fm_run_timed "$cleanup_budget" "$SCRIPT_DIR/fm-herdr-session-cleanup.sh" 2>&1 || cleanup_rc=$?
+    case "$cleanup_rc" in
+      0) ;;
+      124) printf 'warning: Herdr presentation cleanup exceeded %ss; startup will continue\n' "$cleanup_budget" ;;
+      *) printf 'warning: Herdr presentation cleanup exited %s; startup will continue\n' "$cleanup_rc" ;;
+    esac
     FM_BOOTSTRAP_NETWORK=skip FM_TASKS_AXI_COMPATIBLE="$TASKS_AXI_COMPATIBLE" \
       FM_TASKS_AXI_CHECK_REASON="$TASKS_AXI_CHECK_REASON" \
       "$SCRIPT_DIR/fm-bootstrap.sh" 2>&1

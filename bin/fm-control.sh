@@ -6,6 +6,7 @@
 #        fm-control.sh <task-id> exit
 #        fm-control.sh <task-id> relaunch [--harness <name>] [--model <name>]
 #                                         [--effort <level>] [--account <entry>]
+#        fm-control.sh <secondmate-id> relaunch --on-usage-limit
 #                                         (--note <text> | --note-file <path>)
 #
 # Why this exists, and how it differs from fm-send.sh. bin/fm-send.sh is the
@@ -273,6 +274,7 @@ HARNESS_SET=0
 MODEL_SET=0
 EFFORT_SET=0
 ACCOUNT_SET=0
+ON_USAGE_LIMIT=0
 NOTE=
 NOTE_SET=0
 control_want_value=
@@ -305,6 +307,7 @@ for control_arg in "$@"; do
     --effort=*) NEW_EFFORT=${control_arg#--effort=}; EFFORT_SET=1 ;;
     --account) control_want_value=account ;;
     --account=*) NEW_ACCOUNT=${control_arg#--account=}; ACCOUNT_SET=1 ;;
+    --on-usage-limit) ON_USAGE_LIMIT=1 ;;
     --note) control_want_value=note ;;
     --note=*) NOTE=${control_arg#--note=}; NOTE_SET=1 ;;
     --note-file) control_want_value=note_file ;;
@@ -324,6 +327,10 @@ fi
 if [ "$VERB" != relaunch ]; then
   [ "$HARNESS_SET" = 0 ] && [ "$MODEL_SET" = 0 ] && [ "$EFFORT_SET" = 0 ] && [ "$ACCOUNT_SET" = 0 ] && [ "$NOTE_SET" = 0 ] \
     || die "--harness, --model, --effort, --account, and --note apply to 'relaunch' only"
+fi
+if [ "$ON_USAGE_LIMIT" = 1 ]; then
+  [ "$VERB" = relaunch ] && [ "$((HARNESS_SET + MODEL_SET + EFFORT_SET + ACCOUNT_SET + NOTE_SET))" = 0 ] \
+    || die '--on-usage-limit is a standalone relaunch option'
 fi
 [ "$ACCOUNT_SET" = 0 ] || [ -n "$NEW_ACCOUNT" ] || die "--account requires a non-empty value"
 [ "$HARNESS_SET" = 0 ] || [ -n "$NEW_HARNESS" ] || die "--harness requires a non-empty value"
@@ -635,7 +642,7 @@ verify_interrupt_running() {
     after=$(agent_state)
     [ "$after" = alive ] \
       || die "task $ID's agent is '$after' after its interrupt key; an interrupt must leave the agent running"
-    proof=agent-alive
+    proof='agent-alive'
   fi
   printf '%s' "$proof"
 }
@@ -791,6 +798,15 @@ do_exit() {
   if [ -s "${FM_COMPOSER_DIALOG_SINK:-}" ]; then
     dialog=$(cat "$FM_COMPOSER_DIALOG_SINK")
     refuse_blocking_prompt "$dialog"
+  fi
+  if [ "$ON_USAGE_LIMIT" = 1 ] && [ "$composer_state" != empty ]; then
+    local live_screen
+    live_screen=$(fm_backend_visible_capture "$BACKEND" "$T" "$LABEL") || return 1
+    if printf '%s\n' "$live_screen" | fm_composer_strip_ansi | awk '
+      /^[[:space:]]*❯/ { line = $0 }
+      END { exit !(line ~ /^[[:space:]]*❯ Usage limit reached[[:space:]]*$/) }'; then
+      composer_state=empty
+    fi
   fi
   case "$composer_state" in
     empty) ;;
@@ -1084,13 +1100,18 @@ resolve_relaunch_profile() {
   # signed out must refuse here, while nothing has changed yet.
   # Under a declared Claude account list, the replacement stays on the
   # account the task records unless --account explicitly moves it.
-  local account_model=$TARGET_MODEL account_mate=
+  local account_model=$TARGET_MODEL account_mate='' account_config=${FM_CONFIG_OVERRIDE:-$FM_HOME/config}
   [ "$account_model" != default ] || account_model=
   [ "$KIND" != secondmate ] || account_mate=$ID
-  TARGET_ACCOUNT=$(fm_worker_account_relaunch_request "$TARGET_HARNESS" "${FM_CONFIG_OVERRIDE:-$FM_HOME/config}" \
+  if [ -n "$account_mate" ] && [ -n "$NEW_ACCOUNT" ]; then
+    account_config=$(fm_worker_account_secondmate_config "$ID" "$WT") || return 1
+    account_mate=
+  fi
+  TARGET_ACCOUNT=$(fm_worker_account_relaunch_request "$TARGET_HARNESS" "$account_config" \
     "$PRIOR_HARNESS" "$(fm_meta_get "$META" account)" "$NEW_ACCOUNT" "$account_mate") || return 1
-  fm_worker_account_select "$TARGET_HARNESS" "${FM_CONFIG_OVERRIDE:-$FM_HOME/config}" \
+  fm_worker_account_select "$TARGET_HARNESS" "$account_config" \
     "$account_model" "$TARGET_HARNESS" "" "$account_mate" "$TARGET_ACCOUNT" >/dev/null || return 1
+  [ "$KIND" != secondmate ] || account_mate=$ID
   fm_omp_profile_select "$TARGET_HARNESS" "${FM_CONFIG_OVERRIDE:-$FM_HOME/config}" \
     "$account_mate" >/dev/null || return 1
   # Likewise polytoken's launch profile and wiring refusals
@@ -1216,6 +1237,44 @@ record_note() {
   esac
 }
 
+secondmate_quota_relaunch() {
+  local config listed current screen quota reset window
+  [ "$KIND" = secondmate ] && [ "$RECORDED_HARNESS" = claude ] || return 0
+  fm_control_backend_relaunch_supported "$BACKEND" && fm_backend_visible_capture_supported "$BACKEND" || return 0
+  config=$(fm_worker_account_secondmate_config "$ID" "$WT") || return 1
+  listed=$(fm_worker_account_list claude "$config") || return 1
+  [ -n "$listed" ] && [ "$(agent_state)" = alive ] || return 0
+  screen=$(fm_backend_visible_capture "$BACKEND" "$T" "$LABEL") || return 1
+  # shellcheck source=bin/fm-composer-lib.sh
+  . "$SCRIPT_DIR/fm-composer-lib.sh"
+  # shellcheck source=bin/fm-secondmate-quota-lib.sh
+  . "$SCRIPT_DIR/fm-secondmate-quota-lib.sh"
+  if ! quota=$(printf '%s\n' "$screen" | fm_secondmate_quota_screen); then
+    if printf '%s\n' "$screen" | fm_composer_strip_ansi | awk '
+      /^[[:space:]]*❯/ { line = $0 }
+      END { exit !(line ~ /^[[:space:]]*❯[[:space:]]*$/) }'; then
+      printf '%s\n' quota-clear
+    fi
+    return 0
+  fi
+  current=$(fm_meta_get "$META" account)
+  current=${current:-ordinary}
+  case $'\n'"$listed"$'\n' in *$'\n'"$current"$'\n'*) ;; *) return 0 ;; esac
+  window=${quota%%$'\t'*}
+  reset=${quota#*$'\t'}
+  NEW_ACCOUNT=$(fm_secondmate_quota_next "$listed" "$current" "$STATE/.$ID.claude-quota" "$window" "$reset") \
+    || die "could not record Claude quota exhaustion for secondmate $ID"
+  if [ -z "$NEW_ACCOUNT" ]; then
+    printf 'quota-exhausted: %s\n' "$reset"
+    return 0
+  fi
+  NEW_HARNESS=claude HARNESS_SET=1
+  NEW_MODEL=$(fm_meta_get "$META" model); NEW_MODEL=${NEW_MODEL:-default}; MODEL_SET=1
+  NEW_EFFORT=$(fm_meta_get "$META" effort); NEW_EFFORT=${NEW_EFFORT:-default}; EFFORT_SET=1
+  do_relaunch
+  printf '%s\n' quota-rotated
+}
+
 do_relaunch() {
   local exit_result state note_line
   local -a spawn_args
@@ -1328,6 +1387,6 @@ case "$VERB" in
     echo "$result $ID harness=$HARNESS backend=$BACKEND endpoint=$T worktree=$WT"
     ;;
   relaunch)
-    do_relaunch
+    if [ "$ON_USAGE_LIMIT" = 1 ]; then secondmate_quota_relaunch; else do_relaunch; fi
     ;;
 esac

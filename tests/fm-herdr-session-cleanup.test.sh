@@ -312,6 +312,22 @@ FM_HOME="$INTEGRATION_ROOT/home" FM_ROOT_OVERRIDE="$INTEGRATION_ROOT" \
 [ "$(cat "$TRACE")" = "$INTEGRATION_ROOT/home" ] \
   || fail "lock-owning session start did not run cleanup for its exact home"
 
+cat > "$INTEGRATION_ROOT/bin/fm-herdr-session-cleanup.sh" <<'SH'
+#!/usr/bin/env bash
+printf 'started\n' >> "${FM_HERDR_CLEANUP_TRACE:?}"
+sleep 6
+printf 'finished\n' >> "$FM_HERDR_CLEANUP_TRACE"
+SH
+: > "$TRACE"
+FM_HOME="$INTEGRATION_ROOT/home" FM_ROOT_OVERRIDE="$INTEGRATION_ROOT" \
+  FM_HERDR_CLEANUP_TRACE="$TRACE" FM_HERDR_CLEANUP_TIMEOUT=1 \
+  "$INTEGRATION_ROOT/bin/fm-session-start.sh" >"$TMP_ROOT/slow-start.out" 2>&1 \
+  || fail "slow cleanup blocked startup"
+[ "$(cat "$TRACE")" = started ] || fail "startup waited for slow Herdr cleanup to finish"
+assert_contains "$(cat "$TMP_ROOT/slow-start.out")" 'Herdr presentation cleanup exceeded 1s' \
+  'startup reports the cleanup cutoff'
+pass 'startup bounds the Herdr cleanup independently of the startup deadline'
+
 : > "$TRACE"
 cat > "$INTEGRATION_ROOT/bin/fm-lock.sh" <<'SH'
 #!/usr/bin/env bash

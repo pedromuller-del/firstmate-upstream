@@ -77,6 +77,17 @@ case "$FM_FAKE_RELAUNCH_MODE" in
     printf 'error: unverified remote secondmate harness: %s\n' "$harness" >&2
     exit 1
     ;;
+  quota-exhausted|quota-rotated)
+    [ "$harness" = --on-usage-limit ] && [ -z "$model$effort" ] || exit 95
+    if [ "$FM_FAKE_RELAUNCH_MODE" = quota-exhausted ]; then
+      printf 'quota-exhausted: resets 9pm\n'
+      exit 0
+    fi
+    printf 'quota-rotated\n'
+    harness=claude
+    model=claude-opus-5-5
+    effort=medium
+    ;;
   confirm-other)
     harness=claude
     model=claude-opus-5-5
@@ -188,5 +199,17 @@ expect_code 0 "$RC" "a confirmed remote relaunch should succeed with an armed PR
 fm_pr_poll_artifacts_valid "$HOME_DIR/state" ios "$ROOT/bin/fm-pr-poll.sh" \
   || fail "a remote relaunch broke PR poll authentication by writing harness/model/effort after pr="
 pass "a remote relaunch keeps an already-armed PR poll authenticating"
+
+reset_meta
+cp "$HOME_DIR/state/ios.meta" "$TMP/ios-before-quota.meta"
+OUT=$(FM_FAKE_RELAUNCH_MODE=quota-exhausted run_relaunch ios --on-usage-limit); RC=$?
+expect_code 0 "$RC" "remote quota exhaustion does not require a route confirmation"$'\n'"$OUT"
+assert_contains "$OUT" 'quota-exhausted: resets 9pm' 'remote reset reaches the parent'
+cmp -s "$TMP/ios-before-quota.meta" "$HOME_DIR/state/ios.meta" || fail 'exhaustion changed the remote route'
+OUT=$(FM_FAKE_RELAUNCH_MODE=quota-rotated run_relaunch ios --on-usage-limit); RC=$?
+expect_code 0 "$RC" "remote quota rotation must accept a confirmed route"$'\n'"$OUT"
+assert_contains "$OUT" 'quota-rotated' 'rotation confirmation reaches the parent'
+rg -qx 'harness=claude' "$HOME_DIR/state/ios.meta" || fail 'the rotated route was not published'
+pass 'remote quota uses the host-local account decision and updates only a confirmed route'
 
 echo "ALL TESTS PASSED"

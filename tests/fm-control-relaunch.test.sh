@@ -119,6 +119,7 @@ case "${1:-}" in
     printf 'fakepane\n'; exit 0 ;;
   capture-pane)
     [ -z "${FM_FAKE_COMPOSER_READ_FAIL:-}" ] || exit 1
+    [ ! -f "$D/screen" ] || { cat "$D/screen"; exit 0; }
     if [ -s "$D/composer" ]; then
       printf '╭────╮\n│ %s  │\n╰────╯\n' "$(cat "$D/composer")"
     else
@@ -2208,7 +2209,8 @@ test_journal_records_the_checkpoint_it_proved() {
 
 test_secondmate_relaunch_checkpoints_child_work_and_spares_the_charter() {
   local dir home out rc
-  dir=$(new_case sm sm1)
+  local mode=${1:-manual}
+  dir=$(new_case "sm-$mode" sm1)
   home="$dir/home"
   mkdir -p "$home/config"
   printf 'claude\n' > "$home/config/secondmate-harness"
@@ -2237,8 +2239,31 @@ test_secondmate_relaunch_checkpoints_child_work_and_spares_the_charter() {
   printf '%s' "$dir/smhome" > "$dir/fake/cwd"
   # No --note: a secondmate reconciles its own home's records at startup, so
   # the note is optional there.
-  out=$(run_control "$dir" sm1 relaunch); rc=$?
-  expect_code 0 "$rc" "a checkpointed secondmate should relaunch"$'\n'"$out"
+  if [ "$mode" = quota ]; then
+    make_claude_auth_stub "$dir"
+    mkdir -p "$dir/smhome/config" "$dir/alternate"
+    : > "$dir/alternate/.credentials.json"
+    printf '%s\n' ordinary "$dir/alternate" > "$dir/smhome/config/claude-accounts"
+    printf ' account comparison: Usage limit reached\n❯ \n' > "$dir/fake/screen"
+    out=$(run_control "$dir" sm1 relaunch --on-usage-limit); rc=$?
+    expect_code 0 "$rc" "an ordinary Claude screen should be left alone"$'\n'"$out"
+    [ ! -s "$dir/fake/literal" ] || fail 'incidental quota text caused a relaunch'
+    printf '  You\x27ve hit your weekly limit · resets 9pm\n─────\n❯ Usage limit reached\n─────\n' > "$dir/fake/screen"
+    out=$(run_control "$dir" sm1 relaunch --on-usage-limit); rc=$?
+    expect_code 0 "$rc" "a quota-blocked secondmate should relaunch"$'\n'"$out"
+    [ "$(meta_field "$dir" sm1 account)" = "$dir/alternate" ] || fail "secondmate did not switch to its own declared alternate account: $out"
+    assert_contains "$(cat "$dir/fake/literal")" "CLAUDE_CONFIG_DIR='$dir/alternate'" 'replacement launches under the selected account'
+    printf '  You\x27ve hit your weekly limit · resets 11pm\n─────\n❯ Usage limit reached\n─────\n' > "$dir/fake/screen"
+    : > "$dir/fake/literal"
+    out=$(run_control "$dir" sm1 relaunch --on-usage-limit); rc=$?
+    expect_code 0 "$rc" "exhaustion should be reported without relaunching"$'\n'"$out"
+    assert_contains "$out" 'resets 11pm' 'exhaustion includes the live reset time'
+    [ ! -s "$dir/fake/literal" ] || fail 'exhaustion rang an already exhausted account'
+    pass 'fm-control relaunch: Claude rotates on its quota dialog, preserves child state, and reports exhaustion'
+  else
+    out=$(run_control "$dir" sm1 relaunch); rc=$?
+    expect_code 0 "$rc" "a checkpointed secondmate should relaunch"$'\n'"$out"
+  fi
   [ "$(journal_field "$dir" sm1 children)" = 2 ] \
     || fail "the checkpoint must account for the secondmate's child work, got '$(journal_field "$dir" sm1 children)'"
   assert_not_contains "$out" "requires --note" "a secondmate relaunch must not demand a progress note"
@@ -3271,6 +3296,7 @@ test_account_list_relaunch_reuses_the_recorded_account
 test_account_list_relaunch_moves_only_on_explicit_account
 test_account_list_relaunch_refusals_happen_before_stop
 test_secondmate_account_pin_follows_relaunch_and_refuses_before_stop
+test_secondmate_relaunch_checkpoints_child_work_and_spares_the_charter quota
 test_pi_exclude_tools_follow_the_relaunch
 test_claude_exclude_tools_follow_the_relaunch
 test_exclude_tools_refusals_happen_before_the_agent_stops

@@ -1235,12 +1235,24 @@ EOF
 # budget. The per-mate liveness lock serializes this tick against a concurrent
 # session-start sweep, so neither side can kill or re-probe an endpoint the
 # other is mid-relaunch on.
+secondmate_quota_check() { # <meta> <id>
+  local meta=$1 id=$2 control
+  [ "$(fm_meta_get "$meta" harness)" = claude ] || return 0
+  if [ -n "$(fm_meta_get "$meta" remote_host)" ]; then
+    control=("$SCRIPT_DIR/fm-remote-secondmate-relaunch.sh" "$id" --on-usage-limit)
+  else
+    control=("$SCRIPT_DIR/fm-control.sh" "$id" relaunch --on-usage-limit)
+  fi
+  fm_run_timed "$SECONDMATE_LIVENESS_TIMEOUT" "${control[@]}" </dev/null 2>&1
+}
+
 secondmate_liveness_tick() {
   local tick_marker="$STATE/.secondmate-liveness-tick"
   [ "$(age_of "$tick_marker")" -ge "$SECONDMATE_LIVENESS_SECS" ] || return 0
   touch "$tick_marker" || return 1
   local now=$(( $(date +%s) )) meta id kind
   local bound_marker attempts notify_key reason queued err first_reason='' failed=0
+  local quota_out quota_line quota_marker
   for meta in "$STATE"/*.meta; do
     [ -e "$meta" ] || continue
     kind=$(fm_meta_get "$meta" kind 2>/dev/null || true)
@@ -1285,6 +1297,21 @@ secondmate_liveness_tick() {
             triage_log "secondmate $id live again; auto-relaunch pause cleared"
           fi
         fi
+        quota_marker="$STATE/.secondmate-quota-alert-$id"
+        if quota_out=$(secondmate_quota_check "$meta" "$id"); then
+          while IFS= read -r quota_line; do
+            case "$quota_line" in
+              quota-clear|quota-rotated) rm -f -- "$quota_marker" ;;
+              'quota-exhausted: '*)
+                if [ ! -e "$quota_marker" ] && [ ! -L "$quota_marker" ]; then
+                  reason="check: secondmate $id exhausted all declared Claude accounts (${quota_line#quota-exhausted: })"
+                  notify_key="secondmate-quota-$id"
+                fi ;;
+            esac
+          done <<< "$quota_out"
+        else
+          triage_log "secondmate $id quota recovery could not complete: $(fm_sm_live_first_line "$quota_out")"
+        fi
         ;;
       skipped)
         triage_log "secondmate $id liveness: $FM_SM_LIVE_REASON"
@@ -1295,6 +1322,9 @@ secondmate_liveness_tick() {
       if printf '%s\n' "$queued" | grep -Fx "$notify_key" >/dev/null 2>&1 \
         || fm_wake_append check "$notify_key" "$reason"; then
         [ -n "$first_reason" ] || first_reason=$reason
+        if [ "$notify_key" = "secondmate-quota-$id" ]; then
+          ( set -o noclobber; : > "$quota_marker" ) || err='could not record the Claude quota escalation'
+        fi
       else
         err="check wake row could not be queued: $reason"
       fi

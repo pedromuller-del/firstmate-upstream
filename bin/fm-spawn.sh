@@ -1218,9 +1218,9 @@ fi
   echo "error: --account requires a non-empty value" >&2
   exit 1
 }
-# A secondmate, local or remote, launches on its own per-mate pin, so --account
-# is refused here, before the remote route could ignore it.
-[ "$ACCOUNT_SET" -eq 0 ] || [ "$KIND" != secondmate ] || {
+# Fresh secondmate launches keep their pin; only an in-place replacement may
+# explicitly select an account declared in the recorded mate home.
+[ "$ACCOUNT_SET" -eq 0 ] || [ "$KIND" != secondmate ] || [ "$RELAUNCH" -eq 1 ] || {
   echo "error: --account applies to ships and scouts; secondmate ${POS[0]:-} launches on its own config/secondmate-accounts/<id>/claude-account pin" >&2
   exit 1
 }
@@ -3701,16 +3701,23 @@ fi
 RAW_COMMAND=
 [ "$RAW_LAUNCH" = 0 ] || RAW_COMMAND=$ARG3
 WORKER_ACCOUNT_MATE=
-[ "$KIND" != secondmate ] || WORKER_ACCOUNT_MATE=$ID
+WORKER_ACCOUNT_CONFIG=$CONFIG
+if [ "$KIND" = secondmate ]; then
+  if [ "$RELAUNCH" -eq 1 ] && [ -n "$ACCOUNT_ARG" ]; then
+    WORKER_ACCOUNT_CONFIG=$(fm_worker_account_secondmate_config "$ID" "$RELAUNCH_WT") || exit 1
+  else
+    WORKER_ACCOUNT_MATE=$ID
+  fi
+fi
 # A declared Claude account list (config/claude-accounts) needs the entry this
 # launch spends: --account on a fresh spawn, and on a relaunch that flag or
 # else the account the task already records.
 WORKER_ACCOUNT_REQUEST=$ACCOUNT_ARG
 if [ "$RELAUNCH" -eq 1 ]; then
-  WORKER_ACCOUNT_REQUEST=$(fm_worker_account_relaunch_request "$HARNESS" "$CONFIG" "$RELAUNCH_PRIOR_HARNESS" \
+  WORKER_ACCOUNT_REQUEST=$(fm_worker_account_relaunch_request "$HARNESS" "$WORKER_ACCOUNT_CONFIG" "$RELAUNCH_PRIOR_HARNESS" \
     "$(fm_meta_get "$RELAUNCH_META" account)" "$ACCOUNT_ARG" "$WORKER_ACCOUNT_MATE") || exit 1
 fi
-WORKER_ACCOUNT=$(fm_worker_account_select "$HARNESS" "$CONFIG" "$MODEL" "${PI_BIN:-$HARNESS}" "$RAW_COMMAND" "$WORKER_ACCOUNT_MATE" "$WORKER_ACCOUNT_REQUEST") || exit 1
+WORKER_ACCOUNT=$(fm_worker_account_select "$HARNESS" "$WORKER_ACCOUNT_CONFIG" "$MODEL" "${PI_BIN:-$HARNESS}" "$RAW_COMMAND" "$WORKER_ACCOUNT_MATE" "$WORKER_ACCOUNT_REQUEST") || exit 1
 WORKER_ACCOUNT_DECLARED=${WORKER_ACCOUNT%%$'\t'*}
 WORKER_ACCOUNT_ROOT=${WORKER_ACCOUNT#*$'\t'}
 WORKER_ACCOUNT_PROVIDER=${WORKER_ACCOUNT_ROOT#*$'\t'}

@@ -251,6 +251,19 @@ fm_worker_account_relaunch_request() {
   printf '%s\n' "$recorded"
 }
 
+# A secondmate's explicit relaunch account belongs to its own home, not
+# to the home issuing the lifecycle command.
+fm_worker_account_secondmate_config() { # <mate> <home>
+  local mate=$1 home=$2
+  [ -n "$home" ] && [ -d "$home" ] && [ ! -L "$home" ] \
+    && [ -f "$home/.fm-secondmate-home" ] && [ ! -L "$home/.fm-secondmate-home" ] \
+    && [ "$(<"$home/.fm-secondmate-home")" = "$mate" ] || {
+    echo "error: no verified account configuration in secondmate $mate's recorded home" >&2
+    return 1
+  }
+  printf '%s/config\n' "$home"
+}
+
 # fm_worker_account_pi_provider <model>
 # Prints the provider an explicit Pi --model <provider>/<id> names. Returns 1,
 # silently, for anything else, so no caller can fall back to a guess.

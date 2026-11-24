@@ -7,6 +7,7 @@
 #   fm-remote-secondmate-control.sh validate-inheritance <id>
 #   fm-remote-secondmate-control.sh release-backend <id> <backend> <task-set-digest>
 #   fm-remote-secondmate-control.sh relaunch <id> <harness> <model|default|-> <effort|default|->
+#   fm-remote-secondmate-control.sh relaunch <id> --on-usage-limit
 #   fm-remote-secondmate-control.sh state <id>
 #   fm-remote-secondmate-control.sh route <id>
 #   fm-remote-secondmate-control.sh send <id> <message> [fire-and-forget]
@@ -425,13 +426,13 @@ cmd_launch() {
 # re-resolve it here would silently drift the mate onto another runtime. `default`
 # explicitly clears an absent parent pin; `-` remains its compatibility spelling.
 cmd_relaunch() {
-  local id=$1 harness=$2 model=$3 effort=$4
+  local id=$1 harness=$2 model=${3:-default} effort=${4:-default} out
   local -a control_args relaunch_env
 
   validate_id "$id"
   validate_home "$id"
   case "$harness" in
-    claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|omp) ;;
+    --on-usage-limit|claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|omp) ;;
     *) die "unverified remote secondmate harness: $harness" ;;
   esac
   case "$effort" in -|default|low|medium|high|xhigh|max|ultra) ;; *) die "invalid remote secondmate effort: $effort" ;; esac
@@ -453,7 +454,13 @@ cmd_relaunch() {
     FM_CONFIG_OVERRIDE="$TARGET_HOME/config" FM_SKIP_SECONDMATE_INHERIT=1
     FM_SKIP_SECONDMATE_SYNC=1)
   [ "$REMOTE_ENDPOINT_BACKEND" != herdr ] || relaunch_env=("HERDR_SESSION=$REMOTE_HERDR_SESSION" "${relaunch_env[@]}")
-  env "${relaunch_env[@]}" "$SCRIPT_DIR/fm-control.sh" "${control_args[@]}"
+  if [ "$harness" = --on-usage-limit ]; then
+    out=$(env "${relaunch_env[@]}" "$SCRIPT_DIR/fm-control.sh" "$id" relaunch --on-usage-limit) || return $?
+    printf '%s\n' "$out"
+    case $'\n'"$out"$'\n' in *$'\nquota-rotated\n'*) ;; *) return 0 ;; esac
+  else
+    env "${relaunch_env[@]}" "$SCRIPT_DIR/fm-control.sh" "${control_args[@]}"
+  fi
   # A parent tracking this route needs the identity the relaunch actually
   # produced, not the one it asked for, so it can republish its own record the
   # same way cmd_launch's caller already does. Reading it back from the
@@ -678,7 +685,10 @@ case "${1:-}" in
   validate-inheritance) shift; [ "$#" -eq 1 ] || usage; cmd_validate_inheritance "$@" ;;
   release-backend) shift; [ "$#" -eq 3 ] || usage; cmd_release_backend "$@" ;;
   launch) shift; [ "$#" -ge 5 ] && [ "$#" -le 6 ] || usage; cmd_launch "$@" ;;
-  relaunch) shift; [ "$#" -eq 4 ] || usage; cmd_relaunch "$@" ;;
+  relaunch)
+    shift
+    case "$#:${2:-}" in 2:--on-usage-limit|4:*) ;; *) usage ;; esac
+    cmd_relaunch "$@" ;;
   state) shift; [ "$#" -eq 1 ] || usage; validate_id "$1"; validate_home "$1"; state_value "$1" ;;
   route) shift; [ "$#" -eq 1 ] || usage; cmd_route "$1" ;;
   send) shift; [ "$#" -ge 2 ] && [ "$#" -le 3 ] || usage; cmd_send "$@" ;;
