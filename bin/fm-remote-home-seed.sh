@@ -107,18 +107,20 @@ else
 fi
 
 # Resolve before publishing the route or asking the remote doctor to repair it.
-SEED_BACKEND=$(
+seed_backend_select() {
+  local selected
   # shellcheck source=bin/fm-backend.sh
   . "$SCRIPT_DIR/fm-backend.sh"
   # shellcheck source=bin/fm-fleet-backend-lib.sh
   . "$SCRIPT_DIR/fm-fleet-backend-lib.sh"
-  selected=$(fm_fleet_backend_read "$STATE") || exit 1
-  [ -n "$selected" ] || selected=$(fm_backend_name) || exit 1
+  selected=$(fm_fleet_backend_read "$STATE") || return 1
+  [ -n "$selected" ] || selected=$(fm_backend_name) || return 1
   case "$selected" in
     hc|herdr) fm_fleet_backend_validate "$STATE" "${FM_CONFIG_OVERRIDE:-$FM_HOME/config}" "$selected" ;;
     *) printf 'any' ;;
   esac
-) || die "fleet runtime selection failed"
+}
+SEED_BACKEND=$(seed_backend_select) || die "fleet runtime selection failed"
 
 mkdir -p "$STATE" || die "cannot create parent state directory"
 REGISTRY_LOCK=$(secondmate_registry_lock_path "$STATE")
