@@ -637,13 +637,78 @@ launch_mcp_prompt_check() {  # <window> <task> <capture>
   fi
 }
 
+remote_inbox_probe_cleanup() {
+  local pidf pid
+  for pidf in "$STATE"/.remote-inbox-probe-*.running; do
+    [ -f "$pidf" ] && [ ! -L "$pidf" ] || continue
+    pid=$(cat "$pidf" 2>/dev/null || true)
+    case "$pid" in
+      ''|*[!0-9]*) ;;
+      *) kill -TERM "$pid" 2>/dev/null || true ;;
+    esac
+  done
+  rm -f -- "$STATE"/.remote-inbox-probe-*
+}
+
+remote_inbox_probe_start() {  # <task>
+  local task=$1 probe_running probe_result probe_tmp
+  probe_running="$STATE/.remote-inbox-probe-$task.running"
+  probe_result="$STATE/.remote-inbox-probe-$task.result"
+  probe_tmp="$STATE/.remote-inbox-probe-$task.tmp.${BASHPID:-$$}"
+  (
+    rc=0
+    ( run_check_process "$SCRIPT_DIR/fm-on.sh" "$task" fm-remote-secondmate-control.sh inbox-probe "$task" ) \
+      > "$probe_tmp.body" 2>/dev/null || rc=$?
+    {
+      printf '%s\n' "$rc"
+      cat "$probe_tmp.body" 2>/dev/null || true
+    } > "$probe_tmp" && mv -f -- "$probe_tmp" "$probe_result"
+    rm -f -- "$probe_tmp.body" "$probe_tmp" "$probe_running"
+  ) </dev/null >/dev/null 2>&1 &
+  printf '%s\n' "$!" > "$probe_running"
+}
+
 remote_inbox_steer_check() {  # <window> <task>
   local w=$1 task=$2 out kind base count age extra previous attempts last now grace max reason
+  local probe_running probe_result probe_rc probe_pid
   local ladder="$STATE/.remote-inbox-ladder-$2" marker="$STATE/.remote-inbox-escalated-$2"
-  if watcher_waited run_check_process "$SCRIPT_DIR/fm-on.sh" "$task" fm-remote-secondmate-control.sh inbox-probe "$task" 2>/dev/null; then
-    out=$WATCHER_CAPTURE
+  if [ -n "${WATCHER_PID:-}" ]; then
+    probe_running="$STATE/.remote-inbox-probe-$task.running"
+    probe_result="$STATE/.remote-inbox-probe-$task.result"
+    if [ -f "$probe_result" ] && [ ! -L "$probe_result" ]; then
+      probe_rc=1
+      out=''
+      {
+        IFS= read -r probe_rc || probe_rc=1
+        out=$(cat)
+      } < "$probe_result"
+      rm -f -- "$probe_result" "$probe_running"
+      case "$probe_rc" in
+        0) ;;
+        *) out=unknown ;;
+      esac
+    else
+      if [ -f "$probe_running" ] && [ ! -L "$probe_running" ]; then
+        probe_pid=$(cat "$probe_running" 2>/dev/null || true)
+        case "$probe_pid" in
+          ''|*[!0-9]*) rm -f -- "$probe_running" ;;
+          *)
+            if kill -0 "$probe_pid" 2>/dev/null; then
+              return 0
+            fi
+            rm -f -- "$probe_running"
+            ;;
+        esac
+      fi
+      remote_inbox_probe_start "$task"
+      return 0
+    fi
   else
-    out=unknown
+    if watcher_waited run_check_process "$SCRIPT_DIR/fm-on.sh" "$task" fm-remote-secondmate-control.sh inbox-probe "$task" 2>/dev/null; then
+      out=$WATCHER_CAPTURE
+    else
+      out=unknown
+    fi
   fi
   read -r kind base count age extra <<EOF
 $out
@@ -4008,11 +4073,13 @@ watcher_cleanup() {
     lock=${staged%.owner."$FM_LOCK_OWNER_SCOPE".*}
     fm_lock_discard_staged_owners "$lock" "$FM_LOCK_OWNER_SCOPE" "$WATCHER_PID"
   done
-  if [ "$owns_lock" -eq 1 ] \
-    && ! fm_recovery_transition "$WATCHER_DOWNTIME_MARKER" "$transition" "$WATCH_LOCK" \
+  if [ "$owns_lock" -eq 1 ]; then
+    remote_inbox_probe_cleanup
+    if ! fm_recovery_transition "$WATCHER_DOWNTIME_MARKER" "$transition" "$WATCH_LOCK" \
       downtime "$CLEANUP_LOCK_BOUND"; then
-    echo "watcher: recovery state could not be persisted; retaining stale lock evidence" >&2
-    cleanup_status=1
+      echo "watcher: recovery state could not be persisted; retaining stale lock evidence" >&2
+      cleanup_status=1
+    fi
   fi
   return "$cleanup_status"
 }
@@ -4106,6 +4173,7 @@ lane_capacity_publish_detached() {
 }
 
 [ -e "$STATE/.last-heartbeat" ] || touch "$STATE/.last-heartbeat"
+remote_inbox_probe_cleanup
 
 # A merged poll may have queued its terminal wake and then lost the process
 # between receipt publication and fixed-path removal.

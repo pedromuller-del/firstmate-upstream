@@ -45,6 +45,7 @@ printf 'schema=fm-task-inbox.v1\nat=2026-01-01T00:00:00Z\n--\nanother\n' > "$REM
 cat > "$TMP_ROOT/fakebin/ssh" <<'SH'
 #!/usr/bin/env bash
 [ "${FM_TEST_REMOTE_DOWN:-0}" != 1 ] || exit 255
+[ "${FM_TEST_REMOTE_DELAY:-0}" -le 0 ] 2>/dev/null || sleep "$FM_TEST_REMOTE_DELAY"
 [ -z "${FM_TEST_REMOTE_GARBAGE:-}" ] || { printf "%s\n" "$FM_TEST_REMOTE_GARBAGE"; exit 0; }
 while [ "$#" -gt 0 ]; do
   case "$1" in -o) shift 2 ;; --) shift; break ;; *) exit 90 ;; esac
@@ -63,7 +64,7 @@ FM_HOME="$TMP_ROOT" FM_ROOT_OVERRIDE="$ROOT" FM_STATE_OVERRIDE="$TMP_ROOT/state"
   wake() { :; }
   for i in 1 2 3 4 5; do inbox_steer_check remote:mate mate; done
   [ -f "$FM_WAKE_QUEUE" ] && [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 1 ] || { echo "expected one remote inbox wake" >&2; exit 1; }
-  rg -q "mate.*2.*(age|old)" "$FM_WAKE_QUEUE" || { echo "wake must name mate, count and age" >&2; exit 1; }
+  grep -Eq "mate.*2.*(age|old)" "$FM_WAKE_QUEUE" || { echo "wake must name mate, count and age" >&2; exit 1; }
   mv "$2/state/parent-route/mate.inbox/001.msg" "$2/state/parent-route/mate.inbox/002.msg" "$2/state/parent-route/mate.inbox/handled/"
   printf "schema=fm-task-inbox.v1\ndelivery=fire-and-forget\n--\nnotice\n" > "$2/state/parent-route/mate.inbox/003.msg"
   for i in 1 2 3 4 5; do inbox_steer_check remote:mate mate; done
@@ -77,7 +78,7 @@ FM_HOME="$TMP_ROOT" FM_ROOT_OVERRIDE="$ROOT" FM_STATE_OVERRIDE="$TMP_ROOT/state"
   [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 1 ] || { echo "unreachable or garbled remote probe produced a wake" >&2; exit 1; }
   for i in 1 2 3 4 5; do inbox_steer_check remote:mate mate; done
   [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 2 ] || { echo "stuck record after an unknown probe did not wake once" >&2; exit 1; }
-  rg -q "mate has 1 unhandled.*003.msg" "$FM_WAKE_QUEUE" || { echo "second wake must name the stuck record" >&2; exit 1; }
+  grep -Eq "mate has 1 unhandled.*003.msg" "$FM_WAKE_QUEUE" || { echo "second wake must name the stuck record" >&2; exit 1; }
   mv "$2/state/parent-route/mate.inbox/003.msg" "$2/state/parent-route/mate.inbox/handled/"
 ' _ "$ROOT" "$REMOTE"
 pass "remote inbox alerts once for unhandled records and stays quiet on unknown probes"
@@ -99,7 +100,7 @@ FM_HOME="$TMP_ROOT" FM_ROOT_OVERRIDE="$ROOT" FM_STATE_OVERRIDE="$TMP_ROOT/state"
   launch_mcp_prompt_check lab:pi pi "$fixture"
   launch_mcp_prompt_check lab:pi pi "$fixture"
   [ "$(wc -l < "$FM_WAKE_QUEUE" | tr -d " ")" = 1 ] || { echo "expected one prompt-specific wake" >&2; exit 1; }
-  rg -qi "MCP.*(consent|approval)" "$FM_WAKE_QUEUE" || { echo "wake must identify MCP consent" >&2; exit 1; }
+  grep -Eqi "MCP.*(consent|approval)" "$FM_WAKE_QUEUE" || { echo "wake must identify MCP consent" >&2; exit 1; }
 ' _ "$ROOT"
 pass "Pi MCP launch consent produces one prompt-specific wake"
 
@@ -116,9 +117,27 @@ watch_bg "$case_dir/state" "$case_dir/fakebin" "$case_dir/out" env \
   FM_WATCH_HANDLING_SUCCESSOR=1
 pid=$!
 wait_for_exit "$pid" 200 || { reap "$pid"; fail "watcher did not surface the remote inbox"; }
-rg -q 'remote secondmate mate has 1 unhandled' "$case_dir/state/.wake-queue" \
+grep -Eq 'remote secondmate mate has 1 unhandled' "$case_dir/state/.wake-queue" \
   || fail "watcher did not enqueue the remote inbox wake"
 pass "watcher loop surfaces a remote mate's unhandled inbox"
+
+case_dir=$(make_case remote-inbox-delayed-beacon)
+mkdir -p "$case_dir/data" "$case_dir/config"
+printf 'window=remote:mate\nkind=secondmate\nremote_host=lab\n' > "$case_dir/state/mate.meta"
+printf -- '- mate - fixture (host: lab; root: /remote/root; home: %s; scope: fixture; projects: sample; added 2026-08-26)\n' "$REMOTE" > "$case_dir/data/secondmates.md"
+watch_bg "$case_dir/state" "$case_dir/fakebin" "$case_dir/out" env \
+  FM_HOME="$case_dir" FM_ROOT_OVERRIDE="$ROOT" FM_SSH_BIN="$TMP_ROOT/fakebin/ssh" \
+  FM_TEST_ROOT="$ROOT" FM_TEST_REMOTE_DELAY=6 FM_TASK_INBOX_GRACE_SECS=0 FM_TASK_INBOX_RING_MAX=0 \
+  FM_WATCH_HANDLING_SUCCESSOR=1
+pid=$!
+if ! wait_poll_cycle "$case_dir/state" "$pid" 40; then
+  reap "$pid" || true
+  fail "watcher beacon stalled behind delayed remote inbox probe"
+fi
+wait_for_exit "$pid" 200 || { reap "$pid" || true; fail "watcher did not surface the delayed remote inbox"; }
+grep -Eq 'remote secondmate mate has 1 unhandled' "$case_dir/state/.wake-queue" \
+  || fail "watcher did not enqueue the delayed remote inbox wake"
+pass "watcher beacon keeps advancing while a remote inbox probe is delayed, then surfaces it"
 
 case_dir=$(make_case remote-inbox-unreachable)
 mkdir -p "$case_dir/data" "$case_dir/config"
@@ -155,5 +174,5 @@ watch_bg "$case_dir/state" "$case_dir/fakebin" "$case_dir/out" env \
   FM_FAKE_TMUX_CAPTURE="$case_dir/capture" FM_WATCH_HANDLING_SUCCESSOR=1
 pid=$!
 wait_for_exit "$pid" 200 || { reap "$pid"; fail "watcher did not surface the Pi MCP prompt"; }
-rg -qi 'MCP.*consent' "$case_dir/state/.wake-queue" || fail "watcher did not enqueue the MCP consent wake"
+grep -Eqi 'MCP.*consent' "$case_dir/state/.wake-queue" || fail "watcher did not enqueue the MCP consent wake"
 pass "watcher loop surfaces the Pi MCP consent prompt"
