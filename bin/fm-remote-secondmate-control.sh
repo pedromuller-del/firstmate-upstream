@@ -92,6 +92,8 @@ fi
 
 # shellcheck source=bin/fm-backend.sh
 . "$SCRIPT_DIR/fm-backend.sh"
+# shellcheck source=bin/fm-remote-job-lib.sh
+. "$SCRIPT_DIR/fm-remote-job-lib.sh"
 # shellcheck source=bin/fm-fleet-backend-lib.sh
 . "$SCRIPT_DIR/fm-fleet-backend-lib.sh"
 # shellcheck source=bin/fm-ff-lib.sh
@@ -166,6 +168,8 @@ remote_endpoint_load() {
       unset FM_HC_SOCKET HC_SOCKET HC_TERMINAL_SOCKET HC_TERMINAL_ID HC_SCOPE
       # The host-local spawn owns terminal labels under the code root, not the child home.
       export HC_SESSION="$REMOTE_HC_SESSION" FM_HOME="$FM_ROOT"
+      export FM_HC_SOCKET
+      FM_HC_SOCKET=$(fm_remote_job_hc_socket "$HOME" "$HC_SESSION")
       ;;
     rex)
       # The validator above already binds rex_session_id/rex_window_id/
@@ -351,6 +355,8 @@ cmd_launch() {
   if [ "$selected_backend" = hc ]; then
     unset FM_HC_SOCKET HC_SOCKET HC_TERMINAL_SOCKET HC_TERMINAL_ID HC_SCOPE
     export HC_SESSION="$REMOTE_HC_SESSION" FM_HOME="$FM_ROOT"
+    export FM_HC_SOCKET
+    FM_HC_SOCKET=$(fm_remote_job_hc_socket "$HOME" "$HC_SESSION")
     if ! fm_backend_source hc || ! fm_backend_hc_version_check; then
       die "selected remote backend hc is unavailable; install compatible Herdr Core before retrying"
     fi

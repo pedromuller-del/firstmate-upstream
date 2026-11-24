@@ -940,6 +940,7 @@ worker_run_job() { # <account-home> <job-dir>
     "HOME=$account_home"
     "FM_HOME=$home"
     "FM_ROOT_OVERRIDE=$root"
+    "FM_HC_SOCKET=$(fm_remote_job_hc_socket "$account_home" fm-remote)"
     FM_REMOTE_JOB_ACTIVE=1
   )
   if [ -n "${FM_REMOTE_JOB_PLATFORM_OVERRIDE:-}" ]; then

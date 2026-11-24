@@ -31,7 +31,7 @@
 set -eu
 
 PROTOCOL=1
-DOCTOR_SHA256=1abba011d8d81e86cf33d8cf1efc3725967a194aa16be116c9fc1f956e0f36ce
+DOCTOR_SHA256=d93a7ba4b47f34ba31c62bef9cfe66724991faaf5024657955cefd68303c972a
 REAL_SOURCE=$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "${BASH_SOURCE[0]}" 2>/dev/null) ||
   REAL_SOURCE=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null) ||
   REAL_SOURCE=${BASH_SOURCE[0]}
@@ -159,6 +159,7 @@ if [ "$COMMAND" = fm-remote-doctor.sh ]; then
     "HOME=$ACCOUNT_HOME"
     "FM_HOME=$HOME_PATH"
     "FM_ROOT_OVERRIDE=$ROOT"
+    "FM_HC_SOCKET=$(fm_remote_job_hc_socket "$ACCOUNT_HOME" fm-remote)"
     FM_REMOTE_DOCTOR_BOOTSTRAP=1
   )
   if [ -n "${FM_REMOTE_JOB_PLATFORM_OVERRIDE:-}" ]; then

@@ -116,6 +116,12 @@ assert_contains "$(run_control capture mate)" 'fixture capture' 'capture must us
 [ "$(run_control observe mate)" = idle ] || fail 'observation must use recorded hc terminal'
 assert_no_grep '/foreign' "$HC_TEST_LOG" 'ambient socket must never redirect remote control'
 assert_grep 'fm-remote|' "$HC_TEST_LOG" 'control must use dedicated remote session'
+EXPECTED_SOCKET="$TMP/account/.local/state/herdr-core/fm-remote/fm-remote.sock"
+: > "$HC_TEST_LOG"
+mkdir -p "$TMP/runtime"
+XDG_RUNTIME_DIR="$TMP/runtime" run_control state mate >/dev/null
+XDG_RUNTIME_DIR='' run_control state mate >/dev/null
+[ "$(cut -d '|' -f 2 "$HC_TEST_LOG" | sort -u)" = "$EXPECTED_SOCKET" ] || fail 'remote control must pin the same account socket regardless of XDG runtime'
 pass 'hc route, state and capture use the recorded dedicated session'
 
 run_control send mate 'harmless durable steer' fire-and-forget
@@ -151,7 +157,7 @@ pass 'real relaunch refuses a missing secondmate terminal without rebinding'
 cat > "$CODE/bin/fm-spawn.sh" <<'SH'
 #!/usr/bin/env bash
 set -eu
-[ "$HC_SESSION" = fm-remote ] && [ -z "${FM_HC_SOCKET:-}${HC_SOCKET:-}" ]
+[ "$HC_SESSION" = fm-remote ] && [ "${FM_HC_SOCKET:-}" = "$HOME/.local/state/herdr-core/fm-remote/fm-remote.sock" ] && [ -z "${HC_SOCKET:-}" ]
 cat > "$FM_STATE_OVERRIDE/mate.meta" <<META
 worktree=$FM_HOME
 project=$FM_ROOT_OVERRIDE
@@ -167,7 +173,7 @@ SH
 cat > "$CODE/bin/fm-control.sh" <<'SH'
 #!/usr/bin/env bash
 set -eu
-[ "$HC_SESSION" = fm-remote ] && [ -z "${FM_HC_SOCKET:-}${HC_SOCKET:-}" ]
+[ "$HC_SESSION" = fm-remote ] && [ "${FM_HC_SOCKET:-}" = "$HOME/.local/state/herdr-core/fm-remote/fm-remote.sock" ] && [ -z "${HC_SOCKET:-}" ]
 [ -f "$FM_STATE_OVERRIDE/mate.meta" ]
 SH
 chmod +x "$CODE/bin/fm-spawn.sh" "$CODE/bin/fm-control.sh"
