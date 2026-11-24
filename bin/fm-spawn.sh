@@ -2036,7 +2036,7 @@ spawn_abort_cleanup() {
       status=1
     fi
   fi
-  if [ "$status" -ne 0 ] && [ ! -e "$STATE/$ID.meta" ] && [ ! -L "$STATE/$ID.meta" ]; then
+  if [ "$status" -ne 0 ] && [ -n "${ID:-}" ] && [ ! -e "$STATE/$ID.meta" ] && [ ! -L "$STATE/$ID.meta" ]; then
     if [ -n "$HC_FRESH_ABORT_TARGET" ]; then
       if fm_backend_hc_kill "$HC_FRESH_ABORT_TARGET" '' "fm-$ID"; then
         SPAWN_ENDPOINT_CLOSED=1
