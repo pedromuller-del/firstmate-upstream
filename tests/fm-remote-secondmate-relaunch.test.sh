@@ -209,7 +209,7 @@ cmp -s "$TMP/ios-before-quota.meta" "$HOME_DIR/state/ios.meta" || fail 'exhausti
 OUT=$(FM_FAKE_RELAUNCH_MODE=quota-rotated run_relaunch ios --on-usage-limit); RC=$?
 expect_code 0 "$RC" "remote quota rotation must accept a confirmed route"$'\n'"$OUT"
 assert_contains "$OUT" 'quota-rotated' 'rotation confirmation reaches the parent'
-rg -qx 'harness=claude' "$HOME_DIR/state/ios.meta" || fail 'the rotated route was not published'
+grep -qx 'harness=claude' "$HOME_DIR/state/ios.meta" || fail 'the rotated route was not published'
 pass 'remote quota uses the host-local account decision and updates only a confirmed route'
 
 echo "ALL TESTS PASSED"

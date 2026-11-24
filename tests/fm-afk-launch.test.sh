@@ -1079,6 +1079,7 @@ unit_native_daemon_refusal_clears_flag() {
   st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-refusal-held.XXXXXX")
   mkdir -p "$st/state/.supervise-daemon.lock"
   "$SLEEPER" &
+  # shellcheck disable=SC2031 # The background PID is captured immediately in this shell.
   holder=$!
   printf '%s\n' "$holder" > "$st/state/.supervise-daemon.lock/pid"
   printf 'away\n%s\n' "$(date +%s)" > "$st/state/.afk"
