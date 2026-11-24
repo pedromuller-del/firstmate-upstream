@@ -33,6 +33,7 @@
 #   fm-captain-hold.sh complete <origin-id> (--none | <task-id>...)
 #   fm-captain-hold.sh verify <origin-id>
 #   fm-captain-hold.sh open <task-id> [--identity] [--distinguish-absent]
+#   fm-captain-hold.sh age
 #   fm-captain-hold.sh diverged
 #   fm-captain-hold.sh reconcile list
 #   fm-captain-hold.sh reconcile close <task-id> --evidence-file <path>
@@ -206,6 +207,10 @@
 #
 # `diverged` is the read-only guard over the seam between the two records of
 # one captain call. See "record divergence" beside command_diverged below.
+#
+# `age` reports open captain holds as tab-separated task id, hold-set time,
+# whole days elapsed, and hold-until date. A dash marks an absent value.
+# It ends with open, older7 and older14 counts. The thresholds are strict.
 #
 # With config/hold-pr-settle present, pr-policy declares which forge events
 # answer this particular hold. It adds the structured PR link and atomically
@@ -2265,15 +2270,47 @@ EOF
 # two comma-separated listing fields are read - both are slugs that precede any
 # quoted title - so a title containing commas or quotes cannot shift them.
 open_task_ids() {
-  local data
+  local data rows
   data=$(fm_backlog_data_absolute "$DATA") || return 1
-  fm_backlog_row_list "$data" 2>/dev/null | awk -F, '
+  rows=$(fm_backlog_row_list "$data") || { printf '%s\n' "$rows" >&2; return 1; }
+  printf '%s\n' "$rows" | awk -F, '
     /^  [A-Za-z0-9._-]+,/ {
       id = $1
       sub(/^ +/, "", id)
       if ($2 != "done") print id
     }
   '
+}
+
+command_age() {
+  local now ids id show stamp timestamp epoch elapsed days until_date
+  local open=0 older7=0 older14=0
+  [ "$#" -eq 0 ] || { usage >&2; exit 2; }
+  now=$(fm_utc_iso_to_epoch "${FM_CAPTAIN_HOLD_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}") \
+    || fail "invalid report time"
+  ids=$(open_task_ids) || fail "could not list this home's backlog"
+  while IFS= read -r id; do
+    [ -n "$id" ] || continue
+    task_show "$id" || fail "could not read task $id"
+    show=$TASK_SHOW_OUTPUT
+    [ "$(show_field "$show" state)" != "done" ] || continue
+    [ "$(show_field_value "$show" hold_kind)" = captain ] || continue
+    open=$((open + 1))
+    stamp=$(body_hold_set_timestamp "$(show_field_value "$show" body)")
+    timestamp=$stamp
+    case "$timestamp" in ????-??-??) timestamp="${timestamp}T00:00:00Z" ;; esac
+    days=-
+    if epoch=$(fm_utc_iso_to_epoch "$timestamp"); then
+      elapsed=$((now - epoch))
+      [ "$elapsed" -ge 0 ] || elapsed=0
+      days=$((elapsed / 86400))
+      if [ "$elapsed" -gt 604800 ]; then older7=$((older7 + 1)); fi
+      if [ "$elapsed" -gt 1209600 ]; then older14=$((older14 + 1)); fi
+    fi
+    until_date=$(show_field_value "$show" hold_until)
+    printf '%s\t%s\t%s\t%s\n' "$id" "${stamp:--}" "$days" "${until_date:--}"
+  done <<< "$ids"
+  printf 'open=%s older7=%s older14=%s\n' "$open" "$older7" "$older14"
 }
 
 # Every key token stated anywhere in a status log. A cheap candidate scan: it
@@ -2426,6 +2463,7 @@ case "${1:-}" in
   complete) shift; command_complete "$@" ;;
   verify) shift; command_verify "$@" ;;
   open) shift; command_open "$@" ;;
+  age) shift; command_age "$@" ;;
   diverged) shift; command_diverged "$@" ;;
   reconcile) shift; command_reconcile "$@" ;;
   pr-policy) shift; command_pr_policy "$@" ;;
