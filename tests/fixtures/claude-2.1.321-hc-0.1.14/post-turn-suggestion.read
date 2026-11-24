@@ -1,0 +1,17 @@
+ ▐▛███▛█   Claude Code v2.1.321
+▝▜██████▀  Haiku 5.5 · Claude Ultra
+ ▝▝   ▝▝   /work/photos
+
+▎ Your Ultra plan includes $200 a month in API credits to power your apps and agents. Claim them at https://clau.de/api-credits
+
+❯ I am planning a small Python CLI that renames photos by date. What is the first step?
+
+● Start by deciding where the date comes from. Photos usually store capture time in EXIF DateTimeOriginal, but some files lack it, and file modification time changes when files are copied. Pick EXIF
+  as the primary source, fall back to modification time only when EXIF is missing, and write that rule down with your target filename format.
+
+✻ Crunched for 3s · done 7:07 AM
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ Write the naming spec as a markdown file
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ auto mode on (shift+tab to cycle)

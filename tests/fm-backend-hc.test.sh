@@ -6,15 +6,17 @@
 # behavior with a stub so it runs everywhere.
 set -u
 
-# shellcheck source=tests/lib.sh
-. "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+# shellcheck source=tests/fixtures.sh
+. "$(dirname "${BASH_SOURCE[0]}")/fixtures.sh"
 
 TMP_ROOT=$(fm_test_tmproot fm-backend-hc-tests)
 
 # The stub answers `get` from <dir>/<address>.json (exit from <address>.exit,
 # 3 = not_found when no file exists), `ls` from <dir>/ls.json, `run` with
 # <dir>/run.json, and removes <address>.json on `rm` unless <dir>/rm-sticks
-# exists. Every call is logged with its HC_SESSION and HC_SOCKET.
+# exists. `read` prints <dir>/read.txt when it exists; `attach` prints
+# <dir>/attach.paint and then never exits, like a real watch-only attach.
+# Every call is logged with its HC_SESSION and HC_SOCKET.
 make_hc_fakebin() {  # <dir> -> echoes fakebin dir
   local fb="$1/fakebin"
   mkdir -p "$fb"
@@ -37,16 +39,61 @@ case "$cmd" in
     IFS= read -r _req || true
     printf '{"jsonrpc":"2.0","id":1,"result":{"generation":%s}}\n' "${FAKE_HC_GENERATION:-1}"
     ;;
-  ls) cat "$D/ls.json" 2>/dev/null || printf '{"terminals":[]}\n' ;;
-  run) cat "$D/run.json" ;;
+  ls)
+    if [ -e "$D/lifecycle" ]; then
+      set -- "$D"/t*.json
+      if [ -f "$1" ]; then
+        jq -s '{terminals: .}' "$@"
+      else
+        printf '{"terminals":[]}\n'
+      fi
+    else
+      cat "$D/ls.json" 2>/dev/null || printf '{"terminals":[]}\n'
+    fi ;;
+  run)
+    if [ -e "$D/lifecycle" ]; then
+      home= task= cwd=
+      while [ "$#" -gt 0 ]; do
+        case "$1" in
+          --cwd) cwd=$2; shift ;;
+          firstmate.task=*) task=${1#*=} ;;
+          firstmate.home=*) home=${1#*=} ;;
+        esac
+        shift
+      done
+      jq -n --arg cwd "$cwd" --arg task "$task" --arg home "$home" \
+        '{address:"t9",state:"live",cwd:$cwd,labels:{"firstmate.task":$task,"firstmate.home":$home},foreground:{name:"zsh",argv:["/bin/zsh"],pid:1}}' > "$D/t9.json"
+      jq '{address}' "$D/t9.json"
+    else
+      cat "$D/run.json"
+    fi ;;
   get)
     [ -f "$D/$last.exit" ] && exit "$(cat "$D/$last.exit")"
     [ -f "$D/$last.json" ] || { printf '{"error":{"kind":"not_found"}}\n' >&2; exit 3; }
     cat "$D/$last.json"
     ;;
   rm) [ -e "$D/rm-sticks" ] || rm -f "$D/$last.json"; printf '{}\n' ;;
-  read) printf 'screen of %s\n' "$last" ;;
+  read) if [ -f "$D/$last.screen" ]; then cat "$D/$last.screen"; elif [ -f "$D/read.txt" ]; then cat "$D/read.txt"; else printf 'screen of %s\n' "$last"; fi ;;
+  attach)
+    [ -f "$D/attach.paint" ] || { printf '{}\n'; exit 0; }
+    printf '%s\n' "$$" > "$D/attach.pid"
+    cat "$D/attach.paint"
+    exec sleep 31
+    ;;
   send)
+    if [ -e "$D/lifecycle" ]; then
+      target=$3
+      case "$last" in
+        ". '"*"'") staged=${last#". '"}; staged=${staged%"'"}; last=$(< "$staged") ;;
+      esac
+      case "$last" in
+        'treehouse get') : > "$D/interactive-get" ;;
+        'cd -- '*) [ ! -e "$D/refuse-cd" ] || exit 1 ;;
+        *'encode launch-brief'*)
+          jq '.foreground = {name:"codex",argv:["codex"],pid:1}' "$D/$target.json" > "$D/launched"
+          mv "$D/launched" "$D/$target.json" ;;
+      esac
+    fi
     if [ -f "$D/send.exit" ]; then
       printf '{"error":{"kind":"%s"}}\n' "$(cat "$D/send.kind" 2>/dev/null || echo blocked)" >&2
       exit "$(cat "$D/send.exit")"
@@ -137,6 +184,60 @@ test_create_task_is_independent_labeled_and_refuses_duplicates() {
   expect_refused hc_shell 'fm_backend_hc_create_task fmtest fm-a1 /proj'
   assert_not_contains "$(cat "$D/log")" $'\x1frun\x1f' "a live duplicate must not start a second terminal"
   pass "hc: create_task starts an independent labeled terminal and refuses a duplicate"
+}
+
+test_create_task_presentation_home_preserves_parent_ownership() {
+  local out tag child_tag other_tag
+  setup_case presentation
+  mkdir -p "$D/child one" "$D/child two"
+  printf 'same-id\n' > "$D/child one/.fm-secondmate-home"
+  printf 'same-id\n' > "$D/child two/.fm-secondmate-home"
+  printf '{"address":"t9"}\n' > "$D/run.json"
+  tag=$(hometag_of)
+  # shellcheck disable=SC2016 # the inner shell expands it
+  child_tag=$(hc_shell 'FM_HOME="$FAKE_HC_DIR/child one" FM_ROOT="$FAKE_HC_DIR/child one" fm_backend_hometag')
+  # shellcheck disable=SC2016 # the inner shell expands it
+  other_tag=$(hc_shell 'FM_HOME="$FAKE_HC_DIR/child two" FM_ROOT="$FAKE_HC_DIR/child two" fm_backend_hometag')
+  # shellcheck disable=SC2016 # the inner shell expands it
+  out=$(hc_shell '
+    FM_HC_SPACE=parent-custom
+    fm_backend_hc_create_task fmtest fm-child /proj "$FAKE_HC_DIR/child one"
+    printf "home=%s root=%s space=%s tag=%s" "$FM_HOME" "$FM_ROOT" "$FM_HC_SPACE" "$(fm_backend_hometag)"
+  ')
+  assert_contains "$out" "home=$HOMEDIR root=$HOMEDIR space=parent-custom tag=$tag" "child placement must not mutate the parent environment"
+  out=$(grep $'\x1frun\x1f' "$D/log")
+  for want in "firstmate.task=fm-child" "firstmate.home=$tag" "herdr.tab=$tag-fm-child" "herdr.space=fm-$child_tag"; do
+    assert_contains "$out" "$want" "child launch must carry $want"
+  done
+  assert_not_contains "$out" 'herdr.space=parent-custom' "child placement must ignore the parent space override"
+  out=$(grep $'\x1fls\x1f' "$D/log")
+  assert_contains "$out" "firstmate.home=$tag" "duplicate checks must retain parent ownership"
+  : > "$D/log"
+  # shellcheck disable=SC2016 # the inner shell expands it
+  hc_shell 'fm_backend_hc_create_task fmtest fm-other /proj "$FAKE_HC_DIR/child two"' >/dev/null
+  assert_not_contains "$other_tag" "$child_tag" "distinct child paths must have distinct tags even with matching marker IDs"
+  assert_contains "$(cat "$D/log")" "herdr.space=fm-$other_tag" "another child must use its own space"
+  : > "$D/log"
+  # shellcheck disable=SC2016 # the inner shell expands it
+  hc_shell 'FM_HOME="$FAKE_HC_DIR/child one"; FM_ROOT="$FM_HOME"; unset FM_HC_SPACE; fm_backend_hc_create_task fmtest fm-worker /proj' >/dev/null
+  assert_contains "$(cat "$D/log")" "herdr.space=fm-$child_tag" "child workers must share the secondmate presentation space"
+  printf '{"terminals":[{"address":"t9"}]}\n' > "$D/ls.json"
+  : > "$D/log"
+  # shellcheck disable=SC2016 # the inner shell expands it
+  expect_refused hc_shell 'fm_backend_hc_create_task fmtest fm-child /proj "$FAKE_HC_DIR/child one"'
+  assert_not_contains "$(cat "$D/log")" $'\x1frun\x1f' "presentation override must not bypass duplicate refusal"
+  pass "hc: child presentation keeps parent ownership and isolates child spaces"
+}
+
+test_create_task_default_preserves_space_override() {
+  setup_case default-space
+  printf '{"address":"t9"}\n' > "$D/run.json"
+  hc_shell 'FM_HC_SPACE=custom fm_backend_hc_create_task fmtest fm-a1 /proj' >/dev/null
+  assert_contains "$(cat "$D/log")" "herdr.space=custom" "default calls must retain FM_HC_SPACE"
+  : > "$D/log"
+  hc_shell 'FM_HC_SPACE=custom fm_backend_hc_create_task fmtest fm-a1 /proj ""' >/dev/null
+  assert_contains "$(cat "$D/log")" "herdr.space=custom" "an empty presentation home must retain default placement"
+  pass "hc: default placement preserves the configured space"
 }
 
 test_control_interrupt_delivers_the_harness_keys() {
@@ -321,6 +422,105 @@ test_send_text_submit_confirms_through_send_wait() {
   pass "hc: send_text_submit proves the turn through send --wait and never forces a blocked terminal"
 }
 
+# The styled composer read: Claude's dim prompt suggestion is ghost text only
+# in hc's attach paint, so a real recorded paint must read empty while the
+# same text without the dim reads pending; a paint that is cut short or does
+# not match the plain read falls back to the plain read, never to empty.
+test_composer_state_reads_ghost_text_from_the_attach_paint() {
+  local tag out fixture start log
+  setup_case composer-styled
+  tag=$(hometag_of)
+  write_terminal "$D" t1 live fm-a1 "$tag" claude /usr/bin/claude
+  fixture="$FM_TEST_ROOT/tests/fixtures/claude-2.1.321-hc-0.1.14/post-turn-suggestion"
+  cp "$fixture.read" "$D/read.txt"
+  cp "$fixture.paint" "$D/attach.paint"
+  start=$SECONDS
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" empty "a real Claude prompt suggestion (dim in the attach paint) must read empty"
+  [ $((SECONDS - start)) -lt 10 ] || fail "the never-ending attach was not bounded ($((SECONDS - start))s)"
+  if kill -0 "$(cat "$D/attach.pid")" 2>/dev/null; then fail "the bounded attach left its process running"; fi
+  log=$(grep $'\x1fattach\x1f' "$D/log")
+  assert_contains "$log" $'\x1fattach\x1f--observe\x1ft1' "the styled read must be a watch-only attach of the target"
+  LC_ALL=C sed $'s/\e\\[2m//g' "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" pending "the same suggestion text without the dim is typed text"
+  head -c 1500 "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "a paint cut short must fall back to the plain read"
+  cp "$fixture.paint" "$D/attach.paint"
+  LC_ALL=C sed 's/Write the naming spec/Delete the naming spec/' "$fixture.read" > "$D/read.txt"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "a paint that differs from the plain read must fall back to the plain read"
+  cp "$fixture.read" "$D/read.txt"
+  rm -f "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "without a paint, the plain read cannot prove the suggestion empty"
+  pass "hc: the composer read takes Claude's dim suggestion from the attach paint and falls back to the plain read"
+}
+
+# A Claude drawn on the alternate screen (a real macOS paint, hc 0.1.21, its
+# transcript rows blanked) is painted after the main screen and that screen's
+# own cursor placement; only the alternate screen's rows are visible.
+test_composer_state_reads_ghost_text_on_the_alternate_screen() {
+  local tag out fixture
+  setup_case composer-styled-alt
+  tag=$(hometag_of)
+  write_terminal "$D" t1 live fm-a1 "$tag" claude /usr/bin/claude
+  fixture="$FM_TEST_ROOT/tests/fixtures/claude-2.1.321-hc-0.1.21-macos/try-placeholder-alt-screen"
+  cp "$fixture.read" "$D/read.txt"
+  cp "$fixture.paint" "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" empty "Claude's dim Try placeholder on the alternate screen must read empty"
+  LC_ALL=C sed $'s/\e\\[2m//g' "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" pending "the same placeholder text without the dim on the alternate screen is typed text"
+  head -c 700 "$fixture.paint" > "$D/attach.paint"
+  out=$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')
+  assert_equals "$out" unknown "a paint cut before the alternate screen's rows must fall back to the plain read"
+  pass "hc: the composer read takes the alternate screen's rows from a paint that also carries the main screen"
+}
+
+# Pi's composer is blank or typed rows between two solid rules (hc 0.1.14, pi
+# 1.5.0, proof/pi-hc-composer-probe-18ee7a94.log); only a live idle Pi proves it empty.
+pi_screen() {  # <file> <composer-row> [busy-row]
+  local rule='────────────────────────────────────────'
+  { printf '\n\n'; [ -z "${3:-}" ] || printf '%s\n' "$3"; printf '%s\n%s\n%s\n' "$rule" "$2" "$rule"
+    printf 'pi  gpt-6-luna · high  ctx 0.0k/272k  quota ?\n'; } > "$1"
+}
+pi_status() {  # <dir> <address> <state|"">: add hc's native status to a terminal record
+  local f="$1/$2.json"
+  if [ -n "$3" ]; then jq --arg s "$3" '. + {status: {app: "pi", state: $s}}' "$f" > "$f.tmp"; else jq 'del(.status)' "$f" > "$f.tmp"; fi
+  mv "$f.tmp" "$f"
+}
+
+test_pi_composer_is_proven_by_its_foreground_and_status() {
+  local tag
+  setup_case pi-composer
+  tag=$(hometag_of)
+  write_terminal "$D" t1 live fm-a1 "$tag" pi pi
+  pi_status "$D" t1 idle
+  pi_screen "$D/t1.screen" ''
+  assert_equals empty "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "an idle Pi's blank composer must read empty"
+  pi_screen "$D/t1.screen" 'xyz'
+  assert_equals pending "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "typed text in Pi's composer must read pending"
+  pi_screen "$D/t1.screen" ''
+  pi_status "$D" t1 working
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a working Pi must not read empty"
+  pi_status "$D" t1 idle
+  pi_screen "$D/t1.screen" '' '⠋ Working...'
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a busy footer must win over an idle status"
+  pi_screen "$D/t1.screen" ''
+  pi_status "$D" t1 ''
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a Pi with no reported status must not read empty"
+  write_terminal "$D" t1 live fm-a1 "$tag" bash /bin/bash
+  pi_status "$D" t1 idle
+  assert_equals unknown "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "two stale rules over a shell must not read empty"
+  write_terminal "$D" t1 live fm-a1 "$tag" node /home/agent/.local/bin/pi
+  pi_status "$D" t1 idle
+  assert_equals empty "$(hc_shell 'fm_backend_hc_composer_state fmtest:t1 fm-a1')" "a Pi named by its argv path must be proven too"
+  pass "hc: Pi's separated composer reads empty only for a live idle Pi"
+}
+
 test_send_delimiters_and_binary_socket_pins() {
   local tag out
   setup_case pins
@@ -360,10 +560,115 @@ test_required_tool_check_uses_the_adapter_resolver() {
   pass "hc: the bootstrap tool check resolves hc exactly as the adapter does"
 }
 
+setup_hc_worker() {
+  setup_case "$1"
+  : > "$D/lifecycle"
+  HC_WORKER_ID="hcworker-$$"
+  fm_test_spawn_home "$HOMEDIR" codex
+  fm_test_spawn_brief "$HOMEDIR" "$HC_WORKER_ID"
+  fm_git_init_commit "$D/project"
+  git clone -q "$D/project" "$D/slot" || fail "could not clone fixture copy"
+  fm_fake_exit0 "$FB" codex
+  fm_test_fake_sleep_noop "$FB"
+  mkdir -p "$D/user-home"
+  # This fake is the only Treehouse binary the subject can reach.
+  cat > "$FB/treehouse" <<'SH'
+#!/usr/bin/env bash
+D=$FAKE_HC_DIR
+case "${1:-}" in
+  get)
+    [ "$2" = --lease ] || exit 2
+    [ ! -e "$D/pool-full" ] && [ ! -e "$D/leased" ] || { echo 'all 16 worktrees are in use or dirty' >&2; exit 1; }
+    : > "$D/leased"
+    printf '%s\n' "$D/slot" ;;
+  return) rm -f "$D/leased" ;;
+  *) exit 2 ;;
+esac
+SH
+  chmod +x "$FB/treehouse"
+}
+
+hc_worker_command() {
+  FAKE_HC_DIR=$D PATH="$FB:$PATH" FM_HC_BIN="$FB/hc" FM_HOME=$HOMEDIR HOME="$D/user-home" \
+    HC_SESSION=fmtest FM_SPAWN_NO_GUARD=1 FM_CONTROL_POLL=0.05 FM_CONTROL_LAUNCH_WAIT=2 \
+    bash "$FM_TEST_ROOT/bin/$1.sh" "${@:2}"
+}
+
+hc_worker_spawn() {
+  hc_worker_command fm-spawn "$HC_WORKER_ID" "$D/project" --backend hc --mode local-only --yolo off
+}
+
+test_hc_relaunch_replaces_a_shell_in_the_primary_checkout() {
+  local tag rc=0 out meta id
+  setup_hc_worker worker-relaunch
+  id=$HC_WORKER_ID
+  tag=$(FM_HOME="$HOMEDIR" FM_ROOT_OVERRIDE="$FM_TEST_ROOT" bash -c '
+    . "$1/bin/fm-backend.sh"
+    fm_backend_source hc && fm_backend_hometag' bash "$FM_TEST_ROOT")
+  write_terminal "$D" t2 live "fm-$id" "$tag" zsh /bin/zsh
+  jq --arg cwd "$D/project" '.cwd = $cwd | del(.foreground.cwd)' "$D/t2.json" > "$D/original"
+  mv "$D/original" "$D/t2.json"
+  meta="$HOMEDIR/state/$id.meta"
+  printf 'window=fmtest:t2\nendpoint_task_id=%s\nworktree=%s/slot\nproject=%s/project\nharness=codex\nkind=ship\nmode=local-only\nyolo=off\nbranch=fm/%s\nbackend=hc\nhc_session=fmtest\nhc_terminal=t2\n' "$id" "$D" "$D" "$id" > "$meta"
+  printf 'uncommitted work\n' > "$D/slot/local-work"
+
+  out=$(hc_worker_command fm-control "$id" relaunch --note 'continue in the existing copy' 2>&1) || rc=$?
+  expect_code 0 "$rc" "relaunch should replace the leftover shell"$'\n'"$out"
+  [ ! -e "$D/t2.json" ] || fail "the old terminal is still present"
+  assert_equals "$(jq -r .cwd "$D/t9.json")" "$D/slot" "the replacement should start in the recorded copy"
+  assert_equals "$(< "$D/slot/local-work")" 'uncommitted work' "relaunch should preserve local changes"
+  assert_grep 'window=fmtest:t9' "$meta" "the replacement should own the recorded endpoint"
+  assert_grep 'hc_terminal=t9' "$meta" "the hc identity should agree with the recorded endpoint"
+  # Direct relaunch must not replace a live agent, even if hc reports the wrong cwd.
+  jq --arg cwd "$D/project" '.cwd = $cwd' "$D/t9.json" > "$D/live"
+  mv "$D/live" "$D/t9.json"
+  rc=0
+  out=$(hc_worker_command fm-spawn "$id" --relaunch 2>&1) || rc=$?
+  expect_code 1 "$rc" "direct relaunch should refuse the live agent"$'\n'"$out"
+  assert_contains "$out" "reads 'alive'" "refusal should name the live agent"
+  assert_equals "$(jq -r .foreground.name "$D/t9.json")" codex "the live agent should not be retired"
+  pass "hc: relaunch replaces a shell-only terminal in the wrong directory, not a live agent"
+}
+
+test_hc_spawn_refuses_a_full_pool_before_opening_a_terminal() {
+  local rc=0 out
+  setup_hc_worker worker-full
+  : > "$D/pool-full"
+  out=$(hc_worker_spawn 2>&1) || rc=$?
+  expect_code 1 "$rc" "full pool should refuse immediately"$'\n'"$out"
+  assert_contains "$out" 'all 16 worktrees are in use or dirty' "spawn should report the actual Treehouse refusal"
+  [ ! -e "$D/t9.json" ] && [ ! -e "$D/interactive-get" ] || fail "full pool opened an interactive terminal"
+  [ ! -e "$HOMEDIR/state/$HC_WORKER_ID.meta" ] || fail "full pool published a task record"
+  pass "hc: a full pool is reported before opening a terminal"
+}
+
+test_hc_spawn_cleans_up_failed_launch_and_can_retry() {
+  local rc=0 out
+  setup_hc_worker worker-retry
+  : > "$D/refuse-cd"
+  out=$(hc_worker_spawn 2>&1) || rc=$?
+  expect_code 1 "$rc" "spawn should fail when its terminal refuses worktree entry"$'\n'"$out"
+  assert_contains "$out" 'could not be moved into its recorded worktree' "the failure must be after allocation and terminal creation"
+  [ ! -e "$D/t9.json" ] && [ ! -e "$D/leased" ] || fail "failed spawn kept its terminal or lease"
+  [ ! -e "$HOMEDIR/state/$HC_WORKER_ID.meta" ] || fail "failed spawn kept its provisional task record"
+  rm "$D/refuse-cd"
+  rc=0
+  out=$(hc_worker_spawn 2>&1) || rc=$?
+  expect_code 0 "$rc" "the same task id should be retryable"$'\n'"$out"
+  assert_equals "$(jq -r .cwd "$D/t9.json")" "$D/slot" "spawn should start in the leased copy"
+  [ -e "$D/leased" ] && [ ! -e "$D/interactive-get" ] || fail "retry relied on a shell to hold the copy"
+  pass "hc: failed spawn removes its terminal and lease, and the same id can retry"
+}
+
 fm_test_run \
+  test_hc_relaunch_replaces_a_shell_in_the_primary_checkout \
+  test_hc_spawn_refuses_a_full_pool_before_opening_a_terminal \
+  test_hc_spawn_cleans_up_failed_launch_and_can_retry \
   test_hc_is_spawn_capable_and_needs_app_signals \
   test_required_tool_check_uses_the_adapter_resolver \
   test_create_task_is_independent_labeled_and_refuses_duplicates \
+  test_create_task_presentation_home_preserves_parent_ownership \
+  test_create_task_default_preserves_space_override \
   test_control_interrupt_delivers_the_harness_keys \
   test_foreign_or_unlabeled_terminal_gets_no_input_and_no_close \
   test_invalid_session_never_reaches_hc \
@@ -376,4 +681,7 @@ fm_test_run \
   test_endpoint_validation_binds_hc_meta \
   test_container_ensure_gates_binary_version_and_generation \
   test_send_text_submit_confirms_through_send_wait \
+  test_composer_state_reads_ghost_text_from_the_attach_paint \
+  test_composer_state_reads_ghost_text_on_the_alternate_screen \
+  test_pi_composer_is_proven_by_its_foreground_and_status \
   test_send_delimiters_and_binary_socket_pins

@@ -587,6 +587,11 @@ Each signature below was live-verified against the real installed binary through
 An initial Pi signature sourced only from the installed binary's own UI strings ("Project trust", the internal panel-title component, never the dialog's own rendered heading) was wrong and never matched the real screen.
 This guard's first live run caught that before it shipped, which is the evidence for why this class of check must be driven end to end rather than read off strings or a component name.
 
+On 2026-11-16 the same command exited 0 with Pi 1.5.0 and pi-mcp-adapter 7.0.1.
+It printed `ok - pi MCP: real adapter consent surfaces without answering the prompt` from an isolated Pi session with a project MCP server fixture.
+The run also passed Claude Code 2.1.321 and Pi project-trust checks; Gemini was not installed.
+The MCP check observes the dialog and closes the isolated session without approving or declining the server.
+
 Verified 2026-09-22 on Claude Code 2.1.278, pi 0.86.1, and gemini 0.60.0.
 
 ```sh
@@ -687,6 +692,32 @@ skip-runner: pi-signed is not installed, so its pin check was not exercised
 ```
 
 The guard submits no prompt and spends no tokens, so it runs by default wherever a runner is installed; rerun it after every Claude or Pi upgrade.
+
+## Claude worker tool exclusions
+
+`config/crew-exclude-tools` reaches a Claude ship or scout launch as `--disallowedTools '<names>'` placed directly before `--append-system-prompt`, because the option is variadic and would otherwise swallow the launch prompt.
+[Worker tool exclusions](../configuration.md#worker-tool-exclusions-configcrew-exclude-tools) owns the contract; this record owns the measurement.
+Verified on 2026-11-06 with Claude Code 2.1.319 on Linux, interactive launches in a tmux pane with tool search on, against a capture-only local server (`ANTHROPIC_BASE_URL`) that records each `/v1/messages` body and answers 529, so no model is called.
+The arms differ only in the `--disallowedTools` value; the figures are the bytes of the JSON `tools` array and of the whole request for the main-agent request. The two repeats of the `Workflow,Artifact,mcp__claude-artifacts` arm matched on tool schema bytes and differed by 12 request bytes.
+
+| Launch | Tools sent | Tool schema bytes | Request bytes |
+| --- | --- | --- | --- |
+| no list, artifacts MCP server connected | 20 | 52064 | 188189 |
+| `Workflow,Artifact,mcp__claude-artifacts` | 12 | 28416 | 161748 |
+| `mcp__claude-artifacts` only (built-in `Artifact` takes its place) | 14 | 70987 | 206684 |
+| `Workflow,Artifact,mcp__claude-artifacts` | 12 | 28416 | 161736 |
+
+Findings that shape the contract:
+
+- A disallowed name is removed from the request's `tools` array, and a disallowed deferred MCP tool's name also leaves the deferred-tool list in the messages, so the saving is not only the schema.
+- `--tools` is not a substitute: naming an allow-list made Claude Code send every connected MCP tool eagerly (65 tools, 139760 schema bytes in the same environment), the opposite of a saving.
+- A server-level entry `mcp__<server>` hides every tool of that server, and with the artifacts server hidden Claude Code supplies a 37098-byte built-in `Artifact` tool, so both names are needed to drop every artifact schema.
+
+The token-free live guard refreshes the per-version evidence and fails naming the Claude Code version if a release stops honoring the flag:
+
+```sh
+bin/fm-test-run.sh tests/fm-claude-tool-exclude-live.test.sh
+```
 
 ## Secondmate busy contract
 
@@ -929,6 +960,30 @@ Live validation ran 2026-10-01 on Grok 1.0.46 (2765805b9442) [stable], with foll
 The same run's `FM_COMPOSER_MATRIX_LIVE=1 tests/fm-composer-matrix-live-e2e.test.sh` proved the real idle grok 1.0.46 composer `empty` through tmux and checked that the cursorless re-read was not `pending`.
 The portable owner of the shape is `test_matrix_grok_144_approval_titled_bottom_border` in `tests/fm-composer-lib.test.sh`, which pins the `Grok 4.7 (high)` approval title's idle `empty` on tmux (with the cursor on either the content row or bottom border), herdr, and cmux/orca capability profiles, and typed `pending` on tmux and herdr only.
 It also pins idle `empty` for `Grok 4.6` at all four efforts (`low`, `medium`, `high`, `xhigh`) on tmux only, `unknown` for the tested malformed titles on tmux, rejection of light, heavy, double, and ASCII approval-title boxes on tmux, herdr, and cmux/orca profiles, and Grok 1.0.5's three-column overhang still proving `empty` for a title without the suffix on tmux.
+
+Grok 1.0.77 (50ca579fa996), verified 2026-11-12 on Rex at 80x24, keeps this aligned approval title for `grok-4.7`, `grok-4.6`, and `grok-4.5`, but titles `grok-4.7-build-fast` with a two-word model name: `╰── … ── Grok 4.7 Fast (medium) · always-approve ─╯`.
+The space in `4.7 Fast` failed the typed-title model check, so that idle composer read `unknown` and `exit` and `relaunch` refused it (#8388).
+The accepted delta is that one ` Fast` word after the model version, and only on the ` · always-approve` title; a second word, another word, and the `Fast` title at Grok 1.0.5's overhang stay `unknown`.
+The live check launched `grok --always-approve --model grok-4.7-build-fast --reasoning-effort medium` in a scratch Rex block and read it through `fm_backend_rex_composer_state` from `bin/backends/rex.sh`, with the cursor (row 19) and cursorless.
+Before the change, idle, after one turn, and after a Ctrl+C interrupt each read `unknown`, and a typed draft read `pending-unproven`.
+After the change the same states read:
+
+```text
+idle: cursor_y=19 state=empty cursorless=empty
+after Ctrl+C: cursor_y=19 state=empty cursorless=empty
+typed `draft text not sent`: cursor_y=19 state=pending cursorless=pending
+cleared with Ctrl+U: cursor_y=19 state=empty cursorless=empty
+```
+
+`test_matrix_grok_1077_fast_model_title` in `tests/fm-composer-lib.test.sh` feeds the real styled Rex captures in `tests/fixtures/rex-grok-1.0.77/` through the classifier and pins idle `empty`, typed `pending`, and the unobserved titles `unknown`.
+The live guard launches only the default model, so it does not exercise the `Fast` title; its 1.0.77 result is:
+
+```text
+$ FM_REX_COMPOSER_LIVE=1 bash tests/fm-backend-rex-composer-live-e2e.test.sh
+ok - grok (grok 1.0.77 (50ca579fa996)): real idle composer classifies empty on rex
+ok - grok (grok 1.0.77 (50ca579fa996)): the same idle screen read cursorless is not pending (verdict: empty)
+```
+
 After a Grok upgrade, rerun that live guard and refresh both this record and the 1.0.5 note above: each accepted width is pinned to an observed release, the 1.0.5 overhang has never been live-verified, and neither the approval wording nor either width carries a guarantee across a release.
 
 ### 2026-09-20 claude 2.1.236 statusLine footer through Herdr
@@ -3406,6 +3461,21 @@ The evidence below was produced on 2026-09-05 against omp 18.1.11 (`~/.local/bin
 ### Process identity and markers
 
 `ps -o comm=` reports the bare name `omp` for the agent process, from both its `!` bash path and the model's bash tool, so identity is the anchored name; `ompd` and `comp` never match.
+The bun global package (`bun install -g @oh-my-pi/pi-coding-agent`) installs `~/.bun/bin/omp` as a symlink to `dist/cli.js` with a `#!/usr/bin/env bun` shebang, so its process is named `bun` and only its arguments (`bun <path>/omp`) name omp.
+`bin/fm-omp-process-lib.sh` owns both shapes: the exact name `omp`, or `bun` whose argument right after bun is a script named exactly `omp`, including an install path that contains spaces.
+`ompd`, `comp`, and another script followed by an `omp` argument never match.
+`tests/fm-omp-harness.test.sh` and `tests/fm-session-lock-ancestry.test.sh` pin these shapes with real processes; the former also drives `bin/fm-harness.sh` and `bin/fm-lock.sh` from a bun-run script.
+
+The token-free guard refreshes the installed-omp evidence and spends no model tokens: it starts omp in JSON-RPC mode with no prompt, and a loaded extension runs `bin/fm-harness.sh` and `bin/fm-lock.sh` from inside that process; the guard passes only when the saved lock names that process's pid.
+
+```text
+FM_OMP_IDENTITY_LIVE=1 bash tests/fm-omp-primary-live-e2e.test.sh
+ok - omp omp/18.12.3 (bun-package): detected as omp and acquired the session lock with no model tokens
+```
+
+Run on 2026-11-10 against omp 18.12.3, the bun package at `~/.bun/bin/omp`, on macOS 26 arm64.
+Before the change the same install detected as `unknown` and the lock refused with `cannot locate harness process in ancestry`.
+The portable cases ran on macOS only; the Linux procps shape (`comm` is the exec name `bun`) is covered by the fake-ps cases in `tests/fm-session-lock-ancestry.test.sh`, not by a Linux run.
 omp publishes no harness marker: `PI_CODING_AGENT` is absent from the binary, and the default profile sets neither `PI_CODING_AGENT_DIR` nor `OMP_PROFILE` in the process environment.
 `FM_OMP_HARNESS=omp` is Firstmate's own launch marker and wins over an inherited `CLAUDECODE` only under a real omp ancestor; `tests/fm-omp-harness.test.sh` pins both directions with real processes.
 
@@ -3643,11 +3713,14 @@ The default socket path under the scratchpad temp directory exceeded the 103-byt
 | `hc keys <t> -- <key>` (0.1.14, 2026-10-30) | Accepts the `--` delimiter before key names. |
 | `server stop` on a lab session (0.1.14, 2026-10-30) | Closes the API listener only; the session's `serve` and `hold` daemons stay by design and take ~30-60s to finish exiting after TERM/KILL. `bin/fm-hc-lab.sh` sweeps them by their exact `HC_SESSION=<name>` env token. |
 | `hc get` of a terminal running the user's `claude` wrapper | `foreground` was `{"name":"hats","argv":["/Users/fran/.cargo/bin/hats","run","--"]}`; the Claude process was another member of that process group. |
+| `hc get` and `hc read --lines 0` of an idle bare Pi (hc 0.1.14, pi 1.5.0, 2026-11-17) | `foreground` was `{"name":"pi","argv":["pi"]}` and `status` was `{"app":"pi","state":"idle"}`; the screen ended with a solid `─` rule, a blank row, a second rule and Pi's footer. With that identity `fm_backend_hc_composer_state` read `empty`, and `pending` after `hc keys <t> -- x y z` typed into the composer. `tests/fm-backend-hc-liveness-live-e2e.test.sh` now requires `empty` for an idle Pi. |
 
 ### Adapter lifecycle
 
 `tests/fm-backend-hc-smoke.test.sh` passed inside a `bin/fm-hc-lab.sh` session (hc 0.1.14, 2026-10-30): an `fm-hclab-*` core with scratch XDG roots, a pinned `FM_HC_SOCKET`, and a fleet-state tripwire that verified the recorded real-core file metadata inventory unchanged afterward.
 Teardown swept the session's `serve`/`hold` daemons by their `HC_SESSION` env token.
+On 2026-11-17 on Linux, hc 0.1.14 and 0.1.21 each kept a core's terminals in `terminals.json` as `next_id`, `holder`, and `terminals` keyed by id (`"1": {"address": "t1", "title": ...}`), and a title change replaced the file under a new inode.
+The tripwire therefore compares that file as its terminal set (`next_id` and sorted ids) and every other file by metadata; `tests/fm-hc-lab.test.sh` pins the comparison.
 
 ```text
 ok - hc smoke: create_task started fm-hclab-smoke-28051-8595:t1
@@ -3661,6 +3734,53 @@ FM_TEST_COMPLETE
 
 A real Claude Code launch through the user's `claude` wrapper, typed into a task terminal with `fm_backend_hc_send_text_line` and never given a prompt, read `alive` from `fm_backend_agent_state` within three polls, and `fm_backend_kill` returned 0 with no surviving member of its process group.
 Before reading the process group, the same launch read `ambiguous`.
+
+### Away-mode supervisor
+
+On 2026-11-17 with hc 0.1.14, an untracked lab script ran the real `bin/fm-afk-start.sh` with `FM_DAEMON_PRIMARY_HARNESS=claude` against a fake Claude composer (an idle `❯`+NBSP row between two rules) in an owned `bin/fm-hc-lab.sh` core:
+
+| Scenario | Result |
+| --- | --- |
+| Idle composer, explicit `FM_SUPERVISOR_TARGET` | One record-backed doorbell was delivered and confirmed, and the away-mode return check read it as internal. |
+| Claude's rendered working footer, with no native status reported for the fake | Deferred as busy, then delivered once after the footer cleared. |
+| Half-typed text, and a dim prompt suggestion | Both deferred as an unproven composer (`state=unknown`) with nothing typed, then each was delivered once after the composer cleared. |
+| Bare shell prompt | Deferred as `unknown`, with nothing typed. |
+| Daemon started as the fake's child with no override | Resolved `<session>:<address>` with `target_source=HC_TERMINAL_ID` and delivered there. |
+| Missing hc terminal | The daemon refused and removed `state/.afk`. |
+| The same script on the code before hc support | The daemon refused `hc` at startup and left `state/.afk` standing. |
+
+With a plain-text screen read, the dim-suggestion row above deferred as `unknown`.
+The adapter now reads the composer from a styled attach paint, verified next with a real Claude.
+
+On 2026-11-17 with hc 0.1.14 and Claude Code 2.1.321 (Haiku 5.5, hooks, MCP servers and tools disabled), an untracked lab script ran the real `bin/fm-afk-start.sh` against a real Claude Code terminal in an owned `bin/fm-hc-lab.sh` core:
+
+| Scenario | Result |
+| --- | --- |
+| Idle Claude showing its dim post-turn prompt suggestion | Delivered as one doorbell turn. |
+| Idle Claude with an empty composer after a doorbell turn | Delivered as one doorbell turn. |
+| Typed text in the composer | Deferred as `state=pending` with nothing typed, then delivered once after the text was cleared. |
+| Claude mid-turn, native `status.state` `working` | Deferred as busy, then delivered once after the turn ended. |
+| The whole run | Four escalations, four doorbells, four records, no failed submit. |
+| The code before the styled read, with a real suggestion showing | Held for 25 seconds with 15 `state=unknown` deferrals and no delivery. |
+
+Claude Code reports native status through hc: `idle` at start, `working` mid-turn, and `done` after a turn.
+Claude draws both the fresh `Try "..."` placeholder and the post-turn suggestion with SGR 2 (dim), which only the attach paint carries.
+The paint arrived within 0.15 seconds; `hc attach --observe` left the terminal size unchanged, and the bounded read left no attach process under the `timeout`, perl, and bash timeout mechanisms.
+`tests/fm-backend-hc-liveness-live-e2e.test.sh` refreshes the idle-Claude part of this record: an idle Claude must read `empty` through the styled paint.
+
+On 2026-11-17 on macOS 27.2.1 arm64 with hc 0.1.21, Claude Code 2.1.321 drew its idle composer and dim `Try "..."` placeholder on the alternate screen (`ESC[?1049h`), under both bash 3.2.57 and bash 5.3.15.
+hc 0.1.21 paints a terminal on its alternate screen in two parts: the main screen with its own cursor placement, then the switch to the alternate screen, its rows, and the real cursor placement; hc 0.1.14 switches first and never paints the main screen.
+Reading only up to the first placement took the empty main screen, so the styled read failed and the composer read `unknown`; the read now takes the rows after the switch.
+In owned Linux lab cores, a program that writes to the main screen and then draws a dim composer on the alternate screen reads `empty` (and `pending` without the dim) on hc 0.1.14 and 0.1.21; before the change, hc 0.1.21 read `unknown`.
+`tests/fm-backend-hc.test.sh` pins this with the real macOS paint in `tests/fixtures/claude-2.1.321-hc-0.1.21-macos/`, whose transcript rows are blanked.
+The changed read has been replayed against the recorded macOS paints on Linux but not yet run live on macOS.
+
+On 2026-11-17 on Linux with Claude Code 2.1.321 in owned lab cores of hc 0.1.14 and hc 0.1.21, a plain Claude started in a scratch home that passes the primary-scope gate ran that home's SessionStart hook within 5 seconds: it took the session lock, advanced the wake and status cursors, and recorded a completed session start under `state/`.
+Started with `--safe-mode`, which `claude --help` documents as starting with hooks, plugins, MCP servers, and CLAUDE.md disabled, the same Claude reached an `empty` composer and left `state/` unchanged through 20 more seconds, and the live guard run from that home started every Claude with the flag and left `state/` unchanged.
+`tests/fm-backend-hc-claude-hooks-live-e2e.test.sh` refreshes this record; it fails with the `state/` diff when the lab launch drops `--safe-mode`, and names the bare launch when the guard bypasses that launch.
+On this host neither a plain nor a safe-mode Claude drew on the alternate screen, so the guard's composer check here does not show whether `--safe-mode` changes the macOS alternate-screen paint recorded above.
+`claude --help` written to a pipe sometimes ended early (at 12286 or 16380 of 22335 bytes, once in 8 consecutive reads), while 6 of 6 reads into a file were complete, so the lab launch reads the help from a file.
+A Claude Code supervisor inside the Herdr app is not verified.
 
 ### Spawn, steer, peek, and teardown
 
@@ -3739,10 +3859,69 @@ Real Herdr.app exercise on 2026-11-02: the official herdr-app 0.1.11 bundle (sha
 | Marker-less process with no `herdr-app.sock` at all | Undetected, resolving `tmux`. |
 | Real `default` core file-meta before/after | Byte-identical - the lab never drove the shared core. |
 
-`bin/fm-supervisor-target-lib.sh` now resolves `$HC_TERMINAL_ID`+`$HC_TERMINAL_SOCKET` to `<session>:<address>`/`hc`; `bin/fm-supervise-daemon.sh` still supports only `tmux herdr rex t3code` and refuses the resolved backend loudly.
+`bin/fm-supervisor-target-lib.sh` now resolves `$HC_TERMINAL_ID`+`$HC_TERMINAL_SOCKET` to `<session>:<address>`/`hc`, and `bin/fm-supervise-daemon.sh` supports `tmux herdr rex hc t3code`.
+Away mode on hc starts its daemon in a hidden labeled terminal of the captain's core (`bin/fm-afk-launch.sh`; `tests/fm-afk-launch.test.sh` covers it with a fake core and an owned lab core).
+On 2026-11-16 with hc 0.1.14, a lab run of scenarios C and D of `tests/fm-afk-inject-e2e.test.sh`, adapted from tmux to an owned hc core (the adapted script is not tracked), showed the real daemon delivering one escalation digest, and for a Claude primary one record-backed doorbell, into an hc terminal running that test's composer stub.
+Away-mode injection into a real Claude Code composer on hc is recorded under [Away-mode supervisor](#away-mode-supervisor); a Claude Code supervisor inside the Herdr app is not verified.
+
+### Local fleet evidence on hc 0.1.21
+
+The real harness guard passed with hc 0.1.21, a scratch `HOME`, private core state, and an isolated executable search path.
+`tests/fm-backend-hc-liveness-live-e2e.test.sh` launched installed harness binaries without prompts and classified both as `alive`.
+
+| Harness | Version | Core foreground name | Classification |
+| --- | --- | --- | --- |
+| Claude Code | 2.1.325 | `2.1.325` | `alive` |
+| Codex | 0.167.2 | `codex` | `alive` |
+
+Guarded teardown passed and left no lab session directories or sockets.
+Other harnesses were excluded from this run's executable search path, so its skips do not establish whether they were installed.
+This verifies the process classifier used by secondmate recovery, not authenticated model work or full Firstmate startup.
+
+`tests/fm-secondmate-hc-smoke.test.sh` separately passed against hc 0.1.21 with real shell workloads in a private core.
+The secondmate inherited its child home, hc selection, and core session.
+It dispatched a worker without a runtime override, and that worker executed in the inherited session.
+Both terminals occupied the child space while retaining separate parent and child ownership labels.
+Ownership-checked parent input, parent capture, and child capture passed.
+Guarded teardown stopped the lab core, removed its processes, and verified unchanged real-fleet metadata.
+The shell smoke emitted checkout and watcher warnings, so it does not establish working primary supervision.
+
+### Bounded primary startup
+
+Claude Code 2.1.325 completed an authenticated model turn inside a guarded hc 0.1.21 lab.
+The model executed only `bash ./startup-probe.sh`, which ran `bin/fm-session-start.sh` and inspected the resulting lock.
+The lab used a scratch code copy, a marked disposable `FM_HOME`, private core state, and a pinned core socket.
+Normal `HOME` with `CLAUDE_CONFIG_DIR` unset preserved the existing login without login commands or credential edits.
+Safe mode disabled hooks and customizations, and session persistence was disabled.
+Session startup returned zero, bootstrap reported success, and the digest identified the primary harness as Claude.
+Lock status reported a live Claude owner, and independent process inspection confirmed the same installed Claude process.
+Guarded teardown passed.
+This verifies bounded primary session startup and lock ownership, not ongoing supervision or automatic hook loading.
+The scratch copy lacked Git history and private fleet records, so its network diagnostics do not establish dependency readiness.
+
+### Native app projection and reopening
+
+Herdr App 0.1.15 with hc 0.1.21 projected the shell secondmate and worker into one child space with two tabs.
+App inventories before and after a scoped quit and reopen retained the same space, tab, terminal, and pane identities.
+The secondmate remained `t1`, and the worker remained `t2`.
+Both app status responses had empty error arrays and retained the same selected space, tab, and focused pane.
+Both responses also reported the welcome overlay.
+This proves native projection and identity retention across reopening, not unobscured visual verification or real harness status presentation.
+
+### Remote routing with simulated transport
+
+`tests/fm-remote-hc-smoke.test.sh` passed against hc 0.1.21 with real terminals behind simulated SSH transport.
+The host-local controller launched a shell secondmate that dispatched its worker into the same child space with separate ownership labels.
+Routed input, capture, and durable instruction delivery passed.
+A simulated transport failure and reconnection preserved terminal creation times and foreground process identities.
+Guarded cleanup verified unchanged user state.
+This excludes real SSH authentication, the remote entrypoint and job worker, physical `fm-remote` selection, and model-driven instruction handling or relaunch.
 
 ### Not verified
 
-- A spawn with a real harness rather than the stand-in.
+- A complete `fm-spawn.sh` launch with a real harness rather than the stand-in or shell workloads.
+- Ongoing primary supervision and automatic hook loading in hc.
+- Live remote transport, remote lifecycle, and remote app projection.
+- Full unobscured native visual verification.
 - `send --wait`'s `started`/`working` proof against a real status-reporting harness; the lab run covered a non-reporting shell, whose verdict falls to the composer screen.
 - Native `status.state` reported by a real harness launched through `bin/fm-spawn.sh`.

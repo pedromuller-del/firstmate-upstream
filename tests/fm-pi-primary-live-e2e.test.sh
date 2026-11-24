@@ -346,7 +346,7 @@ while [ "$wake_number" -le 3 ]; do
 done
 
 pane=$(capture)
-guard_count=$(printf '%s\n' "$pane" | grep -Fc "TURN WOULD END BLIND - supervision is off." || true)
+guard_count=$(printf '%s\n' "$pane" | grep -Fc "TURN WOULD END BLIND - supervision needs attention." || true)
 [ "$guard_count" -eq 0 ] || fail "successor was not protecting Pi before its next turn end (guard count $guard_count)"
 foreground_arm='$ bin/fm-watch-arm.sh'
 if printf '%s\n' "$pane" | grep -Fq "$foreground_arm"; then

@@ -266,6 +266,10 @@
       "audience": "agent-runtime"
     },
     {
+      "path": ".agents/skills/owner-provisioning/SKILL.md",
+      "audience": "agent-runtime"
+    },
+    {
       "path": ".agents/skills/process-event-sources/SKILL.md",
       "audience": "agent-runtime"
     },
@@ -667,6 +671,10 @@
     },
     {
       "path": ".agents/skills/away-quiet-supervision/SKILL.md",
+      "audience": "agent-runtime"
+    },
+    {
+      "path": ".agents/skills/lavish-url/SKILL.md",
       "audience": "agent-runtime"
     },
     {

@@ -21,8 +21,11 @@
 # must present the current gen; an event or record carrying any other gen is
 # a stale incarnation and is rejected (written events) or classified unknown
 # (read records). seq is a strictly increasing integer per gen, advanced
-# under the writer's lock, so an out-of-order apply can never regress a
-# newer record.
+# under the writer's lock: it records apply order, not harness emission order,
+# and cannot stop a late apply from overwriting a newer harness event.
+# OpenCode's emission-order queue is owned by the generated plugins in
+# bin/fm-spawn.sh; tests/fm-busy-adapter-wiring.test.sh covers unawaited bursts
+# and the OpenCode 2 server/setup entry points.
 #
 # Semantic sources written by adapters (fm_busy_sources_for_harness owns the
 # per-harness trust table; a record whose source is not trusted for the
@@ -30,7 +33,8 @@
 # never classify another adapter):
 #   pi-ext           Pi/pi-signed per-task extension (agent_start/agent_settled)
 #   omp-ext          omp (Oh My Pi) per-task extension (agent_start/agent_end without willContinue)
-#   opencode-plugin  OpenCode per-task plugin (session.status)
+#   opencode-plugin  OpenCode per-task plugin (2.x session.execution.*;
+#                    1.x session.status/session.idle, also accepted by 2.x)
 #   claude-hook      Claude lifecycle hooks (UserPromptSubmit/Stop/StopFailure/SessionEnd)
 #   devin-hook       Devin UserPromptSubmit / Stop / SessionEnd hooks; manual
 #                    cancellation emits no Stop, so control invalidates to unknown.
@@ -1058,11 +1062,24 @@ fm_busy_claude_launch_prompt_tail() {
 # name. Matching BOTH the heading and "Do not trust" keeps this from firing on
 # a worker's own prose that happens to use the common word "trust" alone.
 # Covers omp too: it shares Pi's engine and the same project-trust gate.
+fm_busy_pi_mcp_prompt_tail() {
+  local buf
+  buf=$(cat)
+  printf '%s\n' "$buf" | grep -qiE '^ *Allow project MCP server .+\? *$' \
+    && printf '%s\n' "$buf" | tr '\n' ' ' | tr -s '[:space:]' | grep -qiF 'This server can run local commands or make network requests with your user permissions.' \
+    && printf '%s\n' "$buf" | grep -qiE "^[[:space:]→>]*Don't allow[[:space:]]*$" \
+    && printf '%s\n' "$buf" | grep -qiE '^[[:space:]→>]*Allow[[:space:]]*$' \
+    && printf '%s\n' "$buf" | grep -qiF 'navigate  enter select  escape/ctrl+c cancel'
+}
+
 fm_busy_pi_launch_prompt_tail() {
   local buf
   buf=$(cat)
-  printf '%s' "$buf" | grep -qiE "${FM_BUSY_PI_LAUNCH_PROMPT_REGEX:-Trust project folder\\?}" \
-    && printf '%s' "$buf" | grep -qiE 'Do not trust'
+  if printf '%s' "$buf" | grep -qiE "${FM_BUSY_PI_LAUNCH_PROMPT_REGEX:-Trust project folder\\?}" \
+    && printf '%s' "$buf" | grep -qiE 'Do not trust'; then
+    return 0
+  fi
+  printf '%s' "$buf" | fm_busy_pi_mcp_prompt_tail
 }
 
 # fm_busy_gemini_launch_prompt_tail: Gemini's workspace-trust dialog ("Do you

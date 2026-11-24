@@ -827,6 +827,8 @@ cmd_choice_rows() {
           || ($data->{close} ne "done" && $data->{close} ne "release");
         $mode = $data->{close};
       }
+      # decode_json returns characters while the label is bytes; encode, or accents print as Latin-1.
+      utf8::encode($answer); utf8::encode($note);
       my $label = defined $f{text} ? $f{text} : "";
       s/[\x00-\x1f\x7f]/ /g for ($answer, $note, $label);
       $label = substr($label, 0, 512);

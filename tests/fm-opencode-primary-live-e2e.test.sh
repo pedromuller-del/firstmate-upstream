@@ -422,7 +422,7 @@ grep -Eq 'reason=actionable-signal.*successor=started:[0-9]+' "$HOME_DIR/state/.
 wait_for_handled || fail "OpenCode did not drain and settle after plugin-owned re-arm"
 
 pane=$(capture)
-guard_count=$(printf '%s\n' "$pane" | grep -Fc "TURN WOULD END BLIND - supervision is off." || true)
+guard_count=$(printf '%s\n' "$pane" | grep -Fc "TURN WOULD END BLIND - supervision needs attention." || true)
 [ "$guard_count" -eq 0 ] || fail "OpenCode successor was not protecting the next idle event (guard count $guard_count)"
 if printf '%s\n' "$pane" | grep -Fq '$ bin/fm-watch-arm.sh'; then
   fail "OpenCode model attempted to re-arm instead of leaving continuity to the plugin"

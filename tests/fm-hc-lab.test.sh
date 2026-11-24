@@ -17,6 +17,7 @@ REAL_FIND=$(command -v find)
 REAL_CAT=$(command -v cat)
 cat > "$TMP_ROOT/fakebin/hc" <<'SH'
 #!/usr/bin/env bash
+[ -z "${FAKE_HC_ENV_LOG:-}" ] || env >> "$FAKE_HC_ENV_LOG"
 printf '{"pid":123}\n'
 SH
 cat > "$TMP_ROOT/fakebin/find" <<'SH'
@@ -87,3 +88,73 @@ refuse 'could not record the fleet-state tripwire' env FAIL_READ=find bash "$LAB
 bash "$LAB" teardown fm-hclab-good
 [ ! -e "$FM_HC_LAB_DIR/fm-hclab-good" ] || fail 'successful teardown retained session'
 printf 'ok - private roots, exclusive sessions, and fail-closed tripwire\n'
+
+# Every lab terminal gets the lab server's environment, so the operator's own
+# terminal markers must not reach the hc call that starts the server: a harness
+# hook in the lab would report to the operator's pane.
+HERDR_ENV=1 HERDR_SOCKET_PATH=/operator/herdr.sock HERDR_PANE_ID=operator-pane \
+  TMUX=/operator/tmux,1,0 TMUX_PANE=%1 FAKE_HC_ENV_LOG="$TMP_ROOT/hc-env" \
+  bash "$LAB" provision fm-hclab-markers
+grep -qx 'HC_SESSION=fm-hclab-markers' "$TMP_ROOT/hc-env" || fail 'provision made no hc call to check'
+! grep -E '^(HERDR_[A-Z_]*|TMUX|TMUX_PANE)=' "$TMP_ROOT/hc-env" \
+  || fail 'the lab server inherited the operator terminal markers'
+bash "$LAB" teardown fm-hclab-markers
+printf 'ok - the lab server never inherits the operator Herdr or tmux markers\n'
+
+# A lab Claude can start in the root of a live Firstmate home, so the shared
+# launch starts it with hooks off and refuses a Claude that cannot do that.
+(
+  # shellcheck source=tests/hc-test-safety.sh
+  . "$ROOT/tests/hc-test-safety.sh"
+  fm_backend_hc_cli() { printf '%s\n' "$@" > "$TMP_ROOT/claude-run"; printf '{"address":"lab-term"}\n'; }
+  printf '#!/usr/bin/env bash\necho "Usage: claude [options] [prompt]"\n' > "$TMP_ROOT/fakebin/claude-old"
+  printf '#!/usr/bin/env bash\necho "  --safe-mode   Start with all customizations disabled"\n' > "$TMP_ROOT/fakebin/claude-new"
+  chmod +x "$TMP_ROOT/fakebin/claude-old" "$TMP_ROOT/fakebin/claude-new"
+  HC_SESSION=fm-hclab-claude
+  status=0
+  hc_test_start_claude "$TMP_ROOT/fakebin/claude-old" "$TMP_ROOT" >/dev/null 2> "$TMP_ROOT/claude-refusal" || status=$?
+  [ "$status" = 1 ] || fail "a Claude without --safe-mode was not refused (status $status)"
+  grep -q 'does not document --safe-mode' "$TMP_ROOT/claude-refusal" || fail 'the refusal gave no reason'
+  [ ! -e "$TMP_ROOT/claude-run" ] || fail 'a Claude without --safe-mode was started'
+  address=$(hc_test_start_claude "$TMP_ROOT/fakebin/claude-new" "$TMP_ROOT" --label firstmate.task=t)
+  [ "$address" = lab-term ] || fail "the launch printed '$address', not the terminal address"
+  [ "$(tail -n 2 "$TMP_ROOT/claude-run" | tr '\n' ' ')" = "$TMP_ROOT/fakebin/claude-new --safe-mode " ] \
+    || fail "the lab Claude did not start with --safe-mode: $(tr '\n' ' ' < "$TMP_ROOT/claude-run")"
+)
+printf 'ok - a lab Claude starts with hooks off, and one that cannot is refused\n'
+
+# A real core rewrites terminals.json whenever one of its terminals changes its
+# title or status text, so the tripwire compares that file's terminal set.
+TERMS="$XDG_STATE_HOME/herdr-core/default/terminals.json"
+mkdir -p "$(dirname "$TERMS")"
+terms() { # <next_id> <id:title:msg>... - replaced atomically, as hc does
+  local next=$1 entry id rest sep='' body=''
+  shift
+  for entry in "$@"; do
+    id=${entry%%:*} rest=${entry#*:}
+    body="$body$sep\"$id\":{\"address\":\"t$id\",\"title\":\"${rest%%:*}\",\"status\":null,\"msg\":\"${rest#*:}\"}"
+    sep=,
+  done
+  printf '{"next_id":%s,"holder":null,"terminals":{%s}}\n' "$next" "$body" > "$TERMS.new"
+  mv "$TERMS.new" "$TERMS"
+}
+terms 3 '1:main:idle' '2:shell:'
+bash "$LAB" provision fm-hclab-text
+terms 3 '1:main - reviewing PR 12:working on the review, step 4 of 9' '2:shell:'
+bash "$LAB" teardown fm-hclab-text 2> "$TMP_ROOT/err" \
+  || fail "a title or msg change on an existing real terminal tripped the tripwire: $(cat "$TMP_ROOT/err")"
+printf 'ok - title or msg text changing on an existing real terminal passes the tripwire\n'
+for change in added removed replaced recreated; do
+  terms 3 '1:main:idle' '2:shell:'
+  bash "$LAB" provision "fm-hclab-$change"
+  case "$change" in
+    added) terms 4 '1:main:idle' '2:shell:' '3:lab:' ;;
+    removed) terms 3 '1:main:idle' ;;
+    replaced) terms 3 '1:main:idle' '3:lab:' ;; # only the ids differ
+    recreated) terms 4 '1:main:idle' '2:shell:' ;;
+  esac
+  refuse 'FLEET-STATE TRIPWIRE FAILED' bash "$LAB" teardown "fm-hclab-$change"
+  terms 3 '1:main:idle' '2:shell:'
+  bash "$LAB" teardown "fm-hclab-$change"
+done
+printf 'ok - a real terminal added, removed, replaced, or created and removed fails the tripwire\n'

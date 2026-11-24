@@ -77,7 +77,9 @@
 #
 # Usage: fm-supervise-daemon.sh
 #          Long-lived background loop. Normally started by the /afk skill, which
-#          sets state/.afk first. Env knobs:
+#          sets state/.afk first; a daemon that then refuses at startup (an
+#          unsupported backend or a missing target) removes state/.afk again,
+#          so the watcher is never left one-shot without a daemon. Env knobs:
 #          FM_SUPERVISOR_TARGET     supervisor endpoint target (override; otherwise
 #                                   auto-discovered per backend - $TMUX_PANE
 #                                   under tmux, "<session>:<pane-id>" from
@@ -86,15 +88,16 @@
 #                                   $REX_SESSION/$REX_BLOCK under rex, or the
 #                                   home's one live T3 thread - then firstmate:0
 #                                   fallback). Accepts a tmux target, a herdr
-#                                   "<session>:<pane-id>", a rex target, or a T3
-#                                   thread id; which one it's read as is decided
-#                                   by FM_SUPERVISOR_BACKEND (below),
-#                                   independently.
-#          FM_SUPERVISOR_BACKEND    supervisor endpoint BACKEND (tmux|herdr|rex|t3code;
+#                                   "<session>:<pane-id>", a rex target, an hc
+#                                   "<session>:<address>", or a T3 thread id;
+#                                   which one it's read as is decided by
+#                                   FM_SUPERVISOR_BACKEND (below), independently.
+#          FM_SUPERVISOR_BACKEND    supervisor endpoint BACKEND (tmux|herdr|rex|hc|t3code;
 #                                   override; otherwise resolved by
 #                                   bin/fm-supervisor-target-lib.sh - $TMUX_PANE
 #                                   selects tmux, $HERDR_ENV=1 selects herdr,
-#                                   TERM_PROGRAM=rex selects rex, then T3
+#                                   TERM_PROGRAM=rex selects rex, the hc
+#                                   terminal marker pair selects hc, then T3
 #                                   discovery behind its explicit-selection gate
 #                                   - falling back to tmux).
 #                                   zellij, orca, cmux, paseo, and tern are not yet
@@ -210,8 +213,9 @@ FM_HOME="${FM_HOME:-${FM_ROOT_OVERRIDE:-$FM_ROOT}}"
 . "$FM_DAEMON_DIR/fm-busy-lib.sh"
 
 # --- tunables ---------------------------------------------------------------
-# Supervisor backends this daemon knows how to inject into today. rex goes
-# through the same dispatcher primitives as herdr (bin/backends/rex.sh). zellij,
+# Supervisor backends this daemon knows how to inject into today. rex and hc go
+# through the same dispatcher primitives as herdr (bin/backends/rex.sh,
+# bin/backends/hc.sh). zellij,
 # orca, cmux, paseo, and tern are real backends elsewhere in firstmate
 # (bin/fm-backend.sh) but this daemon has no verified composer/busy primitives
 # wired up for them yet - see docs/herdr-backend.md and AGENTS.md section 4's
@@ -219,7 +223,7 @@ FM_HOME="${FM_HOME:-${FM_ROOT_OVERRIDE:-$FM_ROOT}}"
 # instead of silently running tmux primitives against a pane that is not a tmux
 # pane. t3code injects through the adapter's t3_thread_send, with its
 # thread status table as the busy verdict.
-FM_SUPERVISOR_SUPPORTED_BACKENDS="tmux herdr rex t3code"
+FM_SUPERVISOR_SUPPORTED_BACKENDS="tmux herdr rex hc t3code"
 INJECT_SKIP_DEFAULT="heartbeat"
 STALE_ESCALATE_SECS_DEFAULT=240
 ESCALATE_BATCH_SECS_DEFAULT=90
@@ -386,8 +390,10 @@ classify_signal() {  # <reason-after-colon> <state>
     case "$f" in *.status) ;; *) continue ;; esac
     [ -e "$f" ] || [ -L "$f" ] || continue
     task=$(basename "$f"); task="${task%.status}"
+    reconcile_overdue_pause "$state" "$task" || true
     record=$(status_span_first_actionable_record "$f" \
-      "$(status_seen_offset "$state" "$task")")
+      "$(status_seen_offset "$state" "$task")" '' '' \
+      "$(overdue_delivered_key "$state" "$task")")
     rc=$?
     [ "$rc" -eq 1 ] && [ -z "$record" ] && continue
     if [ "$rc" -eq 2 ]; then
@@ -439,8 +445,10 @@ classify_stale() {  # <window> <state> [<span-record> <span-status>]
   local win=$1 state=$2 record=${3-} rc=${4-} task last declared event rest
   task=$(window_to_task "$win" "$state")
   if [ -z "$rc" ]; then
+    reconcile_overdue_pause "$state" "$task" || true
     record=$(status_span_first_actionable_record "$state/$task.status" \
-      "$(status_seen_offset "$state" "$task")")
+      "$(status_seen_offset "$state" "$task")" '' '' \
+      "$(overdue_delivered_key "$state" "$task")")
     rc=$?
   fi
   last=$(last_status_line "$state/$task.status")
@@ -1351,9 +1359,68 @@ _oldest_line_age() {  # <buf> -> seconds since the oldest buffered item first ar
 #     the window (repeating bounded re-surface, never a wedge).
 #  3) heartbeat scan: every HEARTBEAT_SCAN_SECS, run the catch-all status scan in
 #     the block below and escalate what it finds; that block owns its file set.
+reconcile_overdue_pause() {  # <state> <task> -> reconcile worker events after overdue decision
+  local state=$1 task=$2 statusf="$1/$2.status" marker="$1/.paused-overdue-$2" identity marker_identity offset size added line verb key resume=0 rc prior_pause new_pause pause_verb=${FM_CLASSIFY_PAUSED_VERB:-$FM_CLASSIFY_PAUSED_VERB_DEFAULT} resolve_verb=${FM_CLASSIFY_RESOLVE_VERB:-$FM_CLASSIFY_RESOLVE_VERB_DEFAULT} legacy_re="^[[:space:]]*(${FM_CAPTAIN_RE:-$FM_CLASSIFY_CAPTAIN_RE_DEFAULT})"
+  fm_pause_ceiling_enabled || return 1
+  [ -f "$marker" ] || return 1
+  [ -f "$statusf" ] || return 2
+  if [ "$(uname)" = Darwin ]; then
+    identity=$(/usr/bin/stat -f '%d %i' "$statusf" 2>/dev/null) || return 2
+  else
+    identity=$(stat -c '%d %i' "$statusf" 2>/dev/null) || return 2
+  fi
+  IFS=: read -r marker_identity offset < "$marker" || [ -n "$offset" ] || { rm -f "$marker"; return 1; }
+  size=$(_fm_status_file_size "$statusf") || return 2
+  case "$offset:$size" in *[!0-9:]*) rm -f "$marker"; return 1 ;; esac
+  if [ "$identity" != "$marker_identity" ] || [ "$size" -lt "$offset" ]; then
+    rm -f "$marker"; return 1
+  fi
+  [ "$size" -gt "$offset" ] || return 0
+  added=$(_fm_status_read_span "$statusf" "$offset" "$((size - offset))") || return 2
+  pause_line=$(_fm_status_read_span "$statusf" 0 "$offset" | grep -E "^$pause_verb([[:space:]]|:)" | tail -n 1)
+  _fm_status_unstamped "$pause_line" prior_pause
+  while IFS= read -r line || [ -n "$line" ]; do
+    verb=$(status_line_verb "$line")
+    _fm_status_line_is_event "$line" "$legacy_re" || continue
+    case "$verb" in
+      blocked) ;;
+      "$resolve_verb")
+        key=$(_fm_decision_key "$line" '') || key=
+        [ "$key" = "paused-overdue-$task" ] && { rm -f "$marker"; return 1; }
+        ;;
+      "$pause_verb")
+        _fm_status_unstamped "$line" new_pause
+        [ "$new_pause" = "$prior_pause" ] || resume=1
+        ;;
+      *) resume=1 ;;
+    esac
+  done <<EOF
+$added
+EOF
+  [ "$resume" -eq 1 ] || return 0
+  fm_wake_status_append_self_announced "$state" "$statusf" "$resolve_verb [key=paused-overdue-$task]: worker pause changed"
+  rc=$?
+  [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ] || return 2
+  rm -f "$marker"
+  return 1
+}
+
+# The overdue marker's second line records that the daemon queued the alert. Only
+# that hides the blocker from wake classification: a marker without it is the
+# watcher's, or an enqueue that failed, and either way the supervisor heard nothing.
+overdue_delivered_key() {  # <state> <task>
+  fm_pause_ceiling_enabled || return 0
+  [ -z "$(sed -n 2p "$1/.paused-overdue-$2" 2>/dev/null)" ] || printf 'paused-overdue-%s' "$2"
+}
+
 housekeeping() {  # <state>
-  local state=$1 now due f key task win marker age last max_defer oldest pause_secs marker_epoch until bounded_until pause_reason dialog_name persisted
+  local state=$1 now due f key task win marker age last max_defer oldest pause_secs marker_epoch until bounded_until pause_reason dialog_name persisted append_rc size seen_identity overdue_marker overdue_task pause_identity pause_size record
   now=$(_now)
+  for overdue_marker in "$state"/.paused-overdue-*; do
+    [ -f "$overdue_marker" ] || continue
+    overdue_task=${overdue_marker##*/}; overdue_task=${overdue_task#.paused-overdue-}
+    reconcile_overdue_pause "$state" "$overdue_task" || true
+  done
   migrate_watcher_pause_markers "$state"
 
   # (1) batch flush
@@ -1454,6 +1521,14 @@ housekeeping() {  # <state>
       rm -f "$marker"; continue
     fi
     task=$(window_to_task "$win" "$state")
+    if fm_pause_ceiling_enabled; then
+      if [ "$(uname)" = Darwin ]; then
+        pause_identity=$(/usr/bin/stat -f '%d %i' "$state/$task.status" 2>/dev/null) || continue
+      else
+        pause_identity=$(stat -c '%d %i' "$state/$task.status" 2>/dev/null) || continue
+      fi
+      pause_size=$(_fm_status_file_size "$state/$task.status") || continue
+    fi
     last=$(status_declared_wait_line "$state/$task.status")
     if [ -z "$last" ] || ! status_is_paused_or_captain_held "$last"; then
       reconcile_pause_tracking "$win" "$state" "$last"
@@ -1466,6 +1541,34 @@ housekeeping() {  # <state>
     until=
     bounded_until=0
     if status_is_captain_held "$last" && fm_afk_contract_away_present "$state"; then
+      continue
+    fi
+    status_mtime=$(_stat_file_mtime "$state/$task.status" 2>/dev/null || echo "$now")
+    status_age=$(status_pause_age "$last" "$(( now - status_mtime ))" "$now")
+    if fm_afk_contract_present "$state" && status_is_paused "$last" && status_pause_is_overdue "$last" "$status_age" "$now"; then
+      overdue_marker="$state/.paused-overdue-$task"
+      if [ ! -e "$overdue_marker" ] && ! status_open_decisions "$state/$task.status" | grep -Fq "paused-overdue-$task"; then
+        blocked_line="blocked [key=paused-overdue-$task]: paused ${status_age}s, wait overdue - decide or release"
+        fm_wake_status_append_self_announced "$state" "$state/$task.status" "$blocked_line"; append_rc=$?
+        [ "$append_rc" -eq 0 ] || [ "$append_rc" -eq 1 ] || continue
+        size=$(LC_ALL=C awk -v prefix="blocked [key=paused-overdue-$task]" '
+          { end = offset + length($0) + 1; if (index($0, prefix) == 1) found = end; offset = end }
+          END { if (found) print found; else exit 1 }
+        ' "$state/$task.status") || continue
+        printf '%s:%s\n' "$pause_identity" "$pause_size" > "$overdue_marker" || continue
+        reconcile_overdue_pause "$state" "$task" || continue
+        # A failed enqueue leaves the decision open for the next scan to raise.
+        if escalate_add "$state" "stale: $win (paused ${status_age}s, wait overdue - decide or release)"; then
+          printf 'delivered\n' >> "$overdue_marker"
+          record=$(status_span_first_actionable_record "$state/$task.status" \
+            "$(status_seen_offset "$state" "$task")" '' '' "paused-overdue-$task")
+          if [ "$?" -eq 1 ]; then
+            seen_identity=$(_fm_open_decisions_file_ident "$state/$task.status") || seen_identity=
+            [ -n "$seen_identity" ] && mark_status_seen "$state" "$task" "$size" "$seen_identity" || true
+          fi
+        fi
+        _now > "$marker"
+      fi
       continue
     fi
     if until=$(status_paused_until "$last"); then
@@ -1532,7 +1635,8 @@ housekeeping() {  # <state>
       [ "$f" = "$exclude" ] && continue
       task=$(basename "$f"); task="${task%.status}"
       record=$(status_span_first_actionable_record "$f" \
-        "$(status_seen_offset "$state" "$task")")
+        "$(status_seen_offset "$state" "$task")" '' '' \
+        "$(overdue_delivered_key "$state" "$task")")
       rc=$?
       if [ "$rc" -eq 2 ]; then
         ident=$(status_observed_signature "$f")
@@ -1767,8 +1871,10 @@ handle_wake() {  # <reason> <state>
               dialog_name=$(stale_dialog_name "$stale_detail") || dialog_name=''
               task=$(window_to_task "$arg" "$state")
               if [ -n "$task" ]; then
+                reconcile_overdue_pause "$state" "$task" || true
                 span_record=$(status_span_first_actionable_record "$state/$task.status" \
-                  "$(status_seen_offset "$state" "$task")")
+                  "$(status_seen_offset "$state" "$task")" '' '' \
+                  "$(overdue_delivered_key "$state" "$task")")
                 span_rc=$?
                 case "$span_rc" in
                   0|1)
@@ -1996,6 +2102,31 @@ fm_super_main() {
     exit 1
   fi
   echo "$$" > "$PIDFILE"
+  # A daemon that refuses to start must not leave state/.afk behind: with the
+  # flag present and no daemon, the watcher stays one-shot and nothing
+  # supervises the fleet. The flag is cleared only while this process owns the
+  # lock: startup_refuse clears it and the pidfile before releasing the lock,
+  # and an unexpected exit runs the same rollback from the EXIT trap, which
+  # never releases the lock. Once the lock is free, a second daemon may own it
+  # with its own state/.afk. A daemon that found a live owner exits before any
+  # of this, and the away-posture record stays, as on a home that runs no daemon.
+  startup_rollback() {
+    afk_active "$STATE" || return 0
+    if afk_exit "$STATE" && ! afk_active "$STATE"; then
+      echo "afk: the away-mode daemon could not start, so state/.afk was removed and normal supervision continues" >&2
+      log "startup failed; removed state/.afk so no one-shot watcher is left without a daemon"
+    else
+      echo "afk: the away-mode daemon could not start and state/.afk could not be removed" >&2
+    fi
+  }
+  startup_refuse() {
+    trap - EXIT
+    startup_rollback
+    rm -f "$PIDFILE" 2>/dev/null || true
+    fm_lock_release "$LOCK" 2>/dev/null || true
+    exit 1
+  }
+  trap startup_rollback EXIT
   # The recorded identity is what proves this daemon still owns supervision after
   # its watcher child exits (fm_afk_daemon_owns_supervision, read by the turn-end
   # guard). Startup continues without it - a supervising daemon must not refuse to
@@ -2006,10 +2137,10 @@ fm_super_main() {
     log "warn: could not record this daemon's process identity; the turn-end guard cannot recognize away-mode supervision"
   fi
 
-  # --- auto-discover the supervisor BACKEND (tmux, herdr, or t3code) first --
+  # --- auto-discover the supervisor BACKEND (tmux, herdr, rex, hc, or t3code) first --
   # Priority: FM_SUPERVISOR_BACKEND override > $TMUX_PANE (tmux) > $HERDR_ENV=1
-  # (herdr) > TERM_PROGRAM=rex (rex) > a live T3 thread in this home (t3code) >
-  # tmux fallback. Resolved before the target below, since target discovery
+  # (herdr) > TERM_PROGRAM=rex (rex) > the hc terminal marker pair (hc) > a live
+  # T3 thread in this home (t3code) > tmux fallback. Resolved before the target below, since target discovery
   # composes a herdr "<session>:<pane-id>" string using the same
   # $HERDR_PANE_ID/$HERDR_SESSION markers this checks. Exporting the result
   # into FM_SUPERVISOR_BACKEND makes inject_msg/pane_is_busy/pane_input_pending
@@ -2025,6 +2156,8 @@ fm_super_main() {
       backend_source="HERDR_ENV"
     elif fm_supervisor_in_rex; then
       backend_source="TERM_PROGRAM"
+    elif [ "$discovered_backend" = hc ]; then
+      backend_source="HC_TERMINAL_ID"
     elif [ "$discovered_backend" = t3code ]; then
       backend_source="T3_THREAD"
     else
@@ -2041,11 +2174,9 @@ fm_super_main() {
   # refusal the task calls for, instead of a confusing "does not resolve to a
   # tmux pane" error.
   if ! fm_backend_list_contains "$FM_SUPERVISOR_SUPPORTED_BACKENDS" "$BACKEND"; then
-    echo "error: away-mode daemon does not support supervisor backend '$BACKEND' yet (supported: $FM_SUPERVISOR_SUPPORTED_BACKENDS); set FM_SUPERVISOR_BACKEND=tmux|herdr|rex|t3code and FM_SUPERVISOR_TARGET to run firstmate's own pane under a supported backend" >&2
+    echo "error: away-mode daemon does not support supervisor backend '$BACKEND' yet (supported: $FM_SUPERVISOR_SUPPORTED_BACKENDS); set FM_SUPERVISOR_BACKEND=tmux|herdr|rex|hc|t3code and FM_SUPERVISOR_TARGET to run firstmate's own pane under a supported backend" >&2
     log "startup failed: unsupported supervisor backend '$BACKEND' (source=$backend_source)"
-    fm_lock_release "$LOCK" 2>/dev/null || true
-    rm -f "$PIDFILE" 2>/dev/null || true
-    exit 1
+    startup_refuse
   fi
 
   # --- auto-discover the supervisor target (the endpoint running firstmate) ---
@@ -2066,6 +2197,8 @@ fm_super_main() {
       target_source="HERDR_ENV(HERDR_PANE_ID)"
     elif fm_supervisor_in_rex; then
       target_source="TERM_PROGRAM(REX_BLOCK)"
+    elif [ -n "${HC_TERMINAL_ID:-}" ] && [ -n "${HC_TERMINAL_SOCKET:-}" ]; then
+      target_source="HC_TERMINAL_ID"
     elif [ "$resolved" = 1 ]; then
       target_source="T3_THREAD"
     else
@@ -2084,10 +2217,9 @@ fm_super_main() {
   if ! fm_backend_target_exists "$BACKEND" "$TARGET"; then
     echo "error: supervisor target '$TARGET' does not resolve to a $BACKEND pane; set FM_SUPERVISOR_TARGET" >&2
     log "startup failed: target '$TARGET' not found (backend=$BACKEND)"
-    fm_lock_release "$LOCK" 2>/dev/null || true
-    rm -f "$PIDFILE" 2>/dev/null || true
-    exit 1
+    startup_refuse
   fi
+  trap - EXIT
 
   local afk_status="off"
   afk_active "$STATE" && afk_status="on"

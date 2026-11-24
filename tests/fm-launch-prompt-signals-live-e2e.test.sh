@@ -183,6 +183,36 @@ if [ -x "${PI_BIN:-}" ]; then
       || fail "$h: the same real Pi trust-dialog capture classified '$out', expected 'unknown launch-prompt'"
   done
   pass "pi, pi-signed, omp: a real Pi-engine launch parked on its own rendered trust dialog surfaces through the watcher gate"
+
+  PI_MCP_EXTENSION=${FM_PI_MCP_ADAPTER_EXTENSION:-$HOME/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts}
+  if [ -f "$PI_MCP_EXTENSION" ]; then
+    mcp_lab=$(mktemp -d "${TMPDIR:-/tmp}/fm-launch-prompt-pi-mcp.XXXXXX") || fail "pi MCP: cannot create isolated lab"
+    LABS+=("$mcp_lab")
+    mkdir -p "$mcp_lab/project/.pi" "$mcp_lab/agent" "$mcp_lab/home" "$mcp_lab/state"
+    printf '%s\n' '{"mcpServers":{"fixture":{"command":"/usr/bin/false"}}}' > "$mcp_lab/project/.pi/mcp.json"
+    mcp_target="fm-lp-mcp-$$:w"
+    "$REAL_TMUX" -L "$SOCKET" new-session -d -s "fm-lp-mcp-$$" -n w -x 80 -y 35 -c "$mcp_lab/project" \
+      env HOME="$mcp_lab/home" PI_CODING_AGENT_DIR="$mcp_lab/agent" "$PI_BIN" \
+      --no-extensions -e "$PI_MCP_EXTENSION" --approve --offline --no-session --no-skills --no-prompt-templates --no-context-files \
+      || fail "pi MCP: could not launch isolated Pi"
+    mcp_tail=''
+    for _ in $(seq 1 75); do
+      mcp_tail=$("$REAL_TMUX" -L "$SOCKET" capture-pane -p -t "$mcp_target" -S -40 2>/dev/null) || true
+      printf '%s' "$mcp_tail" | fm_busy_pi_mcp_prompt_tail && break
+      sleep 0.2
+    done
+    printf '%s' "$mcp_tail" | fm_busy_pi_mcp_prompt_tail \
+      || fail "pi MCP: installed adapter did not render the expected consent prompt"
+    "$EV" arm "$mcp_lab/state" t1 >/dev/null || fail "pi MCP: cannot arm busy-state record"
+    out=$(fm_busy_classify tmux w1 pi t1 "$mcp_lab/state" "$mcp_tail")
+    [ "$out" = 'unknown launch-prompt' ] || fail "pi MCP: real consent classified '$out'"
+    watcher_gate_not_busy "$mcp_lab" "$mcp_lab/state" "$mcp_target" pi "$mcp_tail"
+    "$REAL_TMUX" -L "$SOCKET" kill-session -t "fm-lp-mcp-$$" >/dev/null 2>&1 || true
+    CHECKED=$((CHECKED + 1))
+    pass "pi MCP: real adapter consent surfaces without answering the prompt"
+  else
+    note "pi MCP adapter not installed - MCP consent signature not checked"
+  fi
 else
   note "pi not installed - launch-prompt signature not checked"
 fi

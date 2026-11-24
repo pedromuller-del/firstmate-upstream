@@ -100,13 +100,15 @@
 #                              only on a home that runs the host; exit 2 with one
 #                              line naming a live away record on that home.
 #
-# Supported backends: herdr, tmux, and rex for `start`; t3code only through
+# Supported backends: herdr, tmux, rex, and hc for `start`; t3code only through
 # `start-native` (T3 hosts no terminal to create, so the daemon runs as the
 # captain's own tracked background job, which means a Codex captain on t3code
 # has no away mode). Others (zellij, orca, cmux, paseo, tern) have no verified
 # non-visible-launch primitive here yet and refuse loudly. On rex the daemon
 # runs in a dedicated Rex session of its own, so the captain's session gains no
-# tab and keeps its focus.
+# tab and keeps its focus. On hc the daemon runs in a terminal of the captain's
+# core session that carries this home's firstmate labels but no herdr.space or
+# herdr.tab label, so Herdr App does not present it.
 #
 # Test seam: FM_AFK_LAUNCH_ENTRY overrides the command run in the created
 # terminal (default bin/fm-afk-start.sh), so a topology test can run a harmless
@@ -401,8 +403,14 @@ fm_afk_launch_entry_cmd() {
 # itself; the launcher names it here (bin/fm-supervise-daemon.sh
 # fm_daemon_primary_harness).
 fm_afk_launch_daemon_cmd() {  # <captain-target> <captain-backend>
-  printf 'exec env FM_HOME=%q FM_SUPERVISOR_TARGET=%q FM_SUPERVISOR_BACKEND=%q FM_DAEMON_PRIMARY_HARNESS=%q %q' \
-    "$FM_HOME" "$1" "$2" "$(fm_afk_launch_primary_harness)" "$(fm_afk_launch_entry_cmd)"
+  local pins=''
+  # A pinned hc binary or socket names the captain's core, so the daemon keeps it.
+  if [ "$2" = hc ]; then
+    [ -z "${FM_HC_BIN:-}" ] || pins+=$(printf ' FM_HC_BIN=%q' "$FM_HC_BIN")
+    [ -z "${FM_HC_SOCKET:-}" ] || pins+=$(printf ' FM_HC_SOCKET=%q' "$FM_HC_SOCKET")
+  fi
+  printf 'exec env FM_HOME=%q FM_SUPERVISOR_TARGET=%q FM_SUPERVISOR_BACKEND=%q FM_DAEMON_PRIMARY_HARNESS=%q%s %q' \
+    "$FM_HOME" "$1" "$2" "$(fm_afk_launch_primary_harness)" "$pins" "$(fm_afk_launch_entry_cmd)"
 }
 
 fm_afk_launch_record_write() {  # <backend> <target> <extra>
@@ -440,6 +448,9 @@ fm_afk_launch_record_read() {
   case "$FM_AFK_REC_BACKEND" in
     herdr) [ -n "$extra" ] ;;
     rex) [ "${extra%%:*}" = session ] && [ "${FM_AFK_REC_TARGET%%:*}" = "${extra#session:}" ] ;;
+    # An hc record's third field is the daemon terminal's firstmate.task label;
+    # every close checks it, so a reused address can never close another terminal.
+    hc) fm_backend_source hc && fm_backend_hc_parse_target "$FM_AFK_REC_TARGET" && fm_backend_hc_atom_valid "$extra" ;;
     tmux) : ;;
     none) [ "$FM_AFK_REC_TARGET" = - ] && [ "$extra" = native ] ;;
     *) return 2 ;;
@@ -471,6 +482,11 @@ fm_afk_launch_close_terminal() {  # <backend> <target> [extra]
       [ -n "$session" ] && [ -n "$pane" ] && [ "$pane" != "$target" ] || return 1
       fm_backend_herdr_cli "$session" pane close "$pane" >/dev/null 2>&1
       ;;
+    hc)
+      fm_backend_source hc || return 1
+      fm_backend_hc_atom_valid "$extra" || return 1
+      fm_backend_hc_kill "$target" "" "$extra"
+      ;;
     tmux)
       # target is the dedicated daemon session name - kill exactly it.
       tmux kill-session -t "$target" 2>/dev/null
@@ -501,6 +517,11 @@ fm_afk_launch_terminal_absent() {  # <backend> <target>
       [ "$result" -ne 0 ] || return 1
       code=$(printf '%s' "$out" | jq -r '.error.code // empty' 2>/dev/null) || return 1
       [ "$code" = pane_not_found ]
+      ;;
+    hc)
+      # Only hc's structured not_found proves absence; an unreadable core does not.
+      fm_backend_source hc || return 1
+      [ "$(fm_backend_hc_endpoint_state "$target")" = absent ]
       ;;
     tmux)
       out=$(tmux has-session -t "$target" 2>&1)
@@ -539,6 +560,10 @@ fm_afk_launch_terminal_alive() {  # <backend> <target>
       pane=${target#*:}
       [ -n "$session" ] && [ -n "$pane" ] && [ "$pane" != "$target" ] || return 1
       fm_backend_herdr_cli "$session" pane get "$pane" >/dev/null 2>&1
+      ;;
+    hc)
+      fm_backend_source hc || return 1
+      fm_backend_hc_target_ready "$target"
       ;;
     tmux)
       tmux has-session -t "$target" 2>/dev/null
@@ -633,11 +658,17 @@ fm_afk_launch_restore_backup() {  # <backup> <had-afk>
     "$FM_AFK_LAUNCH_STATE/.subsuper-escalations.since" \
     "$FM_AFK_LAUNCH_STATE/.subsuper-inject-wedged" \
     "$FM_AFK_LAUNCH_STATE/.subsuper-unknown-acked" \
-    "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-* || result=1
-  if [ "$had_afk" -eq 1 ]; then
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-stale-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-dialog-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-paused-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-pause-until-due-* || result=1
+  # A prior flag with no live daemon behind it was already an orphan: putting
+  # it back would leave the watcher one-shot with nothing supervising.
+  if [ "$had_afk" -eq 1 ] && daemon_lock_held_by_live_daemon; then
     cp "$backup/.afk" "$FM_AFK_LAUNCH_STATE/.afk" || result=1
   fi
-  for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$backup"/.subsuper-reported-stale-*; do
+  for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$backup"/.subsuper-stale-* "$backup"/.subsuper-reported-stale-* "$backup"/.subsuper-dialog-* "$backup"/.subsuper-paused-* "$backup"/.subsuper-pause-until-due-*; do
     artifact=${artifact##*/}
     if [ -e "$backup/$artifact" ]; then
       cp -p "$backup/$artifact" "$FM_AFK_LAUNCH_STATE/$artifact" || result=1
@@ -741,6 +772,89 @@ fm_afk_launch_create_rex() {  # <captain-target> <captain-backend>
   fm_afk_launch_log "daemon launched in dedicated rex session $sid (block $target), supervising $captain_target"
 }
 
+# A failed hc create may still have started its terminal. It is found by its
+# unique label: one match is recorded and closed through the label-checked
+# close path, no match means nothing was created, and anything else is left
+# alone and named.
+fm_afk_launch_hc_reclaim_created() {  # <session> <label>
+  local session=$1 label=$2 listed addresses target
+  if ! listed=$(fm_backend_hc_cli "$session" ls --json --label "firstmate.task=$label" \
+    --label "firstmate.home=$(fm_backend_hometag)" 2>/dev/null) \
+    || ! addresses=$(printf '%s' "$listed" | jq -r '.terminals[]?.address' 2>/dev/null); then
+    fm_afk_launch_log "could not list hc terminals labeled '$label'; a hidden daemon terminal may remain in session '$session'"
+    return 1
+  fi
+  [ -n "$addresses" ] || return 0
+  if [ "$(printf '%s\n' "$addresses" | wc -l)" -ne 1 ] || ! fm_backend_hc_address_valid "$addresses"; then
+    fm_afk_launch_log "hc terminals labeled '$label' are not one exact address ($addresses); left in session '$session'"
+    return 1
+  fi
+  target="$session:$addresses"
+  fm_afk_launch_log "closing hc daemon terminal $target found by its label after the failed create"
+  if ! fm_afk_launch_record_write hc "$target" "$label"; then
+    fm_afk_launch_log "failed to persist hc daemon terminal record; closing $target"
+    fm_afk_launch_close_terminal hc "$target" "$label"
+    return 1
+  fi
+  FM_AFK_REC_BACKEND=hc
+  FM_AFK_REC_TARGET=$target
+  FM_AFK_REC_EXTRA=$label
+  fm_afk_launch_close_recorded
+}
+
+# Launch the daemon in a terminal of the captain's own hc core session, so the
+# daemon reaches the captain terminal by its recorded address. The terminal
+# carries this home's firstmate.home label and a unique firstmate.task label but
+# no herdr.space/herdr.tab label, so Herdr App keeps it hidden. It is recorded by
+# exact address and label before the daemon command is typed into its shell,
+# mirroring the herdr create-record-run order.
+fm_afk_launch_create_hc() {  # <captain-target> <captain-backend>
+  local captain_target=$1 captain_backend=$2 session label out address target cmd
+  fm_backend_source hc || return 1
+  if ! fm_backend_hc_parse_target "$captain_target"; then
+    fm_afk_launch_log "cannot derive hc session from captain target '$captain_target'"
+    return 1
+  fi
+  session=$FM_BACKEND_HC_SESSION
+  fm_backend_hc_version_check || { fm_afk_launch_log "herdr-core is unavailable or older than the verified minimum"; return 1; }
+  # Without jq a created terminal could be neither addressed nor reclaimed.
+  jq -n true >/dev/null 2>&1 || { fm_afk_launch_log "jq is required to read hc output; no daemon terminal was created"; return 1; }
+  label=${FM_AFK_LAUNCH_LABEL:-"$FM_AFK_LAUNCH_WS_LABEL-$$-${RANDOM:-0}-$(date '+%s')"}
+  if ! fm_backend_hc_atom_valid "$label"; then
+    fm_afk_launch_log "invalid hc daemon label '$label'"
+    return 1
+  fi
+  out=$(fm_backend_hc_cli "$session" run --bg --json --no-parent --outlive-parent --no-notify \
+    --cwd "$FM_HOME" --label "firstmate.task=$label" --label "firstmate.home=$(fm_backend_hometag)" 2>&1) || {
+    fm_afk_launch_log "hc could not create the daemon terminal in session '$session': $out"
+    fm_afk_launch_hc_reclaim_created "$session" "$label" || true
+    return 1
+  }
+  address=$(printf '%s' "$out" | jq -r '.address // empty' 2>/dev/null)
+  if ! fm_backend_hc_address_valid "$address"; then
+    fm_afk_launch_log "hc create did not yield an exact terminal address for '$label'"
+    fm_afk_launch_hc_reclaim_created "$session" "$label" || true
+    return 1
+  fi
+  target="$session:$address"
+  cmd=$(fm_afk_launch_daemon_cmd "$captain_target" "$captain_backend")
+  if ! fm_afk_launch_record_write hc "$target" "$label"; then
+    fm_afk_launch_log "failed to persist hc daemon terminal record; closing $target"
+    fm_afk_launch_close_terminal hc "$target" "$label"
+    return 1
+  fi
+  if ! fm_backend_hc_send_text_line "$target" "$cmd" "$label"; then
+    fm_afk_launch_log "failed to run daemon in hc terminal $target; closing it"
+    FM_AFK_REC_BACKEND=hc
+    FM_AFK_REC_TARGET=$target
+    FM_AFK_REC_EXTRA=$label
+    fm_afk_launch_close_recorded || true
+    return 1
+  fi
+  fm_afk_launch_commit_terminal hc "$target" "$label" 1 || return 1
+  fm_afk_launch_log "daemon launched in hidden hc terminal $target (label $label), supervising $captain_target"
+}
+
 # Launch the daemon in a detached tmux session (never a split-window in the
 # captain's window). tmux pane ids are server-global, so the daemon reaches the
 # captain pane by its %id from this separate session.
@@ -799,7 +913,7 @@ fm_afk_launch_start() {
     had_afk=1
     cp "$FM_AFK_LAUNCH_STATE/.afk" "$backup/.afk" || { rm -rf "$backup"; return 1; }
   fi
-  for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-*; do
+  for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$FM_AFK_LAUNCH_STATE"/.subsuper-stale-* "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-* "$FM_AFK_LAUNCH_STATE"/.subsuper-dialog-* "$FM_AFK_LAUNCH_STATE"/.subsuper-paused-* "$FM_AFK_LAUNCH_STATE"/.subsuper-pause-until-due-*; do
     artifact=${artifact##*/}
     if [ -e "$FM_AFK_LAUNCH_STATE/$artifact" ]; then
       cp -p "$FM_AFK_LAUNCH_STATE/$artifact" "$backup/$artifact" || { rm -rf "$backup"; return 1; }
@@ -827,8 +941,9 @@ fm_afk_launch_start() {
       herdr) fm_afk_launch_create_herdr "$captain_target" "$captain_backend"; result=$? ;;
       tmux)  fm_afk_launch_create_tmux "$captain_target" "$captain_backend"; result=$? ;;
       rex)   fm_afk_launch_create_rex "$captain_target" "$captain_backend"; result=$? ;;
+      hc)    fm_afk_launch_create_hc "$captain_target" "$captain_backend"; result=$? ;;
       *)
-        fm_afk_launch_log "no non-visible daemon-launch primitive for backend '$captain_backend' yet (supported: herdr, tmux, rex)"
+        fm_afk_launch_log "no non-visible daemon-launch primitive for backend '$captain_backend' yet (supported: herdr, tmux, rex, hc)"
         result=1
         ;;
     esac
@@ -858,7 +973,7 @@ fm_afk_launch_start_native() {
     had_afk=1
     cp "$FM_AFK_LAUNCH_STATE/.afk" "$backup/.afk" || { rm -rf "$backup"; return 1; }
   fi
-  for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-*; do
+  for artifact in .subsuper-escalations .subsuper-escalations.since .subsuper-inject-wedged .subsuper-unknown-acked "$FM_AFK_LAUNCH_STATE"/.subsuper-stale-* "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-* "$FM_AFK_LAUNCH_STATE"/.subsuper-dialog-* "$FM_AFK_LAUNCH_STATE"/.subsuper-paused-* "$FM_AFK_LAUNCH_STATE"/.subsuper-pause-until-due-*; do
     artifact=${artifact##*/}
     if [ -e "$FM_AFK_LAUNCH_STATE/$artifact" ]; then
       cp -p "$FM_AFK_LAUNCH_STATE/$artifact" "$backup/$artifact" || { rm -rf "$backup"; return 1; }
@@ -935,6 +1050,18 @@ fm_afk_launch_stop() {
   # posture ends only once every daemon-side artifact is down.
   if ! rm -f "$FM_AFK_LAUNCH_STATE/.afk"; then
     fm_afk_launch_log "failed to clear away-mode flag"
+    result=1
+  fi
+  # The session's per-task supervision markers are episode state that ends with
+  # it: left behind, the NEXT session's first housekeeping reads the stale/pause
+  # clocks as its own and reports a possible wedge whose duration never
+  # happened. A wait that still stands is re-declared and re-windowed fresh.
+  if ! rm -f "$FM_AFK_LAUNCH_STATE"/.subsuper-stale-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-reported-stale-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-dialog-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-paused-* \
+    "$FM_AFK_LAUNCH_STATE"/.subsuper-pause-until-due-*; then
+    fm_afk_launch_log "failed to clear the session's per-task supervision markers"
     result=1
   fi
   if [ "$result" -eq 0 ] && fm_afk_contract_present "$FM_AFK_LAUNCH_STATE"; then

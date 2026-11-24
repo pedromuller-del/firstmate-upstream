@@ -799,15 +799,25 @@ fm_backlog_meta_spawn_gen_optional() {  # <meta> <state>
   fm_backlog_meta_spawn_gen "$meta" "$state"
 }
 
-fm_backlog_row_dispatchable() {
+fm_backlog_row_in_flight() {
   case "$1" in
-    in_flight\ no\ no|queued\ no\ no) return 0 ;;
+    'in_flight no no'|'in_flight yes no'|'in_flight no yes'|'in_flight yes yes') return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+fm_backlog_row_dispatchable() {  # <row> [relaunch=0]
+  if [ "${2:-0}" = 1 ] && fm_backlog_row_in_flight "$1"; then
+    return 0
+  fi
+  case "$1" in
+    'in_flight no no'|'queued no no') return 0 ;;
     *) return 1 ;;
   esac
 }
 
 fm_backlog_dispatch_transition() {
-  local meta=$1 data=$2 id=$3 state=$4 row row_status
+  local meta=$1 data=$2 id=$3 state=$4 relaunch=${5:-0} row row_status
   fm_backlog_record_present "$meta" "task record" "$state" || return 1
   fm_backlog_row_probe "$data" "$id"
   row_status=$?
@@ -820,14 +830,11 @@ fm_backlog_dispatch_transition() {
     return "$row_status"
   fi
   row=$FM_BACKLOG_ROW_STATE
-  if ! fm_backlog_row_dispatchable "$row"; then
+  if ! fm_backlog_row_dispatchable "$row" "$relaunch"; then
     FM_BACKLOG_TRANSITION_ERROR="backlog item $id is not dispatchable in state $row"
     return 1
   fi
-  case "$row" in
-    in_flight\ no\ no) return 0 ;;
-    queued\ no\ no) fm_backlog_start "$data" "$id" ;;
-  esac
+  fm_backlog_row_in_flight "$row" || fm_backlog_start "$data" "$id"
 }
 
 fm_backlog_dispatch_rollback() {

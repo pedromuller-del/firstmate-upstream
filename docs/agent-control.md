@@ -92,8 +92,9 @@ A relaunch does take one session reference when the endpoint's own runtime recor
    A ship or scout relaunch requires `--note`, because the replacement inherits the local copy but none of the conversation; the note is appended to the instructions it reads.
    A secondmate relaunch does not require one and never rewrites its standing charter.
 4. **Stop the old agent** through the `exit` verb, with its postcondition.
-5. **Launch the replacement** through its single owner, `bin/fm-spawn.sh --relaunch`, which reuses the recorded worktree instead of creating one, adopts the recorded endpoint when it still exists, clears the previous harness's per-task wiring, and arms a fresh busy generation.
-   When the recorded endpoint is proven gone rather than merely idle or unreachable - which only Herdr and Rex can establish - the launch owner creates one fresh endpoint in that same worktree and the republished record rebinds the task to it - see [Reclaiming a task whose endpoint is gone](#reclaiming-a-task-whose-endpoint-is-gone).
+5. **Launch the replacement** through its single owner, `bin/fm-spawn.sh --relaunch`, which reuses the recorded worktree, clears the previous harness's per-task wiring, and arms a fresh busy generation.
+   See [Reclaiming a task whose endpoint is gone](#reclaiming-a-task-whose-endpoint-is-gone) for when a replacement endpoint is necessary.
+   An In-flight backlog item already owns the worker, so a relaunch leaves its state and any hold or dependency block unchanged.
 6. **Preserve runtime-bound status authority where supported.**
    The endpoint's runtime may bind pane status to one session identity; the launch owner preserves it only when that runtime records a reference the replacement adapter can consume, and otherwise launches the ordinary fresh session.
    This reference is a launch input, never authority to send, close, or act on the pane.
@@ -106,11 +107,12 @@ Switching harness is therefore one ordinary relaunch rather than a separate mech
 A Herdr pane or workspace, or a Rex block, can be destroyed out from under a live task by churn, a session restart, or a stopped Rex server.
 The task's worktree, branch, commits, and uncommitted changes all survive that; only its terminal does not.
 
-**Reclaim is Herdr- and Rex-only.** On tmux, both verbs refuse a `missing` endpoint, leaving it exactly as deadlocked as it was before this mechanism existed - deliberately, and with the reason stated rather than guessed past.
+**Reclaim is supported on Herdr, Rex, and hc.** On tmux, both verbs refuse a `missing` endpoint rather than guessing that it is gone.
 
 Two endpoint verdicts are agent-free, and both license a relaunch:
 
-- `dead` - the endpoint exists and confidently holds no agent. It is **adopted**, so the task keeps its exact recorded address.
+- `dead` - the endpoint exists and confidently holds no agent.
+  It is adopted unless the backend needs a fresh endpoint to launch in the recorded worktree.
 - gone, **proven** - there is no endpoint and therefore no agent, and it cannot be adopted, so the launch owner **creates one fresh endpoint in the recorded worktree** and the republished record rebinds the task to it.
 
 That proof is its own step for pane backends because their classifier's `missing` can conflate *the endpoint was destroyed* with *the endpoint is unreachable from here right now*.
@@ -127,6 +129,9 @@ An unreachable endpoint can still hold the live agent a rebind would duplicate, 
   [Rex's server-stop limits](rex-backend.md#active-limits) distinguish a restored shell from a missing block.
   A block that is still there is classified from its process view, so `dead` is adopted and `alive` refuses ([`docs/rex-backend.md`](rex-backend.md) "Cleanup and the absence proof").
   Rex's passive reads never start a server, so a stopped Rex server reads `unreadable` rather than `missing`; a Rex `unreadable` therefore goes through this recheck too, and still refuses unless the recheck settles it.
+- **hc can prove it.** It accepts a structured not-found or an owned, finished terminal from the recorded session.
+  If an owned worker terminal is still live but agent-free and its directory does not match the recorded worktree, Firstmate checks agent state again, closes the old terminal, and opens one in the recorded worktree.
+  An unverified or live agent is not eligible for replacement by `fm-spawn.sh --relaunch`.
 - **tmux cannot.** `list-windows -a` describes only the tmux server the *current process* addresses (its `TMUX_TMPDIR`/socket), and a task record carries no socket identity for its endpoint.
   A different but running server would answer "not anywhere" about a window it was never able to see, so a server-wide read cannot tell a destroyed window from one on a server this process cannot address.
   There is no read available that closes that gap, so tmux always refuses - for a renamed session, a moved window, a foreign socket, and a dead server alike.
@@ -195,9 +200,9 @@ The worktree and the task's records are unaffected either way.
 - An ambiguous or unreadable endpoint state refuses.
   Only a positively classified state acts; a Rex `unreadable` acts only once the absence proof above settles it.
 - `exit`'s composer-empty check, above, is itself a fail-closed boundary that `relaunch` inherits by stopping the old agent through `exit`.
-- `fm-spawn --relaunch` independently refuses unless the endpoint is positively agent-free - either a `dead` endpoint that survives, or a Herdr or Rex endpoint proven gone by the absence proof above - so a replacement can never join a live agent.
+- `fm-spawn --relaunch` independently requires the [agent-free endpoint proof](#reclaiming-a-task-whose-endpoint-is-gone), so a replacement cannot join a live agent.
   An `alive`, `ambiguous`, or `unreadable` verdict all refuse (a Rex `unreadable` after the absence proof cannot settle it), and so does any endpoint whose absence is not provable, which on tmux is every `missing`; absence is claimed only from positive evidence of it.
-  For a ship or scout it also refuses, by name, a recorded worktree that is the home, the code root, or a repository's primary checkout (its git dir equals its git common dir), so a worker only ever comes back in its own task worktree.
+  For a ship or scout it also refuses, by name, a recorded worktree that is the home, the code root, or the recorded project repository's primary checkout (the worktree's git dir is the recorded project's common git dir - the same boundary fresh spawn's isolation check draws, so a standalone clone passes this isolation check), so a worker only ever comes back in its own task worktree.
   This check lives only in the launch owner, so on the `relaunch` verb it fires after the old agent has stopped and the transaction ends as a failed launch.
   It also requires the shell to be in the recorded worktree: every backend but Orca (which owns its own task worktree with no current-path probe) gets one explicit `cd` to the recorded path (Herdr, whose shell may not be ready for it, gets one resend if the path has not moved after about 10 seconds), then a pre-launch path read that refuses before any harness starts unless it confirms the endpoint is sitting in the recorded copy.
 

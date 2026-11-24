@@ -1614,6 +1614,45 @@ test_branch_actor_scoped_ack_never_swallows_a_main_owned_row() {
   pass "a branch-actor scoped ack never swallows an unacked main-owned row, and main's later drain sees exactly what remains"
 }
 
+# A host publishes the branch's grant before its engine runs. Its branch tool
+# may not be allowed to inspect the host process through ps, but it must still
+# drain and acknowledge only the exact rows in that published snapshot.
+test_branch_actor_keeps_its_grant_when_ps_cannot_inspect_the_host() {
+  local dir state sequence generation
+  dir=$(make_case branch-ps-denied)
+  state="$dir/state"
+  mkdir -p "$dir/fakebin"
+  printf '#!/usr/bin/env bash\nexit 1\n' > "$dir/fakebin/ps"
+  chmod +x "$dir/fakebin/ps"
+
+  append_wake "$state" check "main-only.check.sh" "check: main-only" || fail "main append failed"
+  append_wake "$state" signal "task-a.status" "signal: task-a" || fail "branch append failed"
+  FM_PROC_ROOT_OVERRIDE="$dir/no-proc" FM_STATE_OVERRIDE="$state" \
+    "$GRANT" activate "$$" ps-denied || fail "branch owner activation failed"
+  FM_PROC_ROOT_OVERRIDE="$dir/no-proc" FM_STATE_OVERRIDE="$state" \
+    "$GRANT" publish ps-denied 2 || fail "branch grant publication failed"
+
+  PATH="$dir/fakebin:$PATH" FM_PROC_ROOT_OVERRIDE="$dir/no-proc" FM_STATE_OVERRIDE="$state" \
+    FM_SUPERVISION_ACTOR=branch "$DRAIN" > "$dir/branch.out" 2> "$dir/branch.err" \
+    || fail "branch lost its live grant when ps was unavailable: $(cat "$dir/branch.err")"
+  grep -Fq "$(printf '\tsignal\ttask-a.status\t')" "$dir/branch.out" \
+    || fail "branch drain omitted its granted row"
+  ! grep -Fq "$(printf '\tcheck\tmain-only.check.sh\t')" "$dir/branch.out" \
+    || fail "branch drain presented the main-owned row"
+  sequence=$(sed -n 's/^WAKE_ACK_REQUIRED:.*--ack-through \([0-9][0-9]*\) --recovery-generation [A-Za-z0-9._-][A-Za-z0-9._-]*$/\1/p' "$dir/branch.err")
+  generation=$(sed -n 's/^WAKE_ACK_REQUIRED:.*--ack-through [0-9][0-9]* --recovery-generation \([A-Za-z0-9._-][A-Za-z0-9._-]*\)$/\1/p' "$dir/branch.err")
+  [ "$sequence" = 2 ] && [ -n "$generation" ] || fail "branch drain omitted its exact acknowledgement"
+  PATH="$dir/fakebin:$PATH" FM_PROC_ROOT_OVERRIDE="$dir/no-proc" FM_STATE_OVERRIDE="$state" \
+    FM_SUPERVISION_ACTOR=branch "$DRAIN" --ack-through "$sequence" --recovery-generation "$generation" \
+    || fail "branch acknowledgement failed when ps was unavailable"
+  grep -Fq "$(printf '\tcheck\tmain-only.check.sh\t')" "$state/.wake-queue" \
+    || fail "branch acknowledgement swallowed the main-owned row"
+  ! grep -Fq "$(printf '\tsignal\ttask-a.status\t')" "$state/.wake-queue" \
+    || fail "branch acknowledgement left its granted row queued"
+
+  pass "branch drain and acknowledgement keep their published grant when ps cannot inspect the host"
+}
+
 test_main_drain_excludes_rows_already_granted_to_branch() {
   local dir state out err sequence generation
   dir=$(make_case main-excludes-branch-grant)
@@ -2423,6 +2462,55 @@ test_branch_stale_ack_that_consumes_nothing_names_its_granted_wake() {
   [ ! -s "$state/.wake-queue" ] || fail "the branch's printed remedy left its wake queued"
   FM_STATE_OVERRIDE="$state" "$GRANT" deactivate "$$" branch-stale || fail "branch owner deactivation failed"
   pass "wake drain: a branch acknowledgement that consumes nothing names the exact command for its granted wake"
+}
+
+# A supervisor that discards or filters the drain's stdout keeps the stderr
+# acknowledgement line, so that line must name the rows it asks to acknowledge.
+test_ack_line_names_the_rows_it_acknowledges() {
+  local dir state line sequence generation kind key i n
+  dir=$(make_case ack-rows-summary)
+  state="$dir/state"
+  append_wake "$state" stale test:fm-parked "stale: test:fm-parked" || fail "could not queue the stale row"
+  append_wake "$state" check due-recheck "check: due recheck" || fail "could not queue the check row"
+  append_wake "$state" signal alpha "signal: $state/alpha.status" || fail "could not queue the signal row"
+  FM_STATE_OVERRIDE="$state" "$DRAIN" > "$dir/first.out" 2> "$dir/first.err" || fail "drain with queued rows failed"
+  line=$(sed -n '/^WAKE_ACK_REQUIRED:/p' "$dir/first.err" | head -1)
+  n=0
+  while IFS=$'\t' read -r _ sequence kind key _; do
+    n=$((n + 1))
+    case "$line" in
+      *"rows: 3 ["*"$sequence $kind $key"*) ;;
+      *) fail "the acknowledgement line did not name row $sequence $kind $key: $line" ;;
+    esac
+  done < "$dir/first.out"
+  [ "$n" -eq 3 ] || fail "expected 3 presented rows, got $n"
+  sequence=$(printf '%s\n' "$line" | sed -n 's/^WAKE_ACK_REQUIRED:.*--ack-through \([0-9][0-9]*\) --recovery-generation [A-Za-z0-9._-][A-Za-z0-9._-]*$/\1/p')
+  generation=$(printf '%s\n' "$line" | sed -n 's/^WAKE_ACK_REQUIRED:.*--ack-through [0-9][0-9]* --recovery-generation \([A-Za-z0-9._-][A-Za-z0-9._-]*\)$/\1/p')
+  [ -n "$sequence" ] && [ -n "$generation" ] \
+    || fail "the rows summary broke the machine-readable acknowledgement command: $line"
+  FM_STATE_OVERRIDE="$state" "$DRAIN" --ack-through "$sequence" --recovery-generation "$generation" \
+    || fail "the command parsed from the summarised line did not acknowledge"
+  [ ! -s "$state/.wake-queue" ] || fail "the parsed acknowledgement left rows queued"
+
+  dir=$(make_case ack-rows-summary-seven)
+  state="$dir/state"
+  i=1
+  while [ "$i" -le 7 ]; do
+    append_wake "$state" stale "window-$i" "stale: window-$i" || fail "could not queue row $i"
+    i=$((i + 1))
+  done
+  FM_STATE_OVERRIDE="$state" "$DRAIN" > /dev/null 2> "$dir/seven.err" || fail "drain with seven queued rows failed"
+  line=$(sed -n '/^WAKE_ACK_REQUIRED:/p' "$dir/seven.err" | head -1)
+  case "$line" in
+    *"rows: 7 ["*"stale window-1"*"stale window-5"*"stale window-6"*"stale window-7] after handling completes run bin/fm-wake-drain.sh --ack-through "*) ;;
+    *) fail "the acknowledgement line did not name all seven rows: $line" ;;
+  esac
+  case "$line" in
+    *" more]"*) fail "the rows summary hid rows behind a count: $line" ;;
+  esac
+  sequence=$(printf '%s\n' "$line" | sed -n 's/^WAKE_ACK_REQUIRED:.*--ack-through \([0-9][0-9]*\) --recovery-generation [A-Za-z0-9._-][A-Za-z0-9._-]*$/\1/p')
+  [ -n "$sequence" ] || fail "the seven-row summary broke the machine-readable acknowledgement command: $line"
+  pass "wake drain: the acknowledgement line names every row it acknowledges, with its command intact"
 }
 
 test_recovery_ack_failure_is_reported() {
@@ -3818,6 +3906,7 @@ test_structural_signal_enrichment_preserves_raw_rows
 test_enrichment_preserves_all_unread_lines_and_status_file_failures
 test_slow_annotation_does_not_block_append_and_deleted_file_fails_open
 test_branch_actor_scoped_ack_never_swallows_a_main_owned_row
+test_branch_actor_keeps_its_grant_when_ps_cannot_inspect_the_host
 test_main_drain_excludes_rows_already_granted_to_branch
 test_branch_ack_commits_secondmate_stall_receipts
 test_main_is_never_told_to_drain_rows_only_the_branch_owns
@@ -3836,6 +3925,7 @@ test_legacy_generationless_wake_is_adopted
 test_handover_restore_undoes_only_its_own_stop
 test_stale_recovery_generation_cannot_touch_a_newer_episode
 test_stale_ack_that_consumes_nothing_names_the_current_wake
+test_ack_line_names_the_rows_it_acknowledges
 test_branch_stale_ack_that_consumes_nothing_names_its_granted_wake
 test_recovery_ack_failure_is_reported
 test_interruption_before_and_after_raw_commit

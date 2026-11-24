@@ -32,7 +32,9 @@
 # herdr.space=<id> and herdr.tab=<id> labels, and an unknown id becomes a new
 # space or tab. create_task sets herdr.space=FM_HC_SPACE (default
 # fm-<hometag>) and herdr.tab=<scoped label>, so a home's tasks group in one
-# space with one tab each. Naming the space needs the app window and is not done.
+# space with one tab each. An optional presentation home places a secondmate
+# in its child's default space without transferring control ownership.
+# Naming the space needs the app window and is not done.
 #
 # Measured limits on hc 0.1.13 and 0.1.14 (docs/hc-backend.md "Limits"):
 #   - `hc send` always presses Enter after pasting. There is no paste without
@@ -54,6 +56,14 @@
 . "$FM_BACKEND_LIB_DIR/fm-composer-lib.sh"
 # shellcheck source=bin/fm-agent-process-lib.sh
 . "$FM_BACKEND_LIB_DIR/fm-agent-process-lib.sh"
+# bin/fm-timeout-lib.sh owns bounded execution (fm_run_timed). It declares
+# set -u for its own hygiene, so the caller's nounset setting is restored.
+_fm_backend_hc_nounset=off
+case $- in *u*) _fm_backend_hc_nounset=on ;; esac
+# shellcheck source=bin/fm-timeout-lib.sh
+. "$FM_BACKEND_LIB_DIR/fm-timeout-lib.sh"
+[ "$_fm_backend_hc_nounset" = on ] || set +u
+unset _fm_backend_hc_nounset
 
 # The verified floor: the oldest herdr-core release every adapter surface
 # (including `send --wait` and the `hello` handshake) was exercised against.
@@ -128,19 +138,31 @@ EOF
 # pins. Ambient HC_TERMINAL_* routing markers are always stripped. An
 # inherited HC_SOCKET is stripped because hc lets it win over HC_SESSION;
 # FM_HC_SOCKET is the deliberate pin used by tests and the lab instead.
-fm_backend_hc_env_run() {  # <session> <args...>
-  local session=$1 bin
+# --bound <seconds> ends a call that never ends by itself (`attach`) through
+# fm_run_timed.
+fm_backend_hc_env_run() {  # [--bound <seconds>] <session> <args...>
+  local bound='' session bin
+  if [ "${1:-}" = --bound ]; then
+    bound=$2
+    shift 2
+  fi
+  session=$1
   shift
   bin=$(fm_backend_hc_bin) || {
     echo "error: backend=hc selected but no 'herdr-core' or 'hc' binary was found on PATH (install Herdr Core per docs/hc-backend.md or set FM_HC_BIN)" >&2
     return 1
   }
   if [ -n "${FM_HC_SOCKET:-}" ]; then
-    env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE \
+    set -- env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE \
       HC_SESSION="$session" HC_SOCKET="$FM_HC_SOCKET" "$bin" "$@"
   else
-    env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE -u HC_SOCKET \
+    set -- env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE -u HC_SOCKET \
       HC_SESSION="$session" "$bin" "$@"
+  fi
+  if [ -n "$bound" ]; then
+    fm_run_timed "$bound" "$@"
+  else
+    "$@"
   fi
 }
 
@@ -277,10 +299,14 @@ fm_backend_hc_container_ensure() {
 # --no-parent and --outlive-parent keep the terminal independent of whichever
 # hc terminal firstmate itself runs in; --no-notify keeps hc from typing notes
 # into any parent.
-fm_backend_hc_create_task() {  # <session> <window-label> <cwd>
-  local session=$1 label=$2 cwd=$3 home scoped dup out address
+fm_backend_hc_create_task() {  # <session> <window-label> <cwd> [presentation-home]
+  local session=$1 label=$2 cwd=$3 presentation_home=${4:-} home scoped space dup out address
   home=$(fm_backend_hometag)
   scoped=$(fm_backend_hc_scoped_label "$label")
+  space=${FM_HC_SPACE:-fm-$home}
+  if [ -n "$presentation_home" ]; then
+    space="fm-$(FM_HOME="$presentation_home" FM_ROOT="$presentation_home" fm_backend_hometag)"
+  fi
   dup=$(fm_backend_hc_cli "$session" ls --json --label "firstmate.task=$label" --label "firstmate.home=$home" 2>/dev/null) \
     || { echo "error: 'hc ls' failed for session '$session'; cannot create $label" >&2; return 1; }
   if [ -n "$(printf '%s' "$dup" | jq -r '.terminals[]?.address' 2>/dev/null)" ]; then
@@ -290,7 +316,7 @@ fm_backend_hc_create_task() {  # <session> <window-label> <cwd>
   out=$(fm_backend_hc_cli "$session" run --bg --json --no-parent --outlive-parent --no-notify \
     --cwd "$cwd" \
     --label "firstmate.task=$label" --label "firstmate.home=$home" \
-    --label "herdr.space=${FM_HC_SPACE:-fm-$home}" --label "herdr.tab=$scoped" 2>&1) \
+    --label "herdr.space=$space" --label "herdr.tab=$scoped" 2>&1) \
     || { echo "error: hc run failed for $label: $out" >&2; return 1; }
   address=$(printf '%s' "$out" | jq -r '.address // empty' 2>/dev/null)
   fm_backend_hc_address_valid "$address" || { echo "error: hc run did not return a terminal address for $label (got: $out)" >&2; return 1; }
@@ -310,6 +336,48 @@ fm_backend_hc_capture() {  # <target> <lines> [expected-label]
 fm_backend_hc_visible_capture() {  # <target> [expected-label]
   fm_backend_hc_target_ready "$1" "${2:-}" || return 1
   fm_backend_hc_cli "$FM_BACKEND_HC_SESSION" read --lines 0 "$FM_BACKEND_HC_ADDRESS" 2>/dev/null
+}
+
+# fm_backend_hc_visible_capture_ansi: the screen with its styling, which
+# `hc read` never carries. It takes the first paint of a watch-only
+# `hc attach --observe` (it never types or resizes): the rows after the
+# paint's last cursor home and before its cursor placement, kept to SGR
+# styling. A terminal on its alternate screen is painted twice: the main
+# screen with its own cursor placement, then the switch to the alternate
+# screen, whose rows are the visible ones. The attach never ends by itself,
+# so it is bounded. The paint is used only when its text equals `hc read` of
+# the screen just before the attach (or, when the screen moved, just after
+# it), so a cut-short, changed, or misparsed paint fails and the caller reads
+# the plain screen.
+# Verified with Claude Code 2.1.321 on hc 0.1.14 and 0.1.21; its alternate
+# screen is checked against a recorded macOS hc 0.1.21 paint.
+fm_backend_hc_visible_capture_ansi() {  # <target> [expected-label]
+  local raw body screen text plain home=$'\e[H' alt=$'\e[?1049h' placement_re=$'\e\\[[0-9]+(;[0-9]+)?H'
+  fm_backend_hc_target_ready "$1" "${2:-}" || return 1
+  plain=$(fm_backend_hc_visible_capture "$1" "${2:-}") || return 1
+  raw=$(fm_backend_hc_env_run --bound 1 "$FM_BACKEND_HC_SESSION" attach --observe \
+    "$FM_BACKEND_HC_ADDRESS" </dev/null 2>/dev/null) || true
+  case "$raw" in *"$alt"*) raw=${raw#*"$alt"} ;; esac
+  [[ $raw =~ $placement_re ]] || return 1
+  body=${raw%%"${BASH_REMATCH[0]}"*}
+  case "$body" in *"$home"*) ;; *) return 1 ;; esac
+  screen=$(printf '%s\n' "${body##*"$home"}" | LC_ALL=C sed -E \
+    -e $'s/\e\\][^\a\e]*(\a|\e\\\\)//g' \
+    -e $'s/\e\\[[?>=!][0-9;:]*[ -/]*[@-~]//g' \
+    -e $'s/\e\\[[0-9;:]*[ -/]*[@-ln-~]//g' \
+    -e $'s/\e[()*+].//g' -e $'s/\e[^[]//g' -e $'s/\r//g')
+  text=$(fm_backend_hc_screen_text "$screen")
+  if [ "$text" != "$(fm_backend_hc_screen_text "$plain")" ]; then
+    plain=$(fm_backend_hc_visible_capture "$1" "${2:-}") || return 1
+    [ "$text" = "$(fm_backend_hc_screen_text "$plain")" ] || return 1
+  fi
+  printf '%s\n' "$screen"
+}
+
+# fm_backend_hc_screen_text: a screen's text for comparison - SGR styling and
+# trailing blanks dropped (the command substitution drops trailing blank rows).
+fm_backend_hc_screen_text() {  # <screen>
+  printf '%s\n' "$1" | LC_ALL=C sed -E -e $'s/\e\\[[0-9;:]*m//g' -e 's/[[:space:]]+$//'
 }
 
 # fm_backend_hc_normalize_key: firstmate's key vocabulary onto hc key names.
@@ -347,14 +415,55 @@ fm_backend_hc_current_path() {  # <target> [expected-label]
 }
 
 fm_backend_hc_composer_caps() {
-  printf 'styled=0\ncursor=0\nidentity=0\nrows=%s\n' "$FM_COMPOSER_CAPTURE_LINES"
+  printf 'styled=0\ncursor=0\nidentity=1\nrows=%s\n' "$FM_COMPOSER_CAPTURE_LINES"
 }
 
+# fm_backend_hc_composer_identity: the identity behind Pi's separated composer
+# (blank or typed rows between two solid rules), which a screen alone cannot
+# tell from transcript rules. It answers "pi<TAB><state>" only while hc's
+# foreground process is a Pi binary, with hc's native status as the state; an
+# idle status still reads working when Pi's rendered busy footer shows, so a
+# busy Pi is never reported idle. Verified on hc 0.1.14 with pi 1.5.0.
+fm_backend_hc_composer_identity() {  # <target> [expected-label] -> "pi\t<state>"
+  local json fields name argv0 state visible
+  json=$(fm_backend_hc_get "$1") || return 1
+  fields=$(printf '%s' "$json" | jq -r '[.foreground.name // "", (.foreground.argv[0] // "" | split("/") | last // ""),
+    .status.state // ""] | @tsv' 2>/dev/null) || return 1
+  IFS=$'\t' read -r name argv0 state <<EOF
+$fields
+EOF
+  case "$name" in
+    pi|pi-signed|pi-launcher|Pi) ;;
+    *) case "$argv0" in pi|pi-signed|pi-launcher) ;; *) return 1 ;; esac ;;
+  esac
+  case "$state" in
+    idle|done)
+      visible=$(fm_backend_hc_capture "$1" 40 "${2:-}" | grep -v '^[[:space:]]*$' | tail -12)
+      if [ -z "$visible" ] || printf '%s' "$visible" | fm_busy_lines_match pi; then state=working; fi
+      ;;
+  esac
+  printf 'pi\t%s' "${state:-unknown}"
+}
+
+# fm_backend_hc_composer_state: the styled capture is preferred (styled=1 lets
+# the shared classifier strip ghost text, such as Claude's dim prompt
+# suggestion); without one, the plain screen degrades to the caps' styled=0.
 fm_backend_hc_composer_state() {  # <target> [expected-label] -> empty|pending|pending-unproven|unknown
-  local cap verdict
-  cap=$(fm_backend_hc_visible_capture "$1" "${2:-}") || { printf 'unknown'; return 0; }
-  verdict=$(fm_composer_classify_screen "$(fm_backend_hc_composer_caps)" "$cap")
-  [ "$verdict" != need-identity ] || verdict=unknown
+  local cap caps verdict identity
+  caps=$(fm_backend_hc_composer_caps)
+  if cap=$(fm_backend_hc_visible_capture_ansi "$1" "${2:-}"); then
+    caps=${caps/styled=0/styled=1}
+  else
+    cap=$(fm_backend_hc_visible_capture "$1" "${2:-}") || { printf 'unknown'; return 0; }
+  fi
+  verdict=$(fm_composer_classify_screen "$caps" "$cap")
+  if [ "$verdict" = need-identity ]; then
+    if ! identity=$(fm_backend_hc_composer_identity "$1" "${2:-}") || [ -z "$identity" ]; then
+      identity='probe-absent'
+    fi
+    verdict=$(fm_composer_classify_screen "$caps" "$cap" '' "$identity")
+    [ "$verdict" != need-identity ] || verdict=unknown
+  fi
   printf '%s' "$verdict"
 }
 

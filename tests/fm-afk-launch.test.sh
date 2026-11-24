@@ -49,6 +49,7 @@ chmod +x "$SLEEPER"
 TRACK_TMUX_SESSIONS=""
 GLOBAL_CLEANUP() {
   declare -F rex_test_cleanup >/dev/null 2>&1 && rex_test_cleanup
+  declare -F e2e_hc_teardown >/dev/null 2>&1 && e2e_hc_teardown
   rm -f "$SLEEPER" 2>/dev/null || true
   rm -rf "$OFF_CONFIG" 2>/dev/null || true
   local s
@@ -256,7 +257,8 @@ unit_stop_archives_the_record_last() {
 }
 
 # ---------------------------------------------------------------------------
-# UNIT 1: fm_afk_clear_stale_artifacts removes exactly the four stale artifacts.
+# UNIT 1: fm_afk_clear_stale_artifacts removes exactly the four delivery
+# artifacts plus the prior session's five per-task marker families.
 # ---------------------------------------------------------------------------
 unit_clear_stale() {
   local st
@@ -266,6 +268,12 @@ unit_clear_stale() {
   : > "$st/state/.subsuper-escalations.since"
   : > "$st/state/.subsuper-inject-wedged"
   : > "$st/state/.subsuper-unknown-acked"
+  : > "$st/state/.subsuper-stale-task1"
+  : > "$st/state/.subsuper-reported-stale-task1"
+  : > "$st/state/.subsuper-dialog-task1"
+  : > "$st/state/.subsuper-paused-task1"
+  : > "$st/state/.subsuper-pause-until-due-task1"
+  : > "$st/state/.subsuper-seen-status-task1"  # classification position must be kept
   : > "$st/state/.wake-queue"          # durable queue must be untouched
   # Source fm-afk-start.sh inside a child bash (it sets `set -eu` and would
   # otherwise leak that into this test shell) and call the clear helper.
@@ -279,10 +287,113 @@ unit_clear_stale() {
   else
     fail "clear-stale: stale artifacts survived"
   fi
+  if ! compgen -G "$st/state/.subsuper-stale-*" >/dev/null \
+     && ! compgen -G "$st/state/.subsuper-reported-stale-*" >/dev/null \
+     && ! compgen -G "$st/state/.subsuper-dialog-*" >/dev/null \
+     && ! compgen -G "$st/state/.subsuper-paused-*" >/dev/null \
+     && ! compgen -G "$st/state/.subsuper-pause-until-due-*" >/dev/null; then
+    pass "clear-stale: removes the prior session's five per-task marker families"
+  else
+    fail "clear-stale: per-task session markers survived"
+  fi
+  if [ -e "$st/state/.subsuper-seen-status-task1" ]; then
+    pass "clear-stale: keeps the durable classification position"
+  else
+    fail "clear-stale: removed the classification position"
+  fi
   if [ -e "$st/state/.wake-queue" ]; then
     pass "clear-stale: leaves the durable wake-queue intact (no pending work dropped)"
   else
     fail "clear-stale: removed the durable wake-queue"
+  fi
+  rm -rf "$st"
+}
+
+# ---------------------------------------------------------------------------
+# The per-task away markers are session-scoped episode state: the return path
+# (fm_afk_launch_stop) and the fresh-entry cleanup must both drop all five
+# families, or the next session's first housekeeping reads a dead session's
+# idle clock as its own and reports a wedge whose duration never happened.
+# The last pass replays the implicit-state-machines audit's reproduction: a
+# hand-written prior-session clock, an idle pane read, delivery stubbed off.
+# ---------------------------------------------------------------------------
+unit_per_task_markers_session_scoped() {
+  local st state now
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-marker-scope.XXXXXX")
+  state="$st/state"
+  mkdir -p "$state"
+  now=$(date +%s)
+  # One finished ship task, as the audit's scratch home: a terminal status and
+  # a meta that still maps its window.
+  printf 'done [at=%s]: PR https://example.test/o/r/pull/1 checks green\n' "$now" > "$state/demo.status"
+  printf 'window=%s\nbackend=tmux\nharness=claude\n' 'fmaudit-none:fm-demo' > "$state/demo.meta"
+  printf '0:fixture\n' > "$state/.subsuper-seen-status-demo"
+  printf '%s\n' "$now" > "$state/.subsuper-last-scan"
+  seed_markers() {
+    # Same path and content as the daemon's stale_marker_record: the epoch the
+    # pane was first seen idle, mid-episode when the session ended.
+    printf '%s\n' $(( now - 172801 )) > "$state/.subsuper-stale-demo"
+    : > "$state/.subsuper-reported-stale-demo"
+    : > "$state/.subsuper-dialog-demo"
+    : > "$state/.subsuper-paused-demo"
+    : > "$state/.subsuper-pause-until-due-demo"
+  }
+  markers_gone() {
+    ! compgen -G "$state/.subsuper-stale-*" >/dev/null \
+      && ! compgen -G "$state/.subsuper-reported-stale-*" >/dev/null \
+      && ! compgen -G "$state/.subsuper-dialog-*" >/dev/null \
+      && ! compgen -G "$state/.subsuper-paused-*" >/dev/null \
+      && ! compgen -G "$state/.subsuper-pause-until-due-*" >/dev/null
+  }
+
+  # The return path drops the session's markers with the away flag.
+  seed_markers
+  : > "$state/.afk"
+  FM_HOME="$st" FM_STATE_OVERRIDE="$state" "$LAUNCH" stop >/dev/null 2>&1
+  if markers_gone && [ ! -e "$state/.afk" ] && [ -e "$state/.subsuper-seen-status-demo" ]; then
+    pass "return: stop drops all five per-task marker families, keeps the classification position"
+  else
+    fail "return: per-task markers survived stop ($(compgen -G "$state/.subsuper-*" | tr '\n' ' '))"
+  fi
+
+  # The fresh-entry cleanup drops them alongside the delivery artifacts.
+  seed_markers
+  FM_HOME="$st" FM_STATE_OVERRIDE="$state" \
+    bash -c '. "$1"; fm_afk_clear_stale_artifacts "$2"' _ "$START" "$state"
+  if markers_gone; then
+    pass "entry: fresh-session cleanup drops all five per-task marker families"
+  else
+    fail "entry: per-task markers survived fresh-session cleanup ($(compgen -G "$state/.subsuper-*" | tr '\n' ' '))"
+  fi
+
+  # The audit narrative end to end: session one's clock goes through stop and
+  # the next entry's cleanup, then the new daemon's first housekeeping pass.
+  # Reset to the audit's repro shape first: ONLY the stale clock, because
+  # housekeeping's pause migration retires the episode before the wedge check
+  # whenever a paused marker is also present.
+  rm -f "$state"/.subsuper-stale-* "$state"/.subsuper-reported-stale-* \
+    "$state"/.subsuper-dialog-* "$state"/.subsuper-paused-* \
+    "$state"/.subsuper-pause-until-due-*
+  printf '%s\n' $(( now - 172801 )) > "$state/.subsuper-stale-demo"
+  : > "$state/.afk"
+  FM_HOME="$st" FM_STATE_OVERRIDE="$state" "$LAUNCH" stop >/dev/null 2>&1
+  : > "$state/.afk"   # a fresh entry, two days later in the audit's telling
+  printf '%s\n' "$(date +%s)" > "$state/.subsuper-last-scan"
+  FM_HOME="$st" FM_STATE_OVERRIDE="$state" \
+    bash -c '. "$1"; fm_afk_clear_stale_artifacts "$2"' _ "$START" "$state"
+  FM_HOME="$st" FM_STATE_OVERRIDE="$state" FM_DAEMON_PRIMARY_HARNESS=claude \
+    bash -c '
+      . "$1"
+      stale_window_is_busy() { return 1; }
+      escalate_flush() { return 0; }
+      inject_msg() { return 0; }
+      inject_wedge_alarm() { return 0; }
+      housekeeping "$2"
+    ' _ "$ROOT/bin/fm-supervise-daemon.sh" "$state"
+  if ! grep -q 'possible wedge' "$state/.subsuper-escalations" 2>/dev/null; then
+    pass "session scope: a dead session's idle clock cannot report 'possible wedge' in the next session"
+  else
+    fail "session scope: first housekeeping reported a wedge that never happened ($(cat "$state/.subsuper-escalations"))"
   fi
   rm -rf "$st"
 }
@@ -934,6 +1045,58 @@ unit_native_lifecycle() {
   rm -rf "$st"
 }
 
+# A harness-native entry (enter, start-native, then the prepared daemon entry
+# the harness runs as its tracked background job) whose daemon refuses at
+# startup must not leave state/.afk behind, or the watcher stays one-shot with
+# no daemon. Both refusal sites are covered: an unsupported backend and a
+# missing hc terminal. The away-posture record stays. A daemon refused by a
+# live owner's lock must leave that owner's flag alone.
+unit_native_daemon_refusal_clears_flag() {
+  local st out rc case holder
+  for case in tern hc; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-refusal.XXXXXX")
+    mkdir -p "$st/state"
+    # shellcheck disable=SC2016 # The fake core reads its own argument.
+    printf '#!/bin/sh\ncase "$1" in --version) echo "hc 0.1.14" ;; get) exit 3 ;; *) exit 88 ;; esac\n' > "$st/hc"
+    chmod +x "$st/hc"
+    enter_posture "$st" || fail "daemon refusal ($case): could not enter fixture posture"
+    FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" "$LAUNCH" start-native >/dev/null 2>&1 \
+      && [ -e "$st/state/.afk" ] || fail "daemon refusal ($case): start-native did not prepare state/.afk"
+    out=$(FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" FM_AFK_STATE_PREPARED=1 \
+      FM_HC_BIN="$st/hc" FM_HC_SOCKET="$st/core.sock" \
+      FM_SUPERVISOR_BACKEND="$case" FM_SUPERVISOR_TARGET=lab:t9 "$START" 2>&1)
+    rc=$?
+    if [ "$rc" -ne 0 ] && [ ! -e "$st/state/.afk" ] && [ -e "$st/state/.afk-contract" ] \
+      && printf '%s' "$out" | grep -F 'state/.afk was removed' >/dev/null; then
+      pass "daemon refusal ($case): the refused daemon removed state/.afk, said why, and kept the posture record"
+    else
+      fail "daemon refusal ($case): rc=$rc afk=$([ -e "$st/state/.afk" ] && echo present || echo absent): $out"
+    fi
+    FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" "$LAUNCH" stop >/dev/null 2>&1
+    rm -rf "$st"
+  done
+
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-refusal-held.XXXXXX")
+  mkdir -p "$st/state/.supervise-daemon.lock"
+  "$SLEEPER" &
+  # shellcheck disable=SC2031 # The background PID is captured immediately in this shell.
+  holder=$!
+  printf '%s\n' "$holder" > "$st/state/.supervise-daemon.lock/pid"
+  printf 'away\n%s\n' "$(date +%s)" > "$st/state/.afk"
+  out=$(FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" FM_SUPERVISOR_BACKEND=tern \
+    "$ROOT/bin/fm-supervise-daemon.sh" 2>&1)
+  rc=$?
+  kill "$holder" 2>/dev/null; wait "$holder" 2>/dev/null
+  if [ "$rc" -ne 0 ] && [ -e "$st/state/.afk" ] \
+    && printf '%s' "$out" | grep -F 'another fm-supervise-daemon is already running' >/dev/null \
+    && ! printf '%s' "$out" | grep -F 'state/.afk was removed' >/dev/null; then
+    pass "daemon refusal: a daemon refused by a live owner's lock leaves state/.afk to that owner"
+  else
+    fail "daemon refusal: a lock-refused daemon touched the owner's flag (rc=$rc): $out"
+  fi
+  rm -rf "$st"
+}
+
 # A Claude home runs the supervision host by default and it is the home's away
 # session, so away mode launches no daemon there with no file or any file but
 # off; quiet mode still does, a plain refresh of a running quiet daemon is
@@ -1556,15 +1719,18 @@ unit_clear_failure_aborts_entry() {
   st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-clear-fail.XXXXXX")
   mkdir -p "$st/state"
   : > "$st/state/.subsuper-escalations"
+  # A flag standing with no live daemon is an orphan; the rollback must not put it back.
+  printf 'away\n1\n' > "$st/state/.afk"
   if FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" bash -c '
     . "$1"
+    fm_afk_launch_record_require() { return 0; }
     fm_afk_launch_reconcile() { return 0; }
     fm_afk_clear_stale_artifacts() { return 1; }
     ! fm_afk_launch_start_native
   ' _ "$LAUNCH" && [ ! -e "$st/state/.afk" ] && [ -e "$st/state/.subsuper-escalations" ]; then
-    pass "clear failure: native entry aborts and restores prior state"
+    pass "clear failure: native entry aborts, restores prior artifacts, and drops an orphan state/.afk"
   else
-    fail "clear failure: native entry proceeded or lost prior state"
+    fail "clear failure: native entry proceeded, lost prior artifacts, or restored an orphan state/.afk"
   fi
   rm -rf "$st"
 }
@@ -1592,15 +1758,26 @@ unit_incomplete_restore_retains_backup() {
   st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-restore-fail.XXXXXX")
   mkdir -p "$st/state"
   backup=$(mktemp -d "$st/state/.afk-launch-backup.XXXXXX")
-  printf 'prior\n' > "$backup/.afk"
+  printf 'prior\n' > "$backup/.subsuper-escalations"
   if FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" bash -c '
     . "$1"
     cp() { return 1; }
-    ! fm_afk_launch_restore_backup "$2" 1
-  ' _ "$LAUNCH" "$backup" && [ -d "$backup" ] && [ -e "$backup/.afk" ]; then
+    ! fm_afk_launch_restore_backup "$2" 0
+  ' _ "$LAUNCH" "$backup" && [ -d "$backup" ] && [ -e "$backup/.subsuper-escalations" ]; then
     pass "rollback restore: incomplete restoration retains its recovery backup"
   else
     fail "rollback restore: incomplete restoration discarded its backup"
+  fi
+  backup=$(mktemp -d "$st/state/.afk-launch-backup.XXXXXX")
+  printf 'away\n1\n' > "$backup/.afk"
+  if FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" bash -c '
+    . "$1"
+    daemon_lock_held_by_live_daemon() { return 0; }
+    fm_afk_launch_restore_backup "$2" 1
+  ' _ "$LAUNCH" "$backup" && [ "$(head -n 1 "$st/state/.afk" 2>/dev/null)" = away ]; then
+    pass "rollback restore: a prior state/.afk returns while a live daemon owns it"
+  else
+    fail "rollback restore: a live daemon's prior state/.afk was not restored"
   fi
   rm -rf "$st"
 }
@@ -1620,6 +1797,324 @@ unit_flag_write_failure_aborts() {
     fail "flag failure: lifecycle reported active state"
   fi
   rm -rf "$st"
+}
+
+# ---------------------------------------------------------------------------
+# UNIT hc: the launcher drives a fake hc CLI through the real adapter. The fake
+# keeps one terminal per address under FAKE_HC_DIR, logs every call, and answers
+# `get` from the labels `run` received (FAKE_HC_TASK overrides the task label;
+# FAKE_HC_GET_FAIL makes every `get` an unreadable core).
+# ---------------------------------------------------------------------------
+hc_fake_install() {  # <dir>
+  mkdir -p "$1/terms"
+  cat > "$1/hc" <<'SH'
+#!/usr/bin/env bash
+set -u
+d=$FAKE_HC_DIR
+printf '%s\n' "$*" >> "$d/calls"
+case "${1:-}" in
+  --version) echo 'hc 0.1.14' ;;
+  run)
+    task='' home=''
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --label) case "$2" in firstmate.task=*) task=${2#*=} ;; firstmate.home=*) home=${2#*=} ;; esac; shift ;;
+      esac
+      shift
+    done
+    [ "${FAKE_HC_RUN:-}" = fail-before ] && exit 1
+    printf '%s\t%s\n' "$task" "$home" > "$d/terms/t5"
+    case "${FAKE_HC_RUN:-}" in
+      no-address) echo '{}' ;;
+      fail-after) exit 1 ;;
+      *) echo '{"address":"t5"}' ;;
+    esac
+    ;;
+  ls)
+    [ -z "${FAKE_HC_LS_FAIL:-}" ] || exit 1
+    want_task='' want_home=''
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --label) case "$2" in firstmate.task=*) want_task=${2#*=} ;; firstmate.home=*) want_home=${2#*=} ;; esac; shift ;;
+      esac
+      shift
+    done
+    for f in "$d"/terms/*; do
+      [ -f "$f" ] || continue
+      IFS=$'\t' read -r task home < "$f"
+      [ "$task" = "$want_task" ] && [ "$home" = "$want_home" ] && printf '%s\n' "${f##*/}"
+    done | jq -R . | jq -s '{terminals: map({address: .})}'
+    ;;
+  get)
+    addr=${3:-}
+    [ -z "${FAKE_HC_GET_FAIL:-}" ] || exit 1
+    [ -f "$d/terms/$addr" ] || { echo '{"error":"not_found"}'; exit 3; }
+    IFS=$'\t' read -r task home < "$d/terms/$addr"
+    jq -n --arg task "${FAKE_HC_TASK:-$task}" --arg home "$home" \
+      '{state:"live",labels:{"firstmate.task":$task,"firstmate.home":$home},status:{state:"idle"}}'
+    ;;
+  send) printf '%s\n' "${*: -1}" >> "$d/typed"; echo '{}' ;;
+  kill) echo '{}' ;;
+  rm) rm -f "$d/terms/${3:-}"; echo '{}' ;;
+  *) exit 88 ;;
+esac
+SH
+  chmod +x "$1/hc"
+}
+
+# A recorded hc daemon terminal in <home>: target fakeses:t5 and label afk-a, with
+# the fake core holding that terminal under the launcher's own home tag.
+hc_fake_recorded() {  # <home> <fake-dir>
+  local tag
+  tag=$(FM_HOME="$1" FM_ROOT="$ROOT" bash -c '. "$1/bin/fm-backend-hometag-lib.sh"; fm_backend_hometag' _ "$ROOT")
+  printf 'afk-a\t%s\n' "$tag" > "$2/terms/t5"
+  printf 'hc\tfakeses:t5\tafk-a\n' > "$1/state/.afk-daemon-terminal"
+}
+
+hc_launch() {  # <home> <fake-dir> <launch args...>
+  local st=$1 dir=$2
+  shift 2
+  FM_HOME="$st" FM_STATE_OVERRIDE="$st/state" FAKE_HC_DIR="$dir" FM_HC_BIN="$dir/hc" \
+    FM_HC_SOCKET=/fake/core.sock FM_SUPERVISOR_TARGET=fakeses:t1 FM_SUPERVISOR_BACKEND=hc \
+    FM_AFK_LAUNCH_ENTRY="$SLEEPER" "$LAUNCH" "$@"
+}
+
+unit_hc_start_and_stop_use_a_hidden_labeled_terminal() {
+  local st dir rec rc
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc.XXXXXX")
+  dir="$st/fake"
+  hc_fake_install "$dir"
+  enter_posture "$st" || fail "hc start: could not enter fixture posture"
+  hc_launch "$st" "$dir" start > "$st/start.out" 2>&1
+  rc=$?
+  rec=$(cat "$st/state/.afk-daemon-terminal" 2>/dev/null || true)
+  if [ "$rc" -eq 0 ] && [ "$(printf '%s' "$rec" | cut -f1-2)" = "hc"$'\t'"fakeses:t5" ] \
+    && [ "$(printf '%s' "$rec" | cut -f3)" = "$(cut -f1 "$dir/terms/t5")" ]; then
+    pass "hc start: daemon terminal recorded by exact address and its own task label"
+  else
+    fail "hc start: rc=$rc record='$rec' output=$(cat "$st/start.out")"
+  fi
+  if grep -q '^run .*--label firstmate.task=firstmate-afk-daemon-' "$dir/calls" \
+    && grep -q '^run .*--label firstmate.home=' "$dir/calls" \
+    && ! grep -q 'herdr\.space\|herdr\.tab' "$dir/calls"; then
+    pass "hc start: daemon terminal carries this home's labels and no Herdr App presentation label"
+  else
+    fail "hc start: unexpected run call: $(grep '^run' "$dir/calls")"
+  fi
+  if grep -q "FM_SUPERVISOR_TARGET=fakeses:t1 FM_SUPERVISOR_BACKEND=hc" "$dir/typed" \
+    && grep -q "FM_HC_BIN=$dir/hc FM_HC_SOCKET=/fake/core.sock" "$dir/typed"; then
+    pass "hc start: daemon command names the captain terminal and keeps the pinned core"
+  else
+    fail "hc start: typed daemon command: $(cat "$dir/typed" 2>/dev/null)"
+  fi
+  hc_launch "$st" "$dir" stop > "$st/stop.out" 2>&1
+  rc=$?
+  if [ "$rc" -eq 0 ] && [ ! -e "$st/state/.afk-daemon-terminal" ] && [ ! -e "$dir/terms/t5" ] \
+    && [ ! -e "$st/state/.afk" ] && grep -q '^kill --json t5$' "$dir/calls"; then
+    pass "hc stop: daemon terminal closed by exact address and the record cleared"
+  else
+    fail "hc stop: rc=$rc output=$(cat "$st/stop.out")"
+  fi
+  rm -rf "$st"
+}
+
+unit_hc_malformed_record_fails_closed() {
+  local st dir rec out rc
+  for rec in 'hc\tfakeses:t5\t' 'hc\tnot-a-target\tafk-a' 'hc\tfakeses:t5\t-bad'; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-bad.XXXXXX")
+    dir="$st/fake"
+    hc_fake_install "$dir"
+    enter_posture "$st" || fail "hc malformed: could not enter fixture posture"
+    hc_fake_recorded "$st" "$dir"
+    # shellcheck disable=SC2059 # The record fixture carries literal tab escapes.
+    printf "$rec\n" > "$st/state/.afk-daemon-terminal"
+    out=$(hc_launch "$st" "$dir" stop 2>&1)
+    rc=$?
+    if [ "$rc" -ne 0 ] && printf '%s' "$out" | grep -q 'malformed' \
+      && [ -e "$st/state/.afk-daemon-terminal" ] && ! grep -q '^kill\|^rm' "$dir/calls" 2>/dev/null; then
+      pass "hc record '$rec': malformed record refuses before any hc close"
+    else
+      fail "hc record '$rec': rc=$rc output=$out calls=$(cat "$dir/calls" 2>/dev/null)"
+    fi
+    rm -rf "$st"
+  done
+}
+
+unit_hc_close_refuses_a_foreign_terminal() {
+  local st dir rc
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-foreign.XXXXXX")
+  dir="$st/fake"
+  hc_fake_install "$dir"
+  enter_posture "$st" || fail "hc foreign: could not enter fixture posture"
+  hc_fake_recorded "$st" "$dir"
+  FAKE_HC_TASK=another-task hc_launch "$st" "$dir" stop > "$st/out" 2>&1
+  rc=$?
+  if [ "$rc" -ne 0 ] && [ -e "$st/state/.afk-daemon-terminal" ] && [ -e "$dir/terms/t5" ] \
+    && ! grep -q '^kill\|^rm' "$dir/calls"; then
+    pass "hc stop: a reused address with another task label is never closed and stays recorded"
+  else
+    fail "hc foreign: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls")"
+  fi
+  rm -rf "$st"
+}
+
+unit_hc_unreadable_core_keeps_the_record() {
+  local st dir rc
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-unreadable.XXXXXX")
+  dir="$st/fake"
+  hc_fake_install "$dir"
+  enter_posture "$st" || fail "hc unreadable: could not enter fixture posture"
+  hc_fake_recorded "$st" "$dir"
+  FAKE_HC_GET_FAIL=1 hc_launch "$st" "$dir" stop > "$st/out" 2>&1
+  rc=$?
+  if [ "$rc" -ne 0 ] && [ "$(cat "$st/state/.afk-daemon-terminal")" = "hc"$'\t'"fakeses:t5"$'\t'"afk-a" ]; then
+    pass "hc stop: an unreadable core is not proof of absence, so the exact record stays"
+  else
+    fail "hc unreadable: rc=$rc output=$(cat "$st/out")"
+  fi
+  rm -rf "$st"
+}
+
+unit_hc_failed_create_reclaims_its_labeled_terminal() {
+  local mode st dir rc tag
+  for mode in no-address fail-after fail-before; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-create.XXXXXX")
+    dir="$st/fake"
+    hc_fake_install "$dir"
+    enter_posture "$st" || fail "hc create $mode: could not enter fixture posture"
+    # Another terminal of this home under another task label must survive.
+    tag=$(FM_HOME="$st" FM_ROOT="$ROOT" bash -c '. "$1/bin/fm-backend-hometag-lib.sh"; fm_backend_hometag' _ "$ROOT")
+    printf 'fm-other\t%s\n' "$tag" > "$dir/terms/t9"
+    FAKE_HC_RUN=$mode hc_launch "$st" "$dir" start > "$st/out" 2>&1
+    rc=$?
+    if [ "$rc" -ne 0 ] && [ ! -e "$dir/terms/t5" ] && [ -e "$dir/terms/t9" ] \
+      && [ ! -e "$st/state/.afk-daemon-terminal" ] && [ ! -s "$dir/typed" ] \
+      && ! grep -q ' t9$' "$dir/calls" \
+      && { [ "$mode" = fail-before ] || grep -q '^kill --json t5$' "$dir/calls"; }; then
+      pass "hc start ($mode): a failed create leaves no daemon terminal and no record, and closes nothing else"
+    else
+      fail "hc create $mode: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls")"
+    fi
+    rm -rf "$st"
+  done
+  # Two terminals under the daemon's label, or a core that cannot list, are
+  # never guessed at: nothing is closed and the launcher names what remains.
+  for mode in ambiguous ls-fail; do
+    st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-create.XXXXXX")
+    dir="$st/fake"
+    hc_fake_install "$dir"
+    enter_posture "$st" || fail "hc create $mode: could not enter fixture posture"
+    tag=$(FM_HOME="$st" FM_ROOT="$ROOT" bash -c '. "$1/bin/fm-backend-hometag-lib.sh"; fm_backend_hometag' _ "$ROOT")
+    [ "$mode" = ambiguous ] && printf 'afk-fixed\t%s\n' "$tag" > "$dir/terms/t6"
+    FAKE_HC_RUN=no-address FM_AFK_LAUNCH_LABEL=afk-fixed FAKE_HC_LS_FAIL=$([ "$mode" = ls-fail ] && echo 1) \
+      hc_launch "$st" "$dir" start > "$st/out" 2>&1
+    rc=$?
+    if [ "$rc" -ne 0 ] && [ -e "$dir/terms/t5" ] && ! grep -q '^kill\|^rm' "$dir/calls" \
+      && [ ! -e "$st/state/.afk-daemon-terminal" ] \
+      && grep -q "labeled 'afk-fixed'" "$st/out"; then
+      pass "hc start ($mode): an uncertain failed create closes nothing and names the label left behind"
+    else
+      fail "hc create $mode: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls")"
+    fi
+    rm -rf "$st"
+  done
+}
+
+# A host whose jq cannot run could neither address nor reclaim a created
+# terminal, so the launcher must refuse before asking the core to create one.
+unit_hc_missing_jq_refuses_before_create() {
+  local st dir rc
+  st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-nojq.XXXXXX")
+  dir="$st/fake"
+  hc_fake_install "$dir"
+  enter_posture "$st" || fail "hc no-jq: could not enter fixture posture"
+  mkdir -p "$st/nojq"
+  printf '#!/bin/sh\nexit 127\n' > "$st/nojq/jq"
+  chmod +x "$st/nojq/jq"
+  PATH="$st/nojq:$PATH" hc_launch "$st" "$dir" start > "$st/out" 2>&1
+  rc=$?
+  if [ "$rc" -ne 0 ] && ! grep -q '^run' "$dir/calls" && [ ! -e "$dir/terms/t5" ] \
+    && [ ! -e "$st/state/.afk-daemon-terminal" ] && grep -q 'jq is required' "$st/out"; then
+    pass "hc start (no jq): refuses before creating a daemon terminal"
+  else
+    fail "hc no-jq: rc=$rc output=$(cat "$st/out") calls=$(cat "$dir/calls" 2>/dev/null)"
+  fi
+  rm -rf "$st"
+}
+
+# ---------------------------------------------------------------------------
+# E2E hc: the same topology invariant on an owned fm-hclab core session. The
+# daemon terminal joins the captain's core but carries no herdr.space label, so
+# Herdr App would not present it. tests/hc-test-safety.sh guards teardown.
+# ---------------------------------------------------------------------------
+HC_E2E_SES=''
+e2e_hc_teardown() {
+  [ -n "$HC_E2E_SES" ] || return 0
+  # shellcheck source=tests/hc-test-safety.sh
+  . "$ROOT/tests/hc-test-safety.sh"
+  hc_test_safe_teardown "$ROOT" "$HC_E2E_SES" >/dev/null 2>&1 \
+    || fail "hc e2e: lab teardown failed or the real core tripwire changed ($HC_E2E_SES)"
+  HC_E2E_SES=''
+}
+
+e2e_hc() {
+  local hc_bin lab_dir sock home_tmp cap ses_env dtgt dlabel before during after fg
+  hc_bin=${FM_HC_BIN:-$(command -v herdr-core || command -v hc || true)}
+  [ -x "$hc_bin" ] || { echo "skip: hc not found (hc e2e)"; return 0; }
+  command -v jq >/dev/null 2>&1 || { echo "skip: jq not found (hc e2e)"; return 0; }
+  # shellcheck source=tests/hc-test-safety.sh
+  . "$ROOT/tests/hc-test-safety.sh"
+  HC_E2E_SES=$("$ROOT/bin/fm-hc-lab.sh" name afklaunch) || { fail "hc e2e: could not name a lab session"; return 0; }
+  FM_HC_BIN=$hc_bin "$ROOT/bin/fm-hc-lab.sh" provision "$HC_E2E_SES" >/dev/null \
+    || { fail "hc e2e: could not provision $HC_E2E_SES"; HC_E2E_SES=''; return 0; }
+  hc_test_refuse_if_unsafe "$HC_E2E_SES" || { fail "hc e2e: unsafe lab session"; HC_E2E_SES=''; return 0; }
+  lab_dir=$(hc_test_lab_dir)/$HC_E2E_SES
+  sock=$("$ROOT/bin/fm-hc-lab.sh" socket "$HC_E2E_SES")
+  ses_env=(env -u HC_TERMINAL_ID -u HC_TERMINAL_SOCKET -u HC_SCOPE -u HC_SOCKET
+    FM_HC_BIN="$hc_bin" FM_HC_SOCKET="$sock" HC_SESSION="$HC_E2E_SES"
+    XDG_STATE_HOME="$lab_dir/env/xdg-state" XDG_CONFIG_HOME="$lab_dir/env/xdg-config"
+    XDG_DATA_HOME="$lab_dir/env/xdg-data")
+  hc_e2e() { FM_HC_BIN=$hc_bin "$ROOT/bin/fm-hc-lab.sh" run "$HC_E2E_SES" "$@"; }
+  cap=$(hc_e2e run --bg --json --no-parent --label herdr.space=captain --label herdr.tab=captain | jq -r '.address // empty')
+  [ -n "$cap" ] || { fail "hc e2e: could not create the captain terminal"; e2e_hc_teardown; return 0; }
+  home_tmp=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-hc-home.XXXXXX")
+  enter_posture "$home_tmp" || fail "hc e2e: could not enter fixture posture"
+  before=$(hc_e2e ls --json | jq '[.terminals[]?] | length')
+  "${ses_env[@]}" FM_HOME="$home_tmp" FM_STATE_OVERRIDE="$home_tmp/state" \
+    FM_SUPERVISOR_TARGET="$HC_E2E_SES:$cap" FM_SUPERVISOR_BACKEND=hc FM_AFK_LAUNCH_ENTRY="$SLEEPER" \
+    "$LAUNCH" start > "$home_tmp/start.out" 2>&1 || fail "hc e2e: start failed: $(cat "$home_tmp/start.out")"
+  during=$(hc_e2e ls --json | jq '[.terminals[]?] | length')
+  dtgt=$(cut -f2 "$home_tmp/state/.afk-daemon-terminal" 2>/dev/null || true)
+  dlabel=$(cut -f3 "$home_tmp/state/.afk-daemon-terminal" 2>/dev/null || true)
+  if [ "$during" -eq $((before + 1)) ] && [ "${dtgt%%:*}" = "$HC_E2E_SES" ] && [ "${dtgt#*:}" != "$cap" ]; then
+    pass "hc e2e: daemon runs in its own terminal of the captain's core session"
+  else
+    fail "hc e2e: terminals $before -> $during, daemon target '$dtgt', captain '$cap'"
+  fi
+  if hc_e2e get --json "${dtgt#*:}" | jq -e --arg l "$dlabel" \
+    '.labels["firstmate.task"] == $l and (.labels["firstmate.home"] // "") != "" and (.labels["herdr.space"] == null) and (.labels["herdr.tab"] == null)' >/dev/null; then
+    pass "hc e2e: daemon terminal carries the recorded task label and no Herdr App presentation label"
+  else
+    fail "hc e2e: daemon terminal labels: $(hc_e2e get --json "${dtgt#*:}" | jq -c .labels)"
+  fi
+  for _ in $(seq 1 50); do
+    fg=$(hc_e2e get --json "${dtgt#*:}" | jq -r '.foreground.name // empty')
+    [ "$fg" = sleep ] && break
+    sleep 0.2
+  done
+  if [ "$fg" = sleep ]; then pass "hc e2e: the typed daemon command runs in the daemon terminal"; else fail "hc e2e: daemon terminal foreground is '$fg', not the sleeper entry"; fi
+  "${ses_env[@]}" FM_HOME="$home_tmp" FM_STATE_OVERRIDE="$home_tmp/state" \
+    FM_SUPERVISOR_TARGET="$HC_E2E_SES:$cap" FM_SUPERVISOR_BACKEND=hc "$LAUNCH" stop > "$home_tmp/stop.out" 2>&1 \
+    || fail "hc e2e: stop failed: $(cat "$home_tmp/stop.out")"
+  after=$(hc_e2e ls --json | jq '[.terminals[]?] | length')
+  if [ "$after" -eq "$before" ] && hc_e2e get --json "$cap" >/dev/null 2>&1; then
+    pass "hc e2e: stop closes only the daemon terminal; the captain terminal stays"
+  else
+    fail "hc e2e: terminals $before -> $after after stop, or the captain terminal is gone"
+  fi
+  if [ ! -e "$home_tmp/state/.afk-daemon-terminal" ] && [ ! -e "$home_tmp/state/.afk" ]; then pass "hc e2e: record + .afk cleared on stop"; else fail "hc e2e: record or .afk not cleared"; fi
+  rm -rf "$home_tmp"
+  e2e_hc_teardown
 }
 
 # ---------------------------------------------------------------------------
@@ -1787,6 +2282,7 @@ e2e_rex() {
 }
 
 unit_clear_stale
+unit_per_task_markers_session_scoped
 unit_enter_records_the_posture_in_one_step_without_a_daemon
 unit_retired_two_step_entry_is_refused
 unit_pi_never_launches_the_daemon
@@ -1817,6 +2313,7 @@ unit_readiness_failure_rolls_back_terminal
 unit_readiness_failure_preserves_unconfirmed_record
 unit_tmux_absence_distinguishes_probe_failure
 unit_native_lifecycle
+unit_native_daemon_refusal_clears_flag
 unit_supervision_host_claude_home_runs_no_away_daemon
 unit_supervision_host_other_harnesses_run_no_away_daemon
 unit_daemon_quiet_entry_holds_nothing_for_a_return
@@ -1839,8 +2336,15 @@ unit_clear_failure_aborts_entry
 unit_confirmed_absence_succeeds
 unit_incomplete_restore_retains_backup
 unit_flag_write_failure_aborts
+unit_hc_start_and_stop_use_a_hidden_labeled_terminal
+unit_hc_malformed_record_fails_closed
+unit_hc_close_refuses_a_foreign_terminal
+unit_hc_unreadable_core_keeps_the_record
+unit_hc_failed_create_reclaims_its_labeled_terminal
+unit_hc_missing_jq_refuses_before_create
 e2e_herdr
 e2e_tmux
 e2e_rex
+e2e_hc
 
 [ "$FAILED" -eq 0 ] || exit 1

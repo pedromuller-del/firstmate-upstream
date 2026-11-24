@@ -91,6 +91,9 @@ rotate_scratch_locked() {
   done
 }
 
+# Main reclaims stale grants. A branch drain uses the grant just published for
+# its turn, and its sandbox may not be able to inspect the host's PID via ps.
+# Reclaiming from that actor would delete its own snapshot before it can drain.
 reclaim_stale_branch_grant_locked() {
   [ -e "$ELIGIBLE_ROWS_FILE" ] || [ -L "$ELIGIBLE_ROWS_FILE" ] || return 0
   if ! fm_wake_branch_grant_live "$ELIGIBLE_ROWS_FILE" "$ELIGIBLE_OWNER_FILE"; then
@@ -851,7 +854,7 @@ else
 fi
 DRAIN_LOCK_HELD=true
 rotate_scratch_locked
-reclaim_stale_branch_grant_locked || exit 1
+[ "$ACTOR" = branch ] || reclaim_stale_branch_grant_locked || exit 1
 [ "$ACTOR" != main ] || retire_unconsumable_rows_locked
 [ "$ACTOR" != branch ] || require_branch_eligible_rows || exit 1
 
@@ -1091,8 +1094,23 @@ case "$RECOVERY_MARKER_TOKEN" in
 esac
 fm_lock_release "$FM_WAKE_QUEUE_LOCK"
 DRAIN_LOCK_HELD=false
-printf 'WAKE_ACK_REQUIRED: after handling completes run bin/fm-wake-drain.sh --ack-through %s --recovery-generation %s\n' \
-  "$ACK_THROUGH" "${RECOVERY_MARKER_TOKEN##*:}" >&2
+# The rows summary precedes the command because callers parse the command with
+# a pattern anchored to the end of this line. It lives on this line, not its own,
+# so a stdout discard or a single-line filter keeps the rows the command acks.
+ACK_ROWS_SUMMARY=$(printf '%s\n' "$RAW_ROWS" | awk -F '\t' '
+  NF >= 5 && $2 ~ /^[0-9]+$/ {
+    total++
+    kind = $3; key = $4
+    gsub(/[^A-Za-z0-9._:\/@+=-]/, "_", kind)
+    gsub(/[^A-Za-z0-9._:\/@+=-]/, "_", key)
+    list = list (total > 1 ? ", " : "") $2 " " kind " " substr(key, 1, 48)
+  }
+  END {
+    if (total) printf "rows: %d [%s] ", total, list
+  }
+') || exit 1
+printf 'WAKE_ACK_REQUIRED: %safter handling completes run bin/fm-wake-drain.sh --ack-through %s --recovery-generation %s\n' \
+  "$ACK_ROWS_SUMMARY" "$ACK_THROUGH" "${RECOVERY_MARKER_TOKEN##*:}" >&2
 
 (print_status_presentation "$RAW_ROWS") || true
 print_branch_outcomes_section || BRANCH_OUTCOMES_RC=1

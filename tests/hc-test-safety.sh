@@ -21,6 +21,28 @@ hc_test_lab_dir() {
   printf '%s' "${FM_HC_LAB_DIR:-${TMPDIR:-/tmp}/fm-hc-lab-${UID}}"
 }
 
+# hc_test_start_claude: start a real Claude Code in lab session $HC_SESSION at
+# <cwd> and print its terminal address; the hc adapter must already be sourced.
+# A lab Claude can start in the root of a live Firstmate home and must never run
+# that home's hooks, so it always starts with every hook, plugin, MCP server,
+# and CLAUDE.md off (`--safe-mode`, as `claude --help` documents it). A Claude
+# that does not document the flag is refused: 1, with the reason on stderr.
+hc_test_start_claude() {  # <claude-binary> <cwd> [hc run options...]
+  local bin=$1 cwd=$2 help documented=0
+  shift 2
+  # Claude can exit before a piped --help is fully read, so the help goes to a file.
+  help=$(mktemp) || return 1
+  "$bin" --help > "$help" 2>/dev/null || true
+  case "$(cat "$help")" in *--safe-mode*) documented=1 ;; esac
+  rm -f -- "${help:?}"
+  if [ "$documented" != 1 ]; then
+    echo "hc safety guard: refusing - $bin does not document --safe-mode, so it could run the hooks of $cwd" >&2
+    return 1
+  fi
+  fm_backend_hc_cli "$HC_SESSION" run --bg --json --no-parent --outlive-parent --no-notify \
+    --cwd "$cwd" "$@" "$bin" --safe-mode | jq -r '.address // empty'
+}
+
 # hc_test_refuse_if_unsafe: 0 (SAFE to drive) only when <session> names a
 # lab-owned core session - the fm-hclab- prefix plus the session directory
 # and its fleet-state tripwire both present. 1 (REFUSE) otherwise.

@@ -9,7 +9,11 @@
 # No case touches the network, and the absent-key case proves the tool makes
 # no call at all.
 set -u
-unset TYPESAFE_BASE
+unset TYPESAFE_BASE TYPESAFE_API_KEY TYPESAFE_API_KEY_PRIVATE \
+  OPENROUTER_API_KEY OPENROUTER_API_KEY_PRIVATE \
+  OPENAI_API_KEY OPENAI_API_KEY_PRIVATE \
+  FM_DISPATCH_PROVIDER FM_DISPATCH_MODEL FM_DISPATCH_BASE_URL \
+  FM_DISPATCH_API_KEY DISPATCH_API_KEY_PRIVATE
 
 # shellcheck source=tests/lib.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -28,7 +32,7 @@ RULES="$HOME_DIR/config/crew-dispatch.json"
 QUOTA="$TMP_ROOT/quota.json"
 BASE_PATH=$PATH
 mkdir -p "$HOME_DIR/config" "$LOG" "$NO_CURL_BIN" "$NO_SECURITY_BIN" "$NO_JQ_BIN"
-for command_name in bash chmod cp dirname jq mktemp rm; do
+for command_name in bash chmod cp date dirname jq mktemp mv rm; do
   ln -s "$(command -v "$command_name")" "$NO_CURL_BIN/$command_name"
   ln -s "$(command -v "$command_name")" "$NO_SECURITY_BIN/$command_name"
 done
@@ -181,8 +185,23 @@ printf '%s\n' "$*" >> "${QUOTA_AXI_CALLS:?}"
 [ "${FAKE_QUOTA_FAIL:-0}" = 1 ] && exit 1
 [ "${1:-}" = --json ] || exit 2
 cat "${QUOTA_AXI_FIXTURE:?}"
+printf 'quota\n' >> "${PI_CALLS:?}.order"
 SH
 chmod +x "$FAKEBIN/quota-axi"
+
+cat > "$FAKEBIN/pi" <<'SH'
+#!/usr/bin/env bash
+# Fake pi: records argv so the test can prove which provider sessions the
+# resolver refreshed; FAKE_PI_FAIL=1 simulates a failed refresh.
+set -u
+printf '%s\n' "$*" >> "${PI_CALLS:?}"
+printf '%s\t%s\t%s\n' "${0##*/}" "${PI_CODING_AGENT_DIR-unset}" "$*" >> "$PI_CALLS.identities"
+printf '%s\n' "$*" >> "$PI_CALLS.order"
+[ "${FAKE_PI_FAIL:-0}" = 1 ] && exit 1
+exit 0
+SH
+chmod +x "$FAKEBIN/pi"
+cp "$FAKEBIN/pi" "$FAKEBIN/pi-signed"
 
 cat > "$FAKEBIN/security" <<'SH'
 #!/usr/bin/env bash
@@ -237,7 +256,7 @@ SH
 chmod +x "$FAKEBIN/uname"
 
 RESPONSE="$TMP_ROOT/response.json"
-export FAKE_CURL_LOG="$LOG" FAKE_CURL_RESPONSE="$RESPONSE" QUOTA_AXI_CALLS="$LOG/quota-axi.calls" QUOTA_AXI_FIXTURE="$QUOTA" CHILD_ENV_LOG="$LOG/child-env" FAKE_SECURITY_LOG="$LOG/security.argv"
+export FAKE_CURL_LOG="$LOG" FAKE_CURL_RESPONSE="$RESPONSE" QUOTA_AXI_CALLS="$LOG/quota-axi.calls" QUOTA_AXI_FIXTURE="$QUOTA" CHILD_ENV_LOG="$LOG/child-env" PI_CALLS="$LOG/pi.calls" FAKE_SECURITY_LOG="$LOG/security.argv"
 
 reset_log() {
   rm -rf "$LOG"
@@ -423,6 +442,7 @@ assert_contains "$out" 'dispatch-resolve:' "TOON block header"
 assert_contains "$out" '  status: clear' "clear status"
 assert_contains "$out" '  rule: rule_4 (A simple bug fix with a stated root cause.)   confidence: 0.9' "rule and confidence line"
 assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "argmax picks the highest spendPriority"
+assert_absent "$TMP_ROOT/dispatch-resolution.json" "a brief outside data/<id>/ writes no task record"
 assert_contains "$out" 'candidate: claude:sonnet  provider=claude  scope=all_models  remaining=79%  spendPriority=-0.4627  runway=projected_exhaustion  -> eligible' "every candidate is accounted for"
 assert_contains "$out" 'candidate: kimi:kimi-code/k3  provider=kimi  -> eligible, unranked: provider kimi unmeasured (unknown): disclosed uncertainty' "unmeasured provider stays listed as eligible and unranked"
 assert_contains "$out" '  note: 1 eligible candidate(s) unranked (kimi)' "clear results flag eligible unranked candidates once"
@@ -624,8 +644,9 @@ reset_log
 write_openrouter_response rule_4 0.5
 FM_DISPATCH_PROVIDER=openrouter FM_DISPATCH_MODEL=typesafe/jev-1.13 \
   OPENROUTER_API_KEY=$OR_KEY FAKE_CURL_RESPONSE=$OR_RESPONSE run code out err "$BRIEF"
-assert_contains "$out" '  status: ambiguous' "OpenRouter low confidence is ambiguous"
-assert_not_contains "$out" '  profile:' "OpenRouter ambiguous response has no profile"
+assert_contains "$out" '  status: clear' "OpenRouter low confidence resolves the most probable option"
+assert_contains "$out" '(low confidence: answer confidence 0.5 below floor 0.6)' "OpenRouter low confidence is marked"
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "OpenRouter low confidence emits a profile"
 reset_log
 printf '%s\n' '{"answers":{"rule":{"choice":"rule_4"}}}' > "$OR_RESPONSE"
 FM_DISPATCH_PROVIDER=openrouter FM_DISPATCH_MODEL=typesafe/jev-1.13 \
@@ -646,7 +667,7 @@ assert_absent "$LOG/argv" "missing model makes no network call"
 FM_DISPATCH_PROVIDER=unknown OPENROUTER_API_KEY=$OR_KEY run code out err "$BRIEF"
 expect_code 2 "$code" "unknown provider is a configuration error"
 assert_contains "$err" 'unknown FM_DISPATCH_PROVIDER' "unknown provider is actionable"
-pass "OpenRouter ambiguous, malformed, HTTP, and missing-model paths are handled"
+pass "OpenRouter low-confidence, malformed, HTTP, and missing-model paths are handled"
 
 # --- credential source declaration: where a key lives, never the key -----------
 # $CONFIG/dispatch-credential-sources.json names a source per provider. It is
@@ -1114,7 +1135,8 @@ reset_log
 write_openai_response rule_4 0.5
 FM_DISPATCH_PROVIDER=openai FM_DISPATCH_MODEL=gpt-6-luna OPENAI_API_KEY=$OA_KEY \
   FAKE_CURL_RESPONSE=$OA_RESPONSE run code out err "$BRIEF"
-assert_contains "$out" '  status: ambiguous' "openai low confidence is ambiguous"
+assert_contains "$out" '  status: clear' "openai low confidence resolves the most probable option"
+assert_contains "$out" '(low confidence: answer confidence 0.5 below floor 0.6)' "openai low confidence is marked"
 reset_log
 FM_DISPATCH_PROVIDER=openai FM_DISPATCH_MODEL=gpt-6-luna OPENAI_API_KEY=$OA_KEY \
   FAKE_CURL_RESPONSE=$OA_RESPONSE FAKE_CURL_HTTP=401 run code out err "$BRIEF"
@@ -1125,7 +1147,7 @@ FM_DISPATCH_PROVIDER=openai FM_DISPATCH_MODEL=gpt-6-luna OPENAI_API_KEY=$OA_KEY 
 expect_code 0 "$code" "openai transport failure exits 0"
 assert_contains "$out" '  status: error' "openai transport failure returns to normal intake"
 assert_not_contains "$out" '  profile:' "openai transport failure never emits a profile"
-pass "openai malformed, partial, refused, ambiguous, HTTP, and transport paths return to normal intake"
+pass "openai malformed, partial, refused, low-confidence, HTTP, and transport paths return to normal intake"
 
 # --- never-send list: a match or a bad list withholds the request -------------
 NEVER_SEND="$HOME_DIR/config/dispatch-never-send"
@@ -1353,17 +1375,64 @@ assert_not_contains "$err" 'malformed rules file' "the documented example reache
 cp "$BASE_RULES" "$RULES"
 pass "no-rule fallback, Agy, Gemini, and documented configurations resolve"
 
-# --- ambiguous: fixed confidence floor -----------------------------------------
+# --- below the global floor: the most probable option resolves, low confidence ---
 reset_log
 write_response "$RESPONSE" rule_4 0.41
 TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
-expect_code 0 "$code" "ambiguous exits 0"
-assert_contains "$out" '  status: ambiguous' "below the floor is ambiguous"
-assert_contains "$out" '  reason: confidence 0.41 below floor 0.6' "ambiguous names the floor"
-assert_contains "$out" 'candidate: claude:sonnet  provider=claude  scope=all_models  remaining=79%  spendPriority=-0.4627  runway=projected_exhaustion  -> eligible' "ambiguous preserves matched candidate evidence"
-assert_contains "$out" 'candidate: kimi:kimi-code/k3  provider=kimi  -> eligible, unranked: provider kimi unmeasured (unknown): disclosed uncertainty' "ambiguous preserves eligible unranked candidate evidence"
-assert_not_contains "$out" '  profile:' "ambiguous emits no profile line"
-pass "ambiguous: confidence below the fixed floor hands the decision back"
+expect_code 0 "$code" "low confidence exits 0"
+assert_contains "$out" '  status: clear' "below the floor the most probable rule still resolves"
+assert_contains "$out" '  note: rule matched (low confidence: answer confidence 0.41 below floor 0.6)' "the low-confidence note names the floor"
+assert_contains "$out" 'candidate: claude:sonnet  provider=claude  scope=all_models  remaining=79%  spendPriority=-0.4627  runway=projected_exhaustion  -> eligible' "low confidence preserves matched candidate evidence"
+assert_contains "$out" 'candidate: kimi:kimi-code/k3  provider=kimi  -> eligible, unranked: provider kimi unmeasured (unknown): disclosed uncertainty' "low confidence preserves eligible unranked candidate evidence"
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "low confidence emits the argmax profile"
+pass "below the global floor the most probable option resolves with a low-confidence note"
+
+# --- task record: data/<id>/dispatch-resolution.json for fm-spawn ---------------
+TASK_BRIEF="$HOME_DIR/data/pager-fix/brief.md"
+TASK_RECORD="$HOME_DIR/data/pager-fix/dispatch-resolution.json"
+mkdir -p "$(dirname "$TASK_BRIEF")"
+cp "$BRIEF" "$TASK_BRIEF"
+reset_log
+write_response "$RESPONSE" rule_4 0.9
+TYPESAFE_API_KEY=$KEY run code out err "$TASK_BRIEF" --project pager
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "the task brief resolves clear"
+assert_equals '{"task":"pager-fix","status":"clear","profile":{"harness":"cursor","model":"cursor-grok-4.6-medium","effort":null}}' \
+  "$(jq -c '{task, status, profile: (.profile | {harness, model, effort})}' "$TASK_RECORD")" \
+  "a clear run records the task, status, and the printed profile with an unset effort as null"
+reset_log
+write_response "$RESPONSE" rule_4 0.41
+TYPESAFE_API_KEY=$KEY run code out err "$TASK_BRIEF" --project pager
+assert_equals 'clear {"harness":"cursor","model":"cursor-grok-4.6-medium","effort":null}' "$(jq -r '"\(.status) \(.profile)"' "$TASK_RECORD")" \
+  "a later low-confidence clear run records the carry's selected profile"
+reset_log
+run code out err "$TASK_BRIEF" --project pager
+assert_contains "$err" 'dispatch-resolve: off (' "the keyless run is off"
+assert_equals 'off null' "$(jq -r '"\(.status) \(.profile)"' "$TASK_RECORD")" "an off run records off so fm-spawn accepts the manual intake"
+mv "$RULES" "$RULES.keep"
+printf '{"broken":\n' > "$RULES"
+TYPESAFE_API_KEY=$KEY run code out err "$TASK_BRIEF" --project pager
+expect_code 2 "$code" "malformed rules exit 2"
+assert_absent "$TASK_RECORD" "a configuration error leaves no task record to act on"
+mv "$RULES.keep" "$RULES"
+pass "task record: every exit-0 outcome records its decision for data/<id>/brief.md, and exit 2 records none"
+
+# A home with FM_DATA_OVERRIDE keeps briefs outside $FM_HOME/data; fm-spawn.sh
+# reads the record there, so the resolver must write it there too.
+OVERRIDE_DATA="$TMP_ROOT/custom-records"
+mkdir -p "$OVERRIDE_DATA/pager-fix" "$TMP_ROOT/data/pager-fix"
+cp "$BRIEF" "$OVERRIDE_DATA/pager-fix/brief.md"
+cp "$BRIEF" "$TMP_ROOT/data/pager-fix/brief.md"
+reset_log
+write_response "$RESPONSE" rule_4 0.9
+FM_DATA_OVERRIDE=$OVERRIDE_DATA TYPESAFE_API_KEY=$KEY run code out err "$OVERRIDE_DATA/pager-fix/brief.md" --project pager
+assert_equals 'pager-fix clear cursor' \
+  "$(jq -r '"\(.task) \(.status) \(.profile.harness)"' "$OVERRIDE_DATA/pager-fix/dispatch-resolution.json")" \
+  "a brief under FM_DATA_OVERRIDE records its decision beside it"
+reset_log
+write_response "$RESPONSE" rule_4 0.9
+TYPESAFE_API_KEY=$KEY run code out err "$TMP_ROOT/data/pager-fix/brief.md" --project pager
+assert_absent "$TMP_ROOT/data/pager-fix/dispatch-resolution.json" "a data/<id>/ directory outside the configured data root writes no task record"
+pass "task record: the configured data root, including FM_DATA_OVERRIDE, decides where the record goes"
 
 # --- per-rule confidence floor ------------------------------------------------
 write_floor_response() {  # <path> <choice> <confidence> <rule_1> <rule_2> <rule_3> <rule_4> <default>
@@ -1417,10 +1486,11 @@ assert_not_contains "$out" '  fallback:' "a picked rule that clears its own floo
 assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "the picked rule resolves at probability 0.35 over floor 0.3"
 
 reset_log
-write_floor_response "$RESPONSE" rule_2 0.95 0.05 0.55 0.05 0.30 0.05
+# 0.3 prints the same on jq 1.6 through 1.8; a trailing zero in 0.30 does not.
+write_floor_response "$RESPONSE" rule_2 0.95 0.05 0.55 0.05 0.3 0.05
 TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
 assert_contains "$out" '  status: clear' "a high answer confidence does not lift a picked rule over its own floor"
-assert_contains "$out" '  fallback: rule_4 (A simple bug fix with a stated root cause.) probability 0.30 clears its floor 0.3; rule_2 probability 0.55 is below its floor 0.9' "the runner-up clears the same floor it would need as the pick"
+assert_contains "$out" '  fallback: rule_4 (A simple bug fix with a stated root cause.) probability 0.3 clears its floor 0.3; rule_2 probability 0.55 is below its floor 0.9' "the runner-up clears the same floor it would need as the pick"
 
 reset_log
 write_floor_response "$RESPONSE" rule_2 0.55 0.05 0.55 0.05 0.25 0.10
@@ -1432,10 +1502,65 @@ cp "$BASE_RULES" "$RULES"
 reset_log
 write_floor_response "$RESPONSE" rule_2 0.55 0.01 0.55 0.01 0.42 0.01
 TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
-assert_contains "$out" '  status: ambiguous' "without declared floors a low pick stays ambiguous"
-assert_contains "$out" '  reason: confidence 0.55 below floor 0.6' "without declared floors the global floor reason is unchanged"
+assert_contains "$out" '  status: clear' "without declared floors a low pick resolves the most probable option"
+assert_contains "$out" '  note: rule matched (low confidence: answer confidence 0.55 below floor 0.6)' "the low-confidence note names the floor"
 assert_not_contains "$out" '  fallback:' "without declared floors no runner-up is taken"
+assert_contains "$out" "  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'" "the most probable rule's rankable candidate wins"
 pass "per-rule confidence floors fall to the most probable runner-up that clears its own floor"
+
+for provider in typesafe openrouter; do
+  reset_log
+  write_floor_response "$RESPONSE" rule_4 0.41 0.01 0.55 0.01 0.42 0.01
+  FM_DISPATCH_PROVIDER="$provider" FM_DISPATCH_MODEL=jev-latest TYPESAFE_API_KEY=$KEY \
+    OPENROUTER_API_KEY=$OR_KEY run code out err "$BRIEF"
+  expect_code 0 "$code" "$provider low-confidence substitution exits 0"
+  assert_contains "$out" '  status: clear' "$provider resolves the most probable rule"
+  assert_contains "$out" '  rule: rule_4 (A simple bug fix with a stated root cause.)   confidence: 0.41' "$provider preserves the original choice"
+  assert_contains "$out" '  fallback: rule_2 (The task generates images.) probability 0.55 replaces rule_4; answer confidence 0.41 is below floor 0.6' "$provider names the effective rule and the original choice"
+  assert_contains "$out" "  profile: --harness 'pi' --model 'openai-codex/gpt-5.6-sol'" "$provider resolves the effective rule's profiles"
+done
+pass "low-confidence substitution evidence preserves both rules for both providers"
+
+# --- low confidence: approval, ties, and nothing rankable still escalate --------
+reset_log
+write_floor_response "$RESPONSE" rule_3 0.4 0.05 0.05 0.7 0.1 0.1
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+assert_contains "$out" '  status: escalate' "a low-confidence pick of an approval-gated rule escalates"
+assert_contains "$out" "  reason: rule requires the captain's explicit approval before dispatch" "the approval gate wins over the low-confidence fallback"
+assert_not_contains "$out" '  profile:' "an approval-gated rule never yields a profile at low confidence"
+
+reset_log
+write_floor_response "$RESPONSE" rule_1 0.4 0.3 0.3 0.05 0.05 0.3
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+assert_contains "$out" '  status: ambiguous' "a below-floor answer whose top options tie stays ambiguous"
+assert_contains "$out" '  reason: confidence 0.4 below floor 0.6; top-probability tie' "the top-probability tie is named"
+assert_not_contains "$out" '  profile:' "a top-probability tie emits no profile"
+
+LOW_NONE="$TMP_ROOT/low-none.json"
+jq '.providers |= map(if .provider == "cursor" or .provider == "claude" then .quotaSemantics.effectiveAvailability |= map(.runway.status = "exhausted_now") else . end)' "$QUOTA" > "$LOW_NONE"
+reset_log
+write_response "$RESPONSE" rule_4 0.41
+TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$LOW_NONE" run code out err "$BRIEF"
+assert_contains "$out" '  status: escalate' "a low-confidence answer with nothing rankable escalates"
+assert_contains "$out" '  reason: no rankable eligible candidate' "nothing rankable is named at low confidence"
+assert_contains "$out" '(low confidence: answer confidence 0.41 below floor 0.6)' "the low-confidence note survives the escalation"
+assert_not_contains "$out" '  profile:' "nothing rankable emits no profile at low confidence"
+pass "low confidence never overrides approval, a tie, or a missing candidate"
+
+# --- low confidence: a top option below its own declared floor is skipped -------
+LC_FLOOR_RULES="$TMP_ROOT/lc-floor-rules.json"
+jq '.rules[1].min_confidence = 0.9' "$BASE_RULES" > "$LC_FLOOR_RULES"
+cp "$LC_FLOOR_RULES" "$RULES"
+reset_log
+write_floor_response "$RESPONSE" rule_4 0.41 0.01 0.55 0.01 0.42 0.01
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+assert_contains "$out" '  status: clear' "a low-confidence answer still resolves"
+assert_contains "$out" '  note: rule matched (low confidence: answer confidence 0.41 below floor 0.6)' "the low-confidence note names the floor"
+assert_contains "$out" 'candidate: claude:sonnet  provider=claude' "the fallback resolves the picked rule's candidates"
+assert_not_contains "$out" 'candidate: pi:openai-codex' "the top option that misses its declared floor never contributes candidates"
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "the picked rule resolves over the floored top option"
+cp "$BASE_RULES" "$RULES"
+pass "low confidence skips a top option that misses its own declared floor"
 
 # --- the model sees only the task-specific brief sections ----------------------
 SCAFFOLD_BRIEF="$TMP_ROOT/scaffold-brief.md"
@@ -1720,7 +1845,7 @@ assert_contains "$out" 'candidate: pi:openai-codex-work/gpt-5.6-terra  provider=
 assert_contains "$out" 'candidate: pi:openai-codex/gpt-5.6-sol  provider=codex  scope=all_models  remaining=0%  spendPriority=-  runway=exhausted_now  -> not eligible: runway exhausted_now at all_models' "the sibling lane reads its own exhausted row"
 assert_contains "$out" 'candidate: codex:gpt-5.6-sol  provider=codex  -> eligible, unranked: provider codex has no quota row for account codex-home: disclosed uncertainty' "native Codex never infers an account from a Pi lane"
 assert_contains "$out" "  profile: --harness 'pi' --model 'openai-codex-work/gpt-5.6-terra'" "the lane with headroom is chosen"
-assert_equals '--json' "$(cat "$LOG/quota-axi.calls")" "schema 6 needs one quota-axi --json read"
+assert_equals '--json --max-age 2m' "$(cat "$LOG/quota-axi.calls")" "schema 6 needs one bounded quota-axi --json read"
 
 SCHEMA6_NATIVE="$TMP_ROOT/schema6-native.json"
 jq '
@@ -1740,6 +1865,15 @@ assert_contains "$out" '  status: clear' "native Codex headroom resolves despite
 assert_contains "$out" 'candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8  runway=through_reset  -> eligible' "native Codex reads codex-home"
 assert_contains "$out" "  profile: --harness 'codex' --model 'gpt-5.6-sol'" "native Codex headroom is chosen"
 
+jq '(.providers[] | select(.provider == "codex" and .accountKey == "codex-home")).accountKeys = ["codex-home", "work account"]' "$SCHEMA6_NATIVE" > "$TMP_ROOT/schema6-whitespace-alias.json"
+reset_log
+TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-whitespace-alias.json" run code out err "$BRIEF"
+expect_code 0 "$code" "a whitespace-containing alias exits 0"
+assert_contains "$out" '  status: clear' "a whitespace-containing alias does not invalidate the snapshot"
+assert_contains "$out" 'candidate: codex:gpt-5.6-sol  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8  runway=through_reset  -> eligible' "an exact accountKey match still supplies quota with a whitespace-containing alias"
+assert_contains "$out" "  profile: --harness 'codex' --model 'gpt-5.6-sol'" "the exact accountKey match is chosen despite a whitespace-containing alias"
+pass "schema 6 accepts whitespace in accountKeys without changing exact matching"
+
 jq '.providers |= reverse' "$SCHEMA6_NATIVE" > "$TMP_ROOT/schema6-reversed.json"
 reset_log
 TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-reversed.json" run code out err "$BRIEF"
@@ -1751,6 +1885,42 @@ reset_log
 TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-default.json" run code out err "$BRIEF"
 assert_contains "$out" "  profile: --harness 'codex' --model 'gpt-5.6-sol'" "native Codex falls back to the default row when codex-home is absent"
 pass "native Codex binds to codex-home before default, independently of Pi accounts and row order"
+
+FOLDED_QUOTA="$TMP_ROOT/schema6-folded.json"
+jq '.providers |= map(select(.provider != "codex" or .accountKey == "codex-home") |
+  if .provider == "codex" then .accountKey = "credential-primary" | .accountKeys = ["credential-primary", "credential-alias"] else . end)' "$SCHEMA6_NATIVE" > "$FOLDED_QUOTA"
+jq '.rules[0].use = [{harness: "pi", model: "credential-alias/gpt-6-astra", provider: "codex"}]' "$LANE_RULES" > "$RULES"
+reset_log
+TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$FOLDED_QUOTA" run code out err "$BRIEF"
+assert_contains "$out" '  status: clear' "a credential key covered only by accountKeys binds to its producer row"
+assert_contains "$out" "candidate: pi:credential-alias/gpt-6-astra  provider=codex  scope=all_models  remaining=80%  spendPriority=0.8" "the folded account row supplies its quota"
+
+jq '(.providers[] | select(.accountKey == "credential-primary")) as $row |
+  .providers += [($row | .accountKey = "credential-alias" | .accountKeys = ["credential-alias"] |
+    .quotaSemantics.effectiveAvailability |= map(.effectivePercentRemaining = 0 | .runway.status = "exhausted_now"))]' "$FOLDED_QUOTA" > "$TMP_ROOT/schema6-folded-exact.json"
+reset_log
+TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-folded-exact.json" run code out err "$BRIEF"
+assert_contains "$out" "candidate: pi:credential-alias/gpt-6-astra  provider=codex  scope=all_models  remaining=0%" "an exact accountKey match takes precedence over another row's alias"
+
+jq '.providers |= reverse' "$FOLDED_QUOTA" > "$TMP_ROOT/schema6-folded-reversed.json"
+reset_log
+TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-folded-reversed.json" run code out err "$BRIEF"
+assert_contains "$out" '  status: clear' "covered-key matching ignores row order"
+
+jq '.providers += [(.providers[] | select(.accountKey == "credential-primary") | .accountKey = "other-credential")] |
+  .providers += [(.providers[] | select(.provider == "codex" and .accountKey == "credential-primary") | .accountKey = "default" | del(.accountKeys))]' "$FOLDED_QUOTA" > "$TMP_ROOT/schema6-folded-ambiguous.json"
+reset_log
+TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-folded-ambiguous.json" run code out err "$BRIEF"
+assert_contains "$out" '  reason: no rankable eligible candidate' "ambiguous covered-key matches remain unmeasured"
+assert_contains "$out" "candidate: pi:credential-alias/gpt-6-astra  provider=codex  -> eligible, unranked: provider codex has no quota row for account credential-alias" "ambiguous matches leave the candidate eligible but unranked"
+
+for malformed_keys in '"credential-alias"' '[""]'; do
+  jq --argjson keys "$malformed_keys" '(.providers[] | select(.accountKey == "credential-primary")).accountKeys = $keys' "$FOLDED_QUOTA" > "$TMP_ROOT/schema6-folded-malformed.json"
+  reset_log
+  TYPESAFE_API_KEY=$KEY QUOTA_AXI_FIXTURE="$TMP_ROOT/schema6-folded-malformed.json" run code out err "$BRIEF"
+  assert_contains "$out" '  reason: quota-axi --json returned an invalid snapshot' "accountKeys must be an array of non-empty strings"
+done
+cp "$LANE_RULES" "$RULES"
 
 jq '.schemaVersion = 5 | .providers |= map(select(.accountKey != "openai-codex")) | del(.providers[].accountKey)' "$SCHEMA6" > "$SCHEMA5_PAIR"
 reset_log
@@ -1800,7 +1970,7 @@ reset_log
 write_response "$RESPONSE" rule_4 0.9
 TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
 expect_code 0 "$code" "quota-axi path exits 0"
-assert_equals '--json' "$(cat "$LOG/quota-axi.calls")" "quota-axi --json is called exactly once"
+assert_equals '--json --max-age 2m' "$(cat "$LOG/quota-axi.calls")" "quota-axi --json is called exactly once, with bounded reuse"
 assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "quota-axi snapshot drives the argmax"
 reset_log
 TYPESAFE_API_KEY=$KEY FAKE_QUOTA_FAIL=1 run code out err "$BRIEF"
@@ -1808,6 +1978,221 @@ expect_code 0 "$code" "quota-axi failure exits 0"
 assert_contains "$out" '  status: error' "quota-axi failure is an error outcome"
 assert_contains "$out" '  reason: quota-axi --json failed' "quota-axi failure is named"
 pass "quota evidence comes from one quota-axi --json read, and its failure is an error outcome"
+
+# --- Pi session refresh: bounded, once per provider, never fatal ----------------
+reset_log
+write_response "$RESPONSE" rule_4 0.9
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+expect_code 0 "$code" "Pi refresh run exits 0"
+assert_equals 'auth check --provider openai-codex' "$(cat "$LOG/pi.calls")" "each Pi provider the rules name is refreshed once"
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "resolution is unchanged by the refresh"
+
+reset_log
+TYPESAFE_API_KEY=$KEY FAKE_PI_FAIL=1 run code out err "$BRIEF"
+assert_contains "$out" '  status: clear' "a failed Pi refresh never changes the outcome"
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "a failed Pi refresh still resolves"
+pass "Pi provider sessions refresh before the quota read, once each, never fatal"
+
+for default_form in array object; do
+  jq --arg form "$default_form" '
+    .default = [{harness: "pi", model: "anthropic/claude-sonnet-5", provider: "claude"},
+                {harness: "pi", model: "openai-codex/gpt-5.6-sol", provider: "codex"}]
+    | if $form == "object" then .default = .default[0] else . end
+  ' "$BASE_RULES" > "$RULES"
+  for choice in default rule_1; do
+    reset_log
+    write_response "$RESPONSE" "$choice" 0.9
+    TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+    expect_code 0 "$code" "$default_form default refresh exits 0 through $choice"
+    assert_contains "$out" '  status: clear' "$default_form default resolves through $choice"
+    assert_contains "$out" 'candidate: pi:anthropic/claude-sonnet-5  provider=claude' "$default_form default is used through $choice"
+    assert_equals $'auth check --provider anthropic\nauth check --provider openai-codex\nquota' "$(cat "$LOG/pi.calls.order")" "$default_form defaults and rules refresh once before quota through $choice"
+  done
+done
+cp "$BASE_RULES" "$RULES"
+pass "Pi refresh includes root defaults in both forms and both fallback paths"
+
+PIN_ROOT="$TMP_ROOT/work account"
+mkdir -p "$PIN_ROOT"
+printf '%s\n' "$PIN_ROOT" openai-codex > "$HOME_DIR/config/pi-account"
+write_response "$RESPONSE" rule_4 0.9
+for harness in pi pi-signed; do
+  jq --arg harness "$harness" '.rules[1].use[0].harness = $harness' "$BASE_RULES" > "$RULES"
+  reset_log
+  TYPESAFE_API_KEY=$KEY PI_CODING_AGENT_DIR="$TMP_ROOT/personal" run code out err "$BRIEF"
+  expect_code 0 "$code" "$harness pinned refresh exits 0"
+  assert_contains "$out" '  status: clear' "$harness pinned refresh preserves routing"
+  assert_equals "$harness"$'\t'"$PIN_ROOT"$'\t''auth check --provider openai-codex' "$(cat "$LOG/pi.calls.identities")" "$harness refresh uses its executable and pinned root"
+done
+SIGNED_BIN="$TMP_ROOT/signed-only-bin"
+mkdir -p "$SIGNED_BIN"
+for command_name in bash chmod cp date dirname jq mktemp mv rm awk cat env head perl sed tr grep; do
+  ln -s "$(command -v "$command_name")" "$SIGNED_BIN/$command_name"
+done
+for command_name in curl quota-axi pi-signed; do
+  ln -s "$FAKEBIN/$command_name" "$SIGNED_BIN/$command_name"
+done
+reset_log
+TYPESAFE_API_KEY=$KEY FAKEBIN="$SIGNED_BIN" BASE_PATH="$SIGNED_BIN" run code out err "$BRIEF"
+expect_code 0 "$code" "pi-signed alone exits 0"
+assert_contains "$out" '  status: clear' "pi-signed alone preserves routing"
+assert_equals 'pi-signed'$'\t'"$PIN_ROOT"$'\t''auth check --provider openai-codex' "$(cat "$LOG/pi.calls.identities")" "pi-signed refresh runs when pi is absent"
+for pin in undeclared malformed; do
+  if [ "$pin" = undeclared ]; then
+    printf '%s\n' "$PIN_ROOT" anthropic > "$HOME_DIR/config/pi-account"
+  else
+    printf 'invalid\n' > "$HOME_DIR/config/pi-account"
+  fi
+  reset_log
+  TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+  assert_contains "$out" '  status: clear' "$pin pin leaves refresh nonfatal"
+  assert_absent "$LOG/pi.calls" "$pin pin never refreshes an ambient account"
+done
+rm -f "$HOME_DIR/config/pi-account"
+reset_log
+TYPESAFE_API_KEY=$KEY PI_CODING_AGENT_DIR="$PIN_ROOT" run code out err "$BRIEF"
+assert_equals 'pi-signed'$'\t'"$PIN_ROOT"$'\t''auth check --provider openai-codex' "$(cat "$LOG/pi.calls.identities")" "an absent pin preserves the ambient Pi root"
+cp "$BASE_RULES" "$RULES"
+pass "Pi refresh preserves executable and account selection without ambient fallback on pin refusal"
+
+# --- determinism: same brief and snapshot give the same profile every run -------
+reset_log
+write_response "$RESPONSE" rule_4 0.9
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+expected_profile=$(grep '^  profile:' <<<"$out")
+assert_equals "  profile: --harness 'cursor' --model 'cursor-grok-4.6-medium'" "$expected_profile" "the first run resolves"
+for repeat in 2 3 4 5; do
+  TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+  assert_equals "$expected_profile" "$(grep '^  profile:' <<<"$out")" "run $repeat returns the same profile line"
+done
+pass "determinism: five runs on one fixture return the same profile line"
+
+# --- until: expired rules leave the option list before the model sees them ------
+UNTIL_RULES="$TMP_ROOT/until-rules.json"
+cat > "$UNTIL_RULES" <<'JSON'
+{
+  "rules": [
+    { "when": "Expired work.", "until": "2000-01-01T00:00:00Z", "use": { "harness": "pi", "model": "expired-provider/model", "provider": "codex" } },
+    { "when": "Live work.", "until": "2999-01-01T00:00:00Z", "use": { "harness": "cursor", "model": "cursor-grok-4.6-high" } }
+  ]
+}
+JSON
+cp "$UNTIL_RULES" "$RULES"
+cat > "$RESPONSE" <<'JSON'
+{ "model": "jev-1.13.0",
+  "answers": { "rule": { "type": "choice", "choice": "rule_1", "confidence": 0.9,
+    "probabilities": { "rule_1": 0.97, "default": 0.03 } } },
+  "usage": { "input_tokens": 812, "output_tokens": 60 } }
+JSON
+reset_log
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+expect_code 0 "$code" "until-filtered rules exit 0"
+assert_contains "$out" '  status: clear' "the live rule resolves"
+assert_contains "$out" '  rule: rule_1 (Live work.)' "the live rule keeps its text after renumbering"
+assert_contains "$out" "  profile: --harness 'cursor' --model 'cursor-grok-4.6-high'" "the live rule's profile is chosen"
+assert_equals '["default","rule_1"]' "$(jq -c '.questions.rule.criteria | keys' "$LOG/body")" "the expired rule never reaches the option list"
+assert_not_contains "$(cat "$LOG/body")" 'Expired work.' "the expired rule's when text never leaves the machine"
+assert_absent "$LOG/pi.calls" "expired Pi profiles never trigger refresh"
+
+cat > "$RULES" <<'JSON'
+{ "rules": [ { "when": "Expired work.", "until": "2000-01-01T00:00:00Z", "use": { "harness": "claude", "model": "opus" } } ] }
+JSON
+reset_log
+TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+assert_contains "$out" '  status: escalate' "a file whose rules all expired is non-clear"
+assert_contains "$out" '  reason: no rules to match' "all-expired rules return control to firstmate"
+assert_absent "$LOG/argv" "all-expired rules never call curl"
+assert_absent "$LOG/quota-axi.calls" "all-expired rules never read quota"
+cp "$BASE_RULES" "$RULES"
+pass "until: expired rules leave the option list before the model sees them"
+
+for until in 2999-13-40T25:61:61Z 2000-13-01T00:00:00Z 2999-02-29T00:00:00Z \
+  2100-02-29T00:00:00Z 2001-02-29T00:00:00Z 2999-04-31T00:00:00Z \
+  2999-01-01T24:00:00Z 2999-01-01T00:60:00Z 2999-01-01T00:00:60Z \
+  $'2999-01-01T00:00:00Z\n'; do
+  jq --arg until "$until" '.rules[0].until = $until' "$BASE_RULES" > "$RULES"
+  reset_log
+  TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+  expect_code 2 "$code" "invalid UTC instant is rejected: $until"
+  assert_contains "$err" 'malformed rules file:' "invalid UTC instant is a configuration error"
+  assert_equals '' "$out" "invalid UTC instant emits no routing result"
+  assert_absent "$LOG/argv" "invalid UTC instant never reaches the decision provider"
+  assert_absent "$LOG/pi.calls" "invalid UTC instant never refreshes credentials"
+  assert_absent "$LOG/quota-axi.calls" "invalid UTC instant never reads quota"
+done
+write_response "$RESPONSE" rule_4 0.9
+for until in 2400-02-29T00:00:00Z 2996-02-29T23:59:59Z; do
+  jq --arg until "$until" '.rules[0].until = $until' "$BASE_RULES" > "$RULES"
+  reset_log
+  TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
+  expect_code 0 "$code" "valid leap day is accepted: $until"
+  assert_contains "$out" '  status: clear' "valid leap day preserves routing"
+done
+cp "$BASE_RULES" "$RULES"
+pass "until rejects invalid calendar dates and clock values before expiry filtering"
+
+PRIVATE_TMP="$TMP_ROOT/private-tmp"
+PRIVACY_BIN="$TMP_ROOT/privacy-bin"
+mkdir -p "$PRIVATE_TMP" "$PRIVACY_BIN"
+REAL_JQ="$(command -v jq)"
+REAL_CHMOD="$(command -v chmod)"
+REAL_MV="$(command -v mv)"
+FILTER_LOG="$LOG/filter-mode"
+export REAL_JQ REAL_CHMOD REAL_MV FILTER_LOG
+for command_name in curl quota-axi pi pi-signed; do
+  ln -s "$FAKEBIN/$command_name" "$PRIVACY_BIN/$command_name"
+done
+cat > "$PRIVACY_BIN/jq" <<'SH'
+#!/usr/bin/env bash
+if [ "${1:-}" = --arg ] && [ "${2:-}" = now ]; then
+  perl -e 'my @s = stat STDOUT; @s or die "stat stdout: $!"; open my $log, ">", $ENV{FILTER_LOG} or die $!; printf $log "%03o\n", $s[2] & 0777;'
+  "$REAL_JQ" "$@" || exit "$?"
+  [ "${FILTER_FAIL:-}" != jq ] || exit 1
+  exit 0
+fi
+exec "$REAL_JQ" "$@"
+SH
+cat > "$PRIVACY_BIN/chmod" <<'SH'
+#!/usr/bin/env bash
+if [ -f "$FILTER_LOG" ] && [ "${FILTER_FAIL:-}" = chmod ]; then exit 1; fi
+exec "$REAL_CHMOD" "$@"
+SH
+cat > "$PRIVACY_BIN/mv" <<'SH'
+#!/usr/bin/env bash
+if [ -f "$FILTER_LOG" ] && [ "${FILTER_FAIL:-}" = mv ]; then exit 1; fi
+exec "$REAL_MV" "$@"
+SH
+chmod +x "$PRIVACY_BIN/jq" "$PRIVACY_BIN/chmod" "$PRIVACY_BIN/mv"
+for filter_fail in none jq chmod mv; do
+  reset_log
+  TYPESAFE_API_KEY=$KEY TMPDIR="$PRIVATE_TMP" FAKEBIN="$PRIVACY_BIN" FILTER_FAIL="$filter_fail" run code out err "$BRIEF"
+  if [ "$filter_fail" = none ]; then
+    expect_code 0 "$code" "private filtering succeeds"
+    assert_contains "$out" '  status: clear' "private filtering preserves routing"
+  else
+    expect_code 2 "$code" "$filter_fail failure exits 2"
+    assert_absent "$LOG/argv" "$filter_fail failure sends no request"
+  fi
+  assert_equals 600 "$(cat "$FILTER_LOG")" "$filter_fail filter output is private before its first write"
+  assert_equals '' "$(rg --files --hidden --no-ignore "$PRIVATE_TMP")" "$filter_fail exit removes all rule snapshots"
+done
+pass "rule snapshots stay private before writing and are removed on success and failures"
+
+for provider in typesafe openrouter; do
+  for choice in rule_9 rule_0; do
+    reset_log
+    write_response "$RESPONSE" "$choice" 0.4
+    FM_DISPATCH_PROVIDER="$provider" FM_DISPATCH_MODEL=jev-latest TYPESAFE_API_KEY=$KEY \
+      OPENROUTER_API_KEY=$OR_KEY run code out err "$BRIEF"
+    expect_code 0 "$code" "$provider unknown choice remains a nonfatal error"
+    assert_contains "$out" '  status: error' "$provider rejects $choice before low-confidence substitution"
+    assert_contains "$out" '  reason: response is not a rule Choice answer' "$provider rejects an unoffered choice"
+    assert_not_contains "$out" '  profile:' "$provider never dispatches an unoffered choice"
+    assert_absent "$LOG/pi.calls" "$provider rejects the choice before credential refresh"
+    assert_absent "$LOG/quota-axi.calls" "$provider rejects the choice before quota"
+  done
+done
+pass "both decision providers reject unknown choices before confidence fallback"
 
 # --- API and response failures are error outcomes, exit 0 ----------------------
 reset_log
@@ -1867,11 +2252,11 @@ reset_log
 write_response "$RESPONSE" rule_9 0.9
 TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
 assert_contains "$out" '  status: error' "an unknown rule id is an error outcome"
-assert_contains "$out" '  reason: rule rule_9 is not in the rules file' "unknown rule id is named"
+assert_contains "$out" '  reason: response is not a rule Choice answer' "unknown rule id is rejected at the response boundary"
 write_response "$RESPONSE" rule_0 0.9
 TYPESAFE_API_KEY=$KEY run code out err "$BRIEF"
 assert_contains "$out" '  status: error' "rule zero is an error outcome"
-assert_contains "$out" '  reason: rule rule_0 is not in the rules file' "rule zero cannot alias the final rule"
+assert_contains "$out" '  reason: response is not a rule Choice answer' "rule zero cannot alias the final rule"
 reset_log
 TYPESAFE_API_KEY=$KEY FAKE_CURL_HTTP=500 run code out err "$BRIEF"
 assert_contains "$out" '  status: error' "http 500 is a TOON error outcome"
@@ -1914,6 +2299,8 @@ for bad in \
   '{"rules":[{"when":"x","use":{"harness":"codex"}}],"default":[{"harness":"claude","model":"opus"},{"harness":"claude","model":"opus"}]}|default must not contain duplicate harness, model, and effort profiles' \
   '{"rules":[{"when":"x","use":{"harness":"spaceship"}}]}|each use profile must name a verified harness' \
   '{"rules":[{"when":"x","use":{"harness":"grok","effort":"max"}}]}|each use profile effort must be supported by its harness and model' \
+  '{"rules":[{"when":"x","until":"soon","use":{"harness":"claude"}}]}|until must be an ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ) when present' \
+  '{"rules":[{"when":"x","until":42,"use":{"harness":"claude"}}]}|until must be an ISO 8601 UTC instant (YYYY-MM-DDTHH:MM:SSZ) when present' \
   '{"rules":[{"when":"x","use":{"harness":"opencode","model":"anthropic/claude-sonnet-4-5"}}]}|use profiles whose harness lacks one authoritative provider family require provider: opencode' \
   '{"rules":[{"when":"x","use":{"harness":"rovo"}}]}|use profiles whose harness lacks one authoritative provider family require provider: rovo' \
   '{"rules":[{"when":"x","use":{"harness":"codex"}}],"default":{"harness":"pi","model":"anthropic/claude-sonnet-5"}}|default profiles whose harness lacks one authoritative provider family require provider: pi'; do

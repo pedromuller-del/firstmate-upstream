@@ -6,6 +6,9 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FM_ROOT="${FM_ROOT_OVERRIDE:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 BIN="$FM_ROOT/bin"
+# shellcheck source=bin/fm-quota-axi-lib.sh
+. "$BIN/fm-quota-axi-lib.sh"
+export FM_QUOTA_AXI_MIN
 
 LAB=$(mktemp -d "${TMPDIR:-/tmp}/fm-quota-choose.XXXXXX")
 FIXTURE="$LAB/quota.json"
@@ -152,7 +155,7 @@ cat > "$FAKEBIN/quota-axi" <<'SH'
 #!/usr/bin/env bash
 printf 'called\n' >> "${QUOTA_AXI_CALLS:?}"
 if [ "${1:-}" = "--version" ]; then
-  echo "quota-axi 0.1.51"
+  printf 'quota-axi %s\n' "$FM_QUOTA_AXI_MIN"
   exit 0
 fi
 cat "${QUOTA_AXI_FIXTURE:?}"
@@ -691,6 +694,12 @@ jq '.providers |= map(select(.provider != "codex" or .accountKey != "default") |
 out=$(call_choose --snapshot "$LAB/schema6-default.json" --candidate codex:default --candidate cursor:default)
 [ "$out" = "codex default" ] || fail "native Codex did not fall back to the default row: $out"
 ok "native Codex binds to codex-home before default, independently of model and row order"
+
+jq '.providers |= map(select(.provider != "codex" or .accountKey == "codex-home") |
+  if .accountKey == "codex-home" then .accountKey = "native-codex" | .accountKeys = ["codex-home"] else . end)' "$SCHEMA6_NATIVE" > "$LAB/schema6-covered-key.json"
+out=$(call_choose --snapshot "$LAB/schema6-covered-key.json" --candidate codex:default --candidate cursor:default)
+[ "$out" = "codex default" ] || fail "native Codex did not bind its covered credential key: $out"
+ok "native Codex matches its producer-declared covered credential key"
 
 jq '.schemaVersion = 5 | .providers |= unique_by(.provider) | del(.providers[].accountKey)' "$SCHEMA6" > "$SCHEMA5_PAIR"
 out=$(call_choose --snapshot "$SCHEMA5_PAIR" --candidate codex:default --candidate cursor:default)

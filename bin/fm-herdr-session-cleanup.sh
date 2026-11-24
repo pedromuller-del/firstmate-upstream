@@ -63,11 +63,19 @@ fm_herdr_cleanup_home_identity() {
 }
 
 fm_herdr_cleanup_journal_matches() { # <title> <session> <home-real>
-  local title=$1 session=$2 home_real=$3 journal id expected journal_home
+  local title=$1 session=$2 home_real=$3 journal id expected journal_home token line matched
   [ -d "$STATE" ] && [ ! -L "$STATE" ] || return 1
+  token=$(fm_herdr_cleanup_title_token "$title") || return 1
   for journal in "$STATE"/*"$FM_BACKEND_HERDR_PRESENTATION_JOURNAL_SUFFIX"; do
     [ -f "$journal" ] && [ ! -L "$journal" ] || continue
-    id=$(basename "$journal" "$FM_BACKEND_HERDR_PRESENTATION_JOURNAL_SUFFIX")
+    # Filter before the full journal proof, which forks for each field.
+    matched=0
+    while IFS= read -r line || [ -n "$line" ]; do
+      if [ "$line" = "projection_id=$token" ]; then matched=1; break; fi
+    done < "$journal"
+    [ "$matched" -eq 1 ] || continue
+    id=${journal##*/}
+    id=${id%"$FM_BACKEND_HERDR_PRESENTATION_JOURNAL_SUFFIX"}
     fm_task_id_creation_valid "$id" || continue
     fm_backend_herdr_projection_journal_snapshot "$journal" "$id" || continue
     if [ "$FM_BACKEND_HERDR_JOURNAL_VERSION" = 2 ]; then

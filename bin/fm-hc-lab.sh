@@ -14,7 +14,9 @@
 # owned directory holding scratch XDG_STATE_HOME / XDG_CONFIG_HOME /
 # XDG_DATA_HOME plus an explicitly pinned HC_SESSION and HC_SOCKET - every hc
 # call this helper makes carries all five, and ambient HC_TERMINAL_* markers
-# are stripped, exactly like bin/backends/hc.sh.
+# are stripped, exactly like bin/backends/hc.sh. The operator's HERDR_*, TMUX,
+# and TMUX_PANE markers are stripped as well, because lab terminals inherit
+# the lab server's environment.
 #
 # Session names must begin with "fm-hclab-" and can never be "default".
 # The name command sanitizes the label, caps it at 16 characters, and appends
@@ -35,7 +37,10 @@
 # in fleet-roots.txt (recorded once, so a caller that repoints XDG for its own
 # children cannot shift what the tripwire watches). The snapshot is file
 # metadata only (never an `hc` call: hc auto-starts a stopped core on
-# contact, which would itself disturb the state being verified). Teardown
+# contact, which would itself disturb the state being verified), except that
+# a core's terminals.json counts as its terminal set: the operator's own
+# terminals rewrite it whenever their title or status text changes, which is
+# not lab damage, while a terminal added or removed is. Teardown
 # stops the lab server and sweeps session processes, then requires a complete,
 # byte-identical snapshot before removing the session directory and sockets.
 # Failed reads or changed real-core metadata refuse verification and retain
@@ -117,14 +122,20 @@ fm_hclab_bin() {
 
 # fm_hclab_cli: every hc call this helper makes, pinned to the lab session's
 # env and socket. Ambient HC_* are stripped in a subshell (env -u is not
-# portable), stdin detached.
+# portable), stdin detached. The operator's Herdr and tmux markers are
+# stripped too: every lab terminal gets the environment the lab server
+# started with, and a harness hook there that still saw them would report to
+# the operator's own pane.
 fm_hclab_cli() { # <session> <hc arguments...>
-  local name=$1 dir bin
+  local name=$1 dir bin var
   shift
   dir=$(fm_hclab_session_dir "$name")
   bin=$(fm_hclab_bin) || return 1
   (
-    unset HC_TERMINAL_ID HC_TERMINAL_SOCKET HC_SCOPE HC_SESSION HC_SOCKET
+    unset HC_TERMINAL_ID HC_TERMINAL_SOCKET HC_SCOPE HC_SESSION HC_SOCKET TMUX TMUX_PANE
+    for var in $(compgen -e); do
+      case "$var" in HERDR_*) unset "$var" ;; esac
+    done
     XDG_STATE_HOME="$dir/env/xdg-state" \
     XDG_CONFIG_HOME="$dir/env/xdg-config" \
     XDG_DATA_HOME="$dir/env/xdg-data" \
@@ -160,6 +171,15 @@ else
   fm_hclab_file_meta() { stat -c '%n %i %Y %s' "$1" 2>/dev/null; }
 fi
 
+# fm_hclab_terminal_set: a core's terminals.json as its next terminal id and
+# sorted terminal ids, so text changes on existing terminals compare equal and
+# a terminal created, removed, or created and removed again does not. hc
+# replaces the file atomically, so the read sees one whole version; an
+# unreadable or unfamiliar file fails the snapshot.
+fm_hclab_terminal_set() { # <terminals.json>
+  jq -er --arg f "$1" '"\($f) terminals next_id=\(.next_id) ids=\(.terminals | keys | join(","))"' "$1" 2>/dev/null
+}
+
 fm_hclab_fleet_state() ( # <root>...
   set -o pipefail
   local root files f
@@ -168,7 +188,10 @@ fm_hclab_fleet_state() ( # <root>...
     files=$(find "$root" \( -type f -o -type s \) -print | LC_ALL=C sort) || return 1
     [ -n "$files" ] || continue
     printf '%s\n' "$files" | while IFS= read -r f; do
-      fm_hclab_file_meta "$f" || return 1
+      case "$f" in
+        */terminals.json) fm_hclab_terminal_set "$f" || return 1 ;;
+        *) fm_hclab_file_meta "$f" || return 1 ;;
+      esac
     done || return 1
   done | LC_ALL=C sort
 )

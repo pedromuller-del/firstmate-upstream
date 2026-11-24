@@ -1,7 +1,7 @@
 # hc runtime backend
 
 hc is an experimental session-provider backend for herdr-core, the terminal core under Herdr.app.
-It provides task terminals while Treehouse continues to provide git worktrees, the same split tmux uses.
+It provides task terminals while Treehouse reserves the task worktrees with durable leases.
 herdr-core is not Herdr 1: the `herdr` backend ([`herdr-backend.md`](herdr-backend.md)) talks to the `herdr` multiplexer, and the two share no socket, id space, or CLI.
 [`configuration.md`](configuration.md#runtime-backend-configbackend--fm_backend) owns shared selection and metadata semantics.
 This page owns operator setup and supported limits; the adapter header in `bin/backends/hc.sh` explains implementation decisions.
@@ -19,10 +19,40 @@ Prerequisites:
 - The universal harness and toolchain requirements in [`configuration.md`](configuration.md#toolchain).
 
 Select hc explicitly with local `config/backend` containing `hc`, `FM_BACKEND=hc` for one launch, or an explicit request to Firstmate.
-An explicit setting always wins; see "Runtime auto-detection" below for when hc is also selected automatically.
+Explicit selection takes precedence over auto-detection, subject to the [fleet binding](configuration.md#one-runtime-per-herdr-fleet).
+A conflicting selection refuses creation rather than changing a bound fleet.
 
 The core a task lands on is the one `HC_SESSION` names when the task is spawned, or hc's `default` session when it is unset.
 The Herdr app shows the terminals of the session it bound at launch, `default` unless the app was started with a different `HC_SESSION`.
+
+### Start a primary in the native app
+
+For a new installation, complete the [clone and toolchain steps](../README.md#install-and-launch) before launching a harness.
+Open Herdr, then create a local space rooted at the absolute path of that checkout:
+
+```sh
+herdr-app
+herdr-app do space.new --name firstmate --folder /absolute/path/to/firstmate
+```
+
+These commands follow `herdr-app --help`, `herdr-app --skill`, and `herdr-app commands` from Herdr App 0.1.15.
+The new space opens a terminal in the checkout.
+In that terminal, select hc for the new home and launch a supported primary harness:
+
+```sh
+mkdir -p config
+printf 'hc\n' > config/backend
+claude
+```
+
+Use `codex` instead of `claude` for a Codex primary.
+Follow the harness's normal authentication and trust setup.
+The [session startup contract](../AGENTS.md#3-session-start-run-once-at-every-session-start) owns Firstmate initialization.
+Keep the terminal's inherited core markers and `HC_SESSION` so subsequent tasks reach the app's core.
+Selecting `FM_BACKEND=hc` in an outside shell does not move that shell or its primary into the app.
+Existing homes must already agree with hc before adopting this setup.
+Changing `config/backend` does not migrate an existing fleet.
+Ask the primary to provision secondmates through the existing [secondmate workflow](remote-secondmates.md).
 
 ## Runtime auto-detection
 
@@ -45,7 +75,7 @@ The signal binds the core a spawn would actually reach, the `HC_SESSION` (else `
 `app-terminal` additionally requires `HC_TERMINAL_SOCKET` to be that same socket, so a labeled terminal on some other core never steers a spawn.
 The app shows the session it bound at launch, so a captain whose app runs a session other than `default` sets the same `HC_SESSION` for Firstmate or selects hc explicitly.
 
-An explicit `--backend`, `FM_BACKEND`, or `config/backend` always wins over detection.
+In an unbound home, an explicit `--backend`, `FM_BACKEND`, or `config/backend` wins over detection.
 Inside the classic Herdr TUI, `HERDR_ENV=1` wins before the app signal is consulted, so the `herdr` backend keeps its behavior; inside tmux, `$TMUX` wins the same way, so a marker-less or contradictory process on either surface never sees the app check at all.
 A contradictory marker set (for example another surface's marker alongside the app's) keeps the earlier surface's verdict rather than switching - ambiguous input means no automatic switch.
 When a live hc terminal is present but no usable hc toolchain resolves (an executable `FM_HC_BIN`, or `herdr-core`/`hc` on `PATH` reporting `hc x.y.z` at or above the adapter's verified minimum, plus `jq` - the same version gate the spawn's container check applies), detection does not switch and a notice names the missing piece instead; a bare terminal marker set is still never a detection.
@@ -53,16 +83,40 @@ An auto-detected hc prints a stderr notice naming the winning signal and how to 
 
 Auto-detected hc spawns carry the same `herdr.space`/`herdr.tab` labels an explicit hc spawn does, so workers appear in the captain's window without the app ever being started by Firstmate.
 The app is local GUI presentation only; detection reads the terminal's core-side label without requiring a live app window, so a surviving labeled terminal can still select hc after the GUI closes.
-Nothing here changes the remote `herdr` path.
+Away-mode supervisor discovery, delivery, and the hidden daemon terminal are owned by [Away-mode supervisor backend](configuration.md#away-mode-supervisor-backend-fm_supervisor_backend--fm_supervisor_target).
 
-Two limits apply to auto-detection specifically:
+## Secondmates
 
-- A `--secondmate` spawn under an auto-detected hc fails the existing refusal rather than silently choosing another backend; set `config/backend` explicitly for a home that spawns secondmates.
-- Away-mode supervisor discovery and hc refusal are owned by [Away-mode supervisor backend](configuration.md#away-mode-supervisor-backend-fm_supervisor_backend--fm_supervisor_target).
+In a fleet bound to `hc`, local secondmates inherit `hc` and the parent's `HC_SESSION`.
+Their workers inherit that selection without needing a task-level override.
+The secondmate terminal appears in the child home's space alongside its workers.
+Its ownership labels remain with the parent, so the parent can safely send, read, and close it.
+The parent's `FM_HC_SPACE` does not override a secondmate's placement.
+
+Remote secondmates use the remote host's `fm-remote` core session.
+Their workers inherit that remote session.
+The [remote operation guide](remote-secondmates.md#launch-or-recover) owns readiness, routing, and recovery.
+Creating a remote terminal does not itself connect the Herdr app to that machine.
+Live remote transport remains unverified by the local evidence below.
+Configure the app's local core to reach the same SSH account and remote session:
+
+```sh
+hc machine add <ssh-host> --name <machine-name> --session fm-remote
+```
+
+Run this from the Herdr app terminal so it reaches the app's core configuration.
+Use the host and account registered for the remote secondmate.
+The `--session fm-remote` selection matters because the remote fleet does not use the remote default session.
+`hc machine ls` lists configured machines, and `herdr-app ls` lists the spaces projected into the window.
+These machine options are documented by `hc machine add --help`; the installed Herdr app guide describes machine-qualified spaces.
 
 ## Task shape and metadata
 
-Each task is one hc terminal running the user's login shell in the project directory, started with `--no-parent --outlive-parent --no-notify` so it is independent of whichever hc terminal Firstmate itself runs in.
+Each task is one hc terminal running the user's login shell, started with `--no-parent --outlive-parent --no-notify` so it is independent of whichever hc terminal Firstmate itself runs in.
+For a new worker, Firstmate leases a Treehouse copy before opening the terminal, then opens it directly in that copy.
+If the pool is full, the Treehouse refusal is reported without opening a terminal.
+The lease does not depend on a shell staying alive.
+A secondmate opens directly in its provisioned home, with no pool allocation.
 The terminal carries these labels:
 
 | Label | Value | Purpose |
@@ -92,9 +146,10 @@ An input, capture, or close that carries the task label refuses a terminal whose
 | Operation | hc command |
 | --- | --- |
 | Container ensure | `hc server status` plus the `hello` generation handshake over `hc connect` |
-| Create task | `hc run --bg --no-parent --outlive-parent --no-notify --cwd <project> --label ...` |
+| Create task | `hc run --bg --no-parent --outlive-parent --no-notify --cwd <task-directory> --label ...` |
 | Capture | `hc read --lines <n>` |
 | Visible capture | `hc read --lines 0` |
+| Composer state | The first paint of a watch-only `hc attach --observe` (the alternate screen's rows when the terminal is on it), bounded to one second and kept only when its text equals `hc read`; otherwise the plain screen |
 | Send a line and submit | `hc send` |
 | Submit with confirmation | `hc send --wait`; see submit safety under Limits |
 | Named key | `hc keys` |
@@ -105,15 +160,21 @@ An input, capture, or close that carries the task label refuses a terminal whose
 
 ## Limits
 
+- If a fresh spawn fails before committing its task record, Firstmate closes the terminal it created, using the task's identity labels.
+  It returns its clean lease on a pre-launch failure only when no terminal could still be using it.
+  If launch may have reached the worker, Firstmate keeps the lease for inspection rather than resetting possible work.
+- See [Transactional relaunch](agent-control.md#transactional-relaunch) for recovery into a recorded worktree.
 - `hc send` always presses Enter, so hc cannot type without submitting.
   `bin/fm-spawn.sh` pastes and submits the spawn launch line with `hc send` and consumes the Enter that follows it.
 - Submitting a message uses one bounded `hc send --wait`.
   A started turn or a still-working wait confirms it natively; otherwise the adapter falls back to the composer screen, with Enter retries only for a proven pending composer.
   A blocked terminal (exit 9) returns `unknown` without typing or retrying and is never forced.
+- `hc read` carries no styling, so the composer read takes the styled screen from an attach paint.
+  Each composer read therefore takes about one second.
+  When no matching paint is available, the plain screen cannot tell dim ghost text, such as Claude's prompt suggestion, from typed text, and the composer reads `unknown`.
 - hc reports one foreground process per terminal.
   When that process is a launcher, the adapter also reads the rest of its process group from `ps`, which works only for terminals on the local machine.
 - Right after a terminal starts, `hc get` can report no foreground process yet, and agent state reads `unreadable` until the shell is up.
-- `--secondmate` spawns are refused.
 - A worker inherits `HC_SESSION`, `HC_TERMINAL_ID`, `HC_TERMINAL_SOCKET`, and `HC_SCOPE` from its terminal, and the `config/launch-env-allowlist` floor keeps them; whether a real harness then reports native status under Firstmate's launch is not verified.
 - Naming a Herdr.app space needs the app window and is not done.
   The `herdr.space`/`herdr.tab` label contract above is the app's documented bridge (its window projects labeled terminals as spaces/tabs and keeps unlabeled ones hidden), verified against a real window: [`verification/runtime-backends.md`](verification/runtime-backends.md#hc) records the live exercise.
@@ -122,8 +183,13 @@ An input, capture, or close that carries the task label refuses a terminal whose
 ## Tests
 
 `tests/fm-backend-hc.test.sh` pins the adapter against a fake `hc`.
+`tests/fm-secondmate-hc.test.sh` exercises secondmate placement and conflicting child selections with a recording fake core.
+`tests/fm-secondmate-hc-smoke.test.sh` executes a secondmate shell and its worker in a real isolated core.
+`tests/fm-fleet-backend.test.sh` covers binding and conflict refusals.
+`tests/fm-hc-recovery.test.sh` covers ownership and recorded-session recovery with a fake core.
 `tests/fm-backend-hc-liveness-live-e2e.test.sh` is the default-on live guard: it launches every installed harness bare in a private core and requires `alive`.
-`tests/fm-backend-hc-smoke.test.sh` drives the real binary in an isolated lab; [`bin/fm-hc-lab.sh`](../bin/fm-hc-lab.sh) owns the isolation and metadata-tripwire contract, and [`tests/hc-test-safety.sh`](../tests/hc-test-safety.sh) owns guarded test teardown.
+`tests/fm-backend-hc-smoke.test.sh` drives the real binary in an isolated lab; [`bin/fm-hc-lab.sh`](../bin/fm-hc-lab.sh) owns the isolation and metadata-tripwire contract, and [`tests/hc-test-safety.sh`](../tests/hc-test-safety.sh) owns guarded test teardown and the hooks-off launch of every lab Claude.
+`tests/fm-backend-hc-claude-hooks-live-e2e.test.sh` is the default-on live proof that a lab Claude leaves the `state/` of a Firstmate home it starts in unchanged.
 `tests/fm-backend-hc-appdetect-smoke.test.sh` runs a real `bin/fm-spawn.sh` spawn in the same kind of lab for the app-terminal and explicit cases, and checks that a live app window never selects hc for a marker-less process and starts nothing for a session with no running core.
 The smokes skip when no resolved Core binary or `jq` is available; provisioning and teardown failures fail the test.
 For CI coverage, see [`configuration.md`](configuration.md#runtime-backend-configbackend--fm_backend); the workflow requires `jq` and rejects the `hc not found` skip.
