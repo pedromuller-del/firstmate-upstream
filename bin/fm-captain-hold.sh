@@ -31,6 +31,7 @@
 #   fm-captain-hold.sh unbind <source-id>
 #   fm-captain-hold.sh binding <source-id>
 #   fm-captain-hold.sh complete <origin-id> (--none | <task-id>...)
+#   fm-captain-hold.sh completion-command <origin-id>
 #   fm-captain-hold.sh verify <origin-id>
 #   fm-captain-hold.sh open <task-id> [--identity] [--distinguish-absent]
 #   fm-captain-hold.sh age
@@ -211,6 +212,9 @@
 # `age` reports open captain holds as tab-separated task id, hold-set time,
 # whole days elapsed, and hold-until date. A dash marks an absent value.
 # It ends with open, older7 and older14 counts. The thresholds are strict.
+#
+# `completion-command` prints a suggested command from open holds with the
+# recorded origin. Review the actual calls before running the suggestion.
 #
 # With config/hold-pr-settle present, pr-policy declares which forge events
 # answer this particular hold. It adds the structured PR link and atomically
@@ -2266,18 +2270,19 @@ EOF
 # Output: one `<task-id>\t<origin>\t<key>\t<title>` line per divergence, in
 # status-log then key order; nothing when the two records agree.
 
-# Every still-open task id in this home's backlog, one per line. Only the first
-# two comma-separated listing fields are read - both are slugs that precede any
-# quoted title - so a title containing commas or quotes cannot shift them.
-open_task_ids() {
-  local data rows
+# Every still-open task id in this home's backlog, one per line. The first
+# two fields precede any quoted title. A requested hold kind is the last field.
+open_task_ids() {  # [hold-kind]
+  local data rows hold_kind=${1:-}
   data=$(fm_backlog_data_absolute "$DATA") || return 1
-  rows=$(fm_backlog_row_list "$data") || { printf '%s\n' "$rows" >&2; return 1; }
-  printf '%s\n' "$rows" | awk -F, '
+  set --
+  [ -z "$hold_kind" ] || set -- --fields hold_kind
+  rows=$(fm_backlog_row_list "$data" "$@") || { printf '%s\n' "$rows" >&2; return 1; }
+  printf '%s\n' "$rows" | awk -F, -v hold_kind="$hold_kind" '
     /^  [A-Za-z0-9._-]+,/ {
       id = $1
       sub(/^ +/, "", id)
-      if ($2 != "done") print id
+      if ($2 != "done" && (hold_kind == "" || $NF == hold_kind)) print id
     }
   '
 }
@@ -2288,7 +2293,7 @@ command_age() {
   [ "$#" -eq 0 ] || { usage >&2; exit 2; }
   now=$(fm_utc_iso_to_epoch "${FM_CAPTAIN_HOLD_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}") \
     || fail "invalid report time"
-  ids=$(open_task_ids) || fail "could not list this home's backlog"
+  ids=$(open_task_ids captain) || fail "could not list this home's backlog"
   while IFS= read -r id; do
     [ -n "$id" ] || continue
     task_show "$id" || fail "could not read task $id"
@@ -2311,6 +2316,28 @@ command_age() {
     printf '%s\t%s\t%s\t%s\n' "$id" "${stamp:--}" "$days" "${until_date:--}"
   done <<< "$ids"
   printf 'open=%s older7=%s older14=%s\n' "$open" "$older7" "$older14"
+}
+
+command_completion_command() {
+  local origin=${1:-} ids id show
+  [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+  validate_slug origin-id "$origin"
+  ids=$(open_task_ids captain) || fail "could not list this home's backlog"
+  set -- bin/fm-captain-hold.sh complete "$origin"
+  while IFS= read -r id; do
+    [ -n "$id" ] && [ "$id" != "$origin" ] || continue
+    task_show "$id" || fail "could not read task $id"
+    show=$TASK_SHOW_OUTPUT
+    [ "$(show_field "$show" state)" != "done" ] || continue
+    [ "$(show_field_value "$show" hold_kind)" = captain ] || continue
+    [ "$(body_hold_origin "$(show_field_value "$show" body)")" = "$origin" ] || continue
+    set -- "$@" "$id"
+  done <<< "$ids"
+  [ "$#" -gt 3 ] || set -- "$@" --none
+  printf '%s' "$1"
+  shift
+  printf ' %q' "$@"
+  printf '\n'
 }
 
 # Every key token stated anywhere in a status log. A cheap candidate scan: it
@@ -2341,7 +2368,7 @@ command_diverged() {
   # compatibility floor and its extra probes: a listing this parser cannot read
   # simply yields no candidates and the report stays silent.
   command -v tasks-axi >/dev/null 2>&1 || return 0
-  ids=$(open_task_ids) || return 0
+  ids=$(open_task_ids 2>/dev/null) || return 0
   [ -n "$ids" ] || return 0
   resolve=${FM_CLASSIFY_RESOLVE_VERB:-$FM_CLASSIFY_RESOLVE_VERB_DEFAULT}
   for f in "$STATE"/*.status; do
@@ -2461,6 +2488,7 @@ case "${1:-}" in
   unbind) shift; command_unbind "$@" ;;
   binding) shift; command_binding "$@" ;;
   complete) shift; command_complete "$@" ;;
+  completion-command) shift; command_completion_command "$@" ;;
   verify) shift; command_verify "$@" ;;
   open) shift; command_open "$@" ;;
   age) shift; command_age "$@" ;;

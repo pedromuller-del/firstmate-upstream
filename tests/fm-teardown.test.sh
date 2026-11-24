@@ -6567,6 +6567,56 @@ SH
   pass "post-reap proof retains late work and retry records on ordinary and Orca paths, preserving clean/force/scout behavior"
 }
 
+test_scout_refusal_names_completion_inventory() {
+  local case_dir rc meta
+  case_dir=$(make_case completion-inventory-hint)
+  write_meta "$case_dir" local-only scout
+  mkdir -p "$case_dir/data/task-x1"
+  printf 'report\n' > "$case_dir/data/task-x1/report.md"
+  fm_test_tasks_toml "$case_dir/.tasks.toml"
+  printf '## In flight\n\n## Queued\n\n## Done\n' > "$case_dir/data/backlog.md"
+  rc=0
+  run_teardown "$case_dir" > "$case_dir/stdout" 2> "$case_dir/stderr" || rc=$?
+  expect_code 1 "$rc" "unreviewed scout with no holds must still refuse teardown"
+  assert_grep 'bin/fm-captain-hold.sh complete task-x1 --none' "$case_dir/stderr" \
+    "refusal omitted the explicit no-calls attestation"
+  cat > "$case_dir/data/backlog.md" <<'EOF'
+## In flight
+- [ ] task-x1 - Scout report
+
+## Queued
+- [ ] call-a - First call (hold: choose) (hold-kind: captain)
+  Captain hold origin: task-x1
+- [ ] call-b - Second call (hold: choose) (hold-kind: captain)
+  Captain hold origin: task-x1
+- [ ] other-call - Another scout's call (hold: choose) (hold-kind: captain)
+  Captain hold origin: another
+
+## Done
+- [x] closed-call - Closed call (hold: choose) (hold-kind: captain)
+  Captain hold origin: task-x1
+EOF
+  meta=$(cat "$case_dir/state/task-x1.meta")
+  rc=0
+  run_teardown "$case_dir" > "$case_dir/stdout" 2> "$case_dir/stderr" || rc=$?
+  expect_code 1 "$rc" "unreviewed scout must refuse teardown"
+  assert_grep 'bin/fm-captain-hold.sh complete task-x1 call-a call-b' "$case_dir/stderr" \
+    "refusal did not name the two open holds from this scout"
+  [ "$(cat "$case_dir/state/task-x1.meta")" = "$meta" ] || fail "teardown attested without review"
+  (
+    export FM_HOME="$case_dir" FM_DATA_OVERRIDE="$case_dir/data" FM_STATE_OVERRIDE="$case_dir/state"
+    bash "$ROOT/bin/fm-captain-hold.sh" complete task-x1 call-a call-b >/dev/null \
+      && bash "$ROOT/bin/fm-captain-hold.sh" verify task-x1
+  ) >/dev/null || fail "the suggested inventory did not clear the completion gate"
+  pass "scout teardown suggests the exact inventory command without attesting"
+}
+
+if [ -n "${FM_TEST_ONLY:-}" ]; then
+  fm_test_run "$FM_TEST_ONLY"
+  exit 0
+fi
+
+test_scout_refusal_names_completion_inventory
 test_hidden_untracked_work_refuses_before_return
 test_content_fallback_git_capability_boundary
 test_work_written_at_reap_boundary_is_preserved
