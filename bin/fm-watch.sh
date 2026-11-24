@@ -3329,6 +3329,27 @@ scan_signals() {
   return 0
 }
 
+absorb_declared_pause_turnends() {  # <pending-signals>
+  local seen sig file task until now
+  if afk_present; then printf '%s\n' "$1"; return; fi
+  now=$(date +%s)
+  while IFS=$'\t' read -r seen sig file; do
+    [ -n "$seen" ] || continue
+    case "$file" in
+      *.turn-ended)
+        task=${file##*/}; task=${task%.turn-ended}
+        if [ -f "$STATE/$task.meta" ] \
+          && until=$(status_paused_until "$(status_declared_wait_line "$STATE/$task.status")") \
+          && [ "$now" -lt "$until" ] \
+          && printf '%s' "$sig" > "$seen"; then
+          continue
+        fi
+        ;;
+    esac
+    printf '%s\t%s\t%s\n' "$seen" "$sig" "$file"
+  done <<< "$1"
+}
+
 # Deliver a durably queued process-event result to firstmate. Publication is
 # owned by bin/fm-procevent.sh - by the runner at capture time and by reconcile's
 # re-announcement - so this decides only whether a queued check record has been
@@ -4525,6 +4546,9 @@ EOF
     # home_summary_refresh_detached for why publication stays off the beacon's
     # path. Publication failure stays side-band.
     home_summary_refresh_detached
+    pending=$(absorb_declared_pause_turnends "$pending")
+  fi
+  if [ -n "$pending" ]; then
     files=""
     while IFS=$(printf '\t') read -r sf sig f; do
       [ -n "$sf" ] || continue

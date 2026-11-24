@@ -566,6 +566,28 @@ test_live_paused_until_controls_recheck_time() {
   pass "a live paused worker stays absorbed until its declared time, then rechecks"
 }
 
+test_declared_pause_absorbs_bare_turn_end() {
+  local dir state out future pid i
+  dir=$(make_case paused-turn-end)
+  state="$dir/state"; out="$dir/watch.out"
+  future=$(iso_utc_at "$(( $(date +%s) + 300 ))")
+  printf 'kind=ship\nwindow=test:fm-watcher\n' > "$state/watcher.meta"
+  printf 'paused: waiting for the next check until %s\n' "$future" > "$state/watcher.status"
+  seen_sig "$state/watcher.status" > "$state/.seen-watcher_status"
+  : > "$state/watcher.turn-ended"
+  FM_FAKE_CREW_STATE='state: unknown · source: none · idle' watch_bg "$state" "$dir/fakebin" "$out"
+  pid=$!
+  for ((i=0; i<100; i++)); do
+    [ ! -s "$out" ] || { reap "$pid"; fail "paused worker woke firstmate: $(cat "$out")"; }
+    [ ! -s "$state/.seen-watcher_turn-ended" ] || break
+    sleep 0.1
+  done
+  reap "$pid"
+  [ -s "$state/.seen-watcher_turn-ended" ] || fail "watcher did not consume the paused turn-end"
+  [ ! -s "$out" ] && [ ! -s "$state/.wake-queue" ] || fail "paused turn-end queued a wake"
+  pass "a persistent worker's bare turn-end stays quiet before its declared time"
+}
+
 
 # --- work the captain is already holding: pane churn must not re-alarm -------
 # The other record of a legitimate wait. The declared-wait bound above reads the
@@ -2050,6 +2072,7 @@ fm_test_run \
   test_absorbed_replacement_wait_does_not_inherit_the_old_throttle \
   test_live_declared_wait_churn_honors_the_resurface_throttle \
   test_live_paused_until_controls_recheck_time \
+  test_declared_pause_absorbs_bare_turn_end \
   test_open_captain_call_bounds_stale_churn \
   test_stale_churn_without_a_captain_call_still_alarms \
   test_failed_wake_append_does_not_arm_the_captain_hold_throttle \
